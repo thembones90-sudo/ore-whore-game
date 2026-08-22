@@ -7,7 +7,7 @@ type Rarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Mythic";
 type Item = { id: string; name: string; rarity: Rarity; weight: number; color: string; note: string };
 type Biome = "old" | "deep" | "outland" | "northrend";
 type Settings = { master:number;sfx:number;reducedShake:boolean;reducedMotion:boolean;vibration:boolean;highContrast:boolean;helpSeen:boolean };
-type Save = { digs: number; strikes: number; distance: number; combos: Record<string, number>; ores: Record<string, number>; minerals: Record<string, number>; first: Record<string, number>; achievements: string[]; streak: number; longestStreak:number;newStreak:number;longestNewStreak:number; dust: number; dustEarned:number;dustSpent:number; biome: Biome; unlockedBiomes:Biome[]; completedBiomes:Biome[]; milestones: Record<string, number>; lastDigAt: number; schema: number; settings:Settings;unlocks:string[];equipped:string;huntTarget:string|null;huntCounts:Record<string,number>;huntStartedAtDig:number;longestHunt:number };
+type Save = { digs: number; emptyDigs:number; strikes: number; distance: number; combos: Record<string, number>; ores: Record<string, number>; minerals: Record<string, number>; first: Record<string, number>; achievements: string[]; streak: number; longestStreak:number;newStreak:number;longestNewStreak:number; dust: number; dustEarned:number;dustSpent:number; biome: Biome; unlockedBiomes:Biome[]; completedBiomes:Biome[]; milestones: Record<string, number>; lastDigAt: number; schema: number; settings:Settings;unlocks:string[];equipped:string;huntTarget:string|null;huntCounts:Record<string,number>;huntStartedAtDig:number;longestHunt:number };
 
 const ores: Item[] = [
   { id: "copper", name: "Copper Ore", rarity: "Common", weight: 48, color: "#d88156", note: "Honest rock for dishonest amounts of time." },
@@ -65,7 +65,7 @@ const achievements = [
 ];
 
 const defaultSettings:Settings={master:.7,sfx:.8,reducedShake:false,reducedMotion:false,vibration:true,highContrast:false,helpSeen:false};
-const blank: Save = { digs: 0, strikes: 0, distance: 0, combos: {}, ores: {}, minerals: {}, first: {}, achievements: [], streak: 0,longestStreak:0,newStreak:0,longestNewStreak:0, dust: 0,dustEarned:0,dustSpent:0, biome: "old", unlockedBiomes:["old"], completedBiomes:[], milestones: {}, lastDigAt: 0, schema: 6,settings:defaultSettings,unlocks:[],equipped:"standard",huntTarget:null,huntCounts:{},huntStartedAtDig:0,longestHunt:0 };
+const blank: Save = { digs: 0, emptyDigs:0, strikes: 0, distance: 0, combos: {}, ores: {}, minerals: {}, first: {}, achievements: [], streak: 0,longestStreak:0,newStreak:0,longestNewStreak:0, dust: 0,dustEarned:0,dustSpent:0, biome: "old", unlockedBiomes:["old"], completedBiomes:[], milestones: {}, lastDigAt: 0, schema: 7,settings:defaultSettings,unlocks:[],equipped:"standard",huntTarget:null,huntCounts:{},huntStartedAtDig:0,longestHunt:0 };
 const cosmetics=[{id:"rust",name:"Rustbite Pick",cost:15,kind:"PICKAXE"},{id:"neon",name:"Toxic Impact",cost:30,kind:"IMPACT"},{id:"gilded",name:"Gilded Album",cost:45,kind:"ALBUM"},{id:"deepframe",name:"Deep-Mine Frame",cost:60,kind:"ALBUM"},{id:"menace",name:"Geological Menace",cost:75,kind:"TITLE"},{id:"void",name:"Void Pick",cost:100,kind:"PICKAXE"},{id:"fel",name:"Fel Dust",cost:35,kind:"IMPACT"},{id:"frost",name:"Frostbite Pick",cost:55,kind:"PICKAXE"},{id:"saroniteframe",name:"Saronite Whisper",cost:70,kind:"ALBUM"},{id:"prospector",name:"Master Prospector",cost:80,kind:"TITLE"},{id:"khoriumframe",name:"Khorium Prestige",cost:110,kind:"REVEAL"},{id:"titan",name:"Titanium Crown",cost:140,kind:"PICKAXE"},{id:"brdtitle",name:"Not Going Back",cost:95,kind:"TITLE"},{id:"arcaneimpact",name:"Arcane Fracture",cost:125,kind:"IMPACT"},{id:"volumeone",name:"Volume I Victor",cost:180,kind:"ALBUM"},{id:"orewhoretitle",name:"THE ORE WHORE",cost:999,kind:"TITLE"},{id:"orewhorepick",name:"The Final Pick",cost:999,kind:"PICKAXE"},{id:"orewhorealbum",name:"225 Stamp",cost:999,kind:"ALBUM"},{id:"centerpiece",name:"Mountain's Regret",cost:999,kind:"TROPHY"}];
 const biomeWeights: Record<Biome, number[]> = {
  old:[28,20,12,18,10,8,2,1,1,0,0,0,0,0,0],
@@ -86,7 +86,7 @@ const dustByRarity: Record<Rarity,number> = { Common:1, Uncommon:2, Rare:3, Epic
 const makeRng = (seed:number) => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; };
 const pick = (items: Item[], random:()=>number, weights?:number[]) => { const ws=weights||items.map(i=>i.weight); let n=random()*ws.reduce((s,w)=>s+w,0); return items.find((_,i)=>(n-=ws[i])<=0)||items[0]; };
 const odds = (ore:Item,mineral:Item,biome:Biome) => {const ow=biomeWeights[biome],oi=ores.indexOf(ore);if(!ow[oi])return Infinity;return Math.round((ow.reduce((a,b)=>a+b,0)*minerals.reduce((a,b)=>a+b.weight,0))/(ow[oi]*mineral.weight))};
-const migrate=(old:any):Save=>{const map:Record<string,string>={quartz:"malachite",jade:"jade",citrine:"citrine",opal:"largeopal",star:"arcane"};const combos:Record<string,number>={},first:Record<string,number>={};for(const [k,v] of Object.entries(old.combos||{})){const p=k.lastIndexOf("-");const o=k.slice(0,p),m=k.slice(p+1);combos[`${o}-${map[m]||m}`]=Number(v)}for(const [k,v] of Object.entries(old.first||{})){const p=k.lastIndexOf("-");const o=k.slice(0,p),m=k.slice(p+1);first[`${o}-${map[m]||m}`]=Number(v)}const mineralCounts:Record<string,number>={};for(const [k,v] of Object.entries(old.minerals||{}))mineralCounts[map[k]||k]=(mineralCounts[map[k]||k]||0)+Number(v);const biome:Biome=biomeOrder.includes(old.biome)?old.biome:"old";const saved=Array.isArray(old.unlockedBiomes)?old.unlockedBiomes.filter((b:unknown):b is Biome=>biomeOrder.includes(b as Biome)):biomeOrder.slice(0,biomeOrder.indexOf(biome)+1);const unlockedBiomes=biomeOrder.filter(b=>b==="old"||saved.includes(b));const completedBiomes=Array.isArray(old.completedBiomes)?old.completedBiomes.filter((b:unknown):b is Biome=>biomeOrder.includes(b as Biome)):[];return {...blank,...old,combos,first,minerals:mineralCounts,settings:{...defaultSettings,...old.settings},schema:6,biome,unlockedBiomes,completedBiomes}}
+const migrate=(old:any):Save=>{const map:Record<string,string>={quartz:"malachite",jade:"jade",citrine:"citrine",opal:"largeopal",star:"arcane"};const combos:Record<string,number>={},first:Record<string,number>={};for(const [k,v] of Object.entries(old.combos||{})){const p=k.lastIndexOf("-");const o=k.slice(0,p),m=k.slice(p+1);combos[`${o}-${map[m]||m}`]=Number(v)}for(const [k,v] of Object.entries(old.first||{})){const p=k.lastIndexOf("-");const o=k.slice(0,p),m=k.slice(p+1);first[`${o}-${map[m]||m}`]=Number(v)}const mineralCounts:Record<string,number>={};for(const [k,v] of Object.entries(old.minerals||{}))mineralCounts[map[k]||k]=(mineralCounts[map[k]||k]||0)+Number(v);const biome:Biome=biomeOrder.includes(old.biome)?old.biome:"old";const saved=Array.isArray(old.unlockedBiomes)?old.unlockedBiomes.filter((b:unknown):b is Biome=>biomeOrder.includes(b as Biome)):biomeOrder.slice(0,biomeOrder.indexOf(biome)+1);const unlockedBiomes=biomeOrder.filter(b=>b==="old"||saved.includes(b));const completedBiomes=Array.isArray(old.completedBiomes)?old.completedBiomes.filter((b:unknown):b is Biome=>biomeOrder.includes(b as Biome)):[];return {...blank,...old,combos,first,minerals:mineralCounts,settings:{...defaultSettings,...old.settings},schema:7,biome,unlockedBiomes,completedBiomes}}
 
 export default function Home() {
   const [save, setSave] = useState<Save>(blank);
@@ -99,6 +99,7 @@ export default function Home() {
   const [impact, setImpact] = useState<number | null>(null);
   const [hitPoint, setHitPoint] = useState({x:50,y:48});
   const [found, setFound] = useState<{ ore: Item; mineral: Item; isNew: boolean; count: number } | null>(null);
+  const [emptyFind,setEmptyFind]=useState(false);
   const [toast, setToast] = useState<{ name: string; text: string } | null>(null);
   const [milestone, setMilestone] = useState<{ore:Item;level:number;missing?:Item;attempts:number} | null>(null);
   const [mineCompletion,setMineCompletion]=useState<{completed:Biome;next?:Biome}|null>(null);
@@ -135,7 +136,7 @@ export default function Home() {
   };
 
   const strike = (point?:{x:number;y:number}) => {
-    if (found) return;
+    if (found||emptyFind) return;
     setHitPoint(point||{x:50,y:48});
     const hit = rockHp - 1;
     setImpact(Date.now());
@@ -144,6 +145,7 @@ export default function Home() {
     setSave(s => ({ ...s, strikes: s.strikes + 1, distance: +(s.distance + (stage === "tunnel" ? 0.4 : 0)).toFixed(1) }));
     if (hit > 0) { playImpact(stage==="ore"?"crack":"rock"); return setRockHp(hit); }
     if (stage === "tunnel") {
+      if(rng.current()<.2){playImpact("crack");setSave(s=>{const streak=s.streak+1;return {...s,digs:s.digs+1,emptyDigs:s.emptyDigs+1,streak,longestStreak:Math.max(s.longestStreak,streak),newStreak:0,lastDigAt:Date.now()}});sessionDigs.current++;setEmptyFind(true);track("dig_empty",{attempt:save.digs+1,biome:save.biome,empty_rate:.2});return;}
       const ore = pick(ores,rng.current,biomeWeights[save.biome]);
       playImpact("clank");
       setPendingOre(ore);
@@ -186,13 +188,13 @@ export default function Home() {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.code === "Space" && tab === "mine" && !found) { event.preventDefault(); strike(); }
+      if (event.code === "Space" && tab === "mine" && !found && !emptyFind) { event.preventDefault(); strike(); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  const continueMine = () => { const hp=10+Math.floor(rng.current()*6); setFound(null); setPendingOre(null); setStage("tunnel"); setMaxHp(hp); setRockHp(hp); track("mine_started",{attempt:save.digs+1,biome:save.biome}); };
+  const continueMine = () => { const hp=10+Math.floor(rng.current()*6); setFound(null); setEmptyFind(false); setPendingOre(null); setStage("tunnel"); setMaxHp(hp); setRockHp(hp); track("mine_started",{attempt:save.digs+1,biome:save.biome}); };
   const unique = Object.keys(save.combos).length;
   const reset = () => { if (confirm("Erase every discovery and return to the cold, uncaring rock?")) { setSave(blank); setFound(null); setPendingOre(null); setStage("tunnel"); setMaxHp(12); setRockHp(12); } };
 
@@ -234,6 +236,7 @@ export default function Home() {
     {tab === "more" && <><VolumeRewards save={save}/><More save={save} setSave={setSave} onHelp={()=>{setTab("mine");setOnboarding(true)}} /></>}
 
     {found && <Reveal found={found} total={unique} biome={save.biome} onContinue={continueMine} />}
+    {emptyFind&&<EmptyReveal attempt={save.digs} onContinue={continueMine}/>}
     {milestone && <Milestone data={milestone} biome={save.biome} onClose={()=>setMilestone(null)} onAlbum={()=>{if(milestone.level===14&&milestone.missing){const target=`${milestone.ore.id}-${milestone.missing.id}`,b=bestBiome(milestone.ore);setSave(s=>({...s,biome:b,huntTarget:target,huntStartedAtDig:s.digs,huntCounts:{...s.huntCounts,[target]:(s.huntCounts[target]||0)+1}}));track("hunt_started",{biome:b,combination_id:target});setTab("mine")}else setTab("album");setMilestone(null)}} />}
     {onboarding&&<Onboarding onDone={()=>{setOnboarding(false);setSave(s=>({...s,settings:{...s.settings,helpSeen:true}}));track("mine_started",{attempt:save.digs+1,biome:save.biome})}}/>}
     {share&&<ShareCard data={share} biome={save.biome} onClose={()=>setShare(null)}/>} 
@@ -280,6 +283,10 @@ function MineCompletion({data,digs,onContinue}:{data:{completed:Biome;next?:Biom
  return <div className="mine-completion"><div><p className="eyebrow">ALL PAGES COMPLETE</p><div className="completion-seal">◆</div><h2>{biomeNames[data.completed]}<br/><i>MASTERED.</i></h2><p>{biomePages[data.completed].length} pages sealed after {digs} total deposits. The mountain has reluctantly acknowledged your paperwork.</p>{data.next?<div className="next-mine-reveal"><small>NEW DESCENT UNLOCKED</small><strong>{biomeNames[data.next]}</strong></div>:<div className="next-mine-reveal"><small>VOLUME I MINE NETWORK</small><strong>FULLY MASTERED</strong></div>}<button onClick={onContinue}>{data.next?`ENTER ${biomeNames[data.next]}`:"RETURN TO THE MOUNTAIN"} <span>→</span></button></div></div>
 }
 
+function EmptyReveal({attempt,onContinue}:{attempt:number;onContinue:()=>void}){
+ return <div className="reveal empty-reveal"><div className="reveal-card"><button className="close" onClick={onContinue}>×</button><p className="eyebrow">THE MOUNTAIN HAS SPOKEN</p><div className="empty-mark">∅</div><h2>NOTHING.</h2><p>Absolutely nothing. Twenty percent of excavations produce only dust, regret, and a slightly wider tunnel.</p><div className="verdict duplicate"><span>EMPTY DIG</span><strong>ATTEMPT #{attempt}</strong><small>NO ORE · NO MINERAL · NO ALBUM PROGRESS</small></div><button className="continue" onClick={onContinue}>DIG SOMEWHERE ELSE <span>→</span></button></div></div>
+}
+
 function Records({ save, onReset }: { save: Save; onReset: () => void }) {
   const dupes = Object.values(save.combos).reduce((s,n)=>s+Math.max(0,n-1),0);
   const most=Object.entries(save.combos).sort((a,b)=>b[1]-a[1])[0];const mostOre=Object.entries(save.ores).sort((a,b)=>b[1]-a[1])[0];const complete=ores.filter(o=>minerals.every(m=>save.combos[`${o.id}-${m.id}`])).length;
@@ -289,7 +296,7 @@ function Records({ save, onReset }: { save: Save; onReset: () => void }) {
 
 function Onboarding({onDone}:{onDone:()=>void}){return <div className="onboarding"><div><span className="brand-mark">OW</span><p className="eyebrow">VOLUME I · CLASSIC → TBC → WOTLK</p><h1>DIG. CLANK. CRACK. <i>COLLECT.</i></h1><p>Fifteen ores. Fifteen minerals. 225 reasons not to stop.</p><button onClick={onDone}>START MINING <span>→</span></button><small>Click the rock or press Space. That is genuinely it.</small></div></div>}
 
-function HuntRecords({save}:{save:Save}){const top=Object.entries(save.huntCounts).sort((a,b)=>b[1]-a[1])[0];const label=top?(()=>{const p=top[0].lastIndexOf("-");return `${ores.find(o=>o.id===top[0].slice(0,p))?.name} + ${minerals.find(m=>m.id===top[0].slice(p+1))?.name}`})():"No target repeatedly hunted";return <div className="hunt-records"><article><small>LONGEST NEW STREAK</small><strong>{save.longestNewStreak}</strong><span>fresh combinations in a row</span></article><article><small>MOST HUNTED TARGET</small><strong>{top?`${top[1]}×`:"—"}</strong><span>{label}</span></article><article><small>LONGEST TARGET HUNT</small><strong>{save.longestHunt}</strong><span>digs from pin to acquisition</span></article></div>}
+function HuntRecords({save}:{save:Save}){const top=Object.entries(save.huntCounts).sort((a,b)=>b[1]-a[1])[0];const label=top?(()=>{const p=top[0].lastIndexOf("-");return `${ores.find(o=>o.id===top[0].slice(0,p))?.name} + ${minerals.find(m=>m.id===top[0].slice(p+1))?.name}`})():"No target repeatedly hunted";return <div className="hunt-records"><article><small>LONGEST NEW STREAK</small><strong>{save.longestNewStreak}</strong><span>fresh combinations in a row</span></article><article><small>MOST HUNTED TARGET</small><strong>{top?`${top[1]}×`:"—"}</strong><span>{label}</span></article><article><small>LONGEST TARGET HUNT</small><strong>{save.longestHunt}</strong><span>digs from pin to acquisition</span></article><article><small>EMPTY DIGS</small><strong>{save.emptyDigs}</strong><span>{save.digs?`${(save.emptyDigs/save.digs*100).toFixed(1)}% of all attempts`:"the mountain is saving them up"}</span></article></div>}
 
 function ShareCard({data,biome,onClose}:{data:{ore:Item;mineral:Item;attempt:number;total:number};biome:Biome;onClose:()=>void}){return <div className="share-wrap"><div className="share-card"><p>ORE WHORE · VOLUME I</p><div><span className="gem-art" style={{"--gem":data.ore.color} as React.CSSProperties}/><b>+</b><span className="gem-art" style={{"--gem":data.mineral.color} as React.CSSProperties}/></div><small>{data.ore.rarity.toUpperCase()} + {data.mineral.rarity.toUpperCase()}</small><h2>{data.ore.name}<br/>+ {data.mineral.name}</h2><strong>RARE DISCOVERY</strong><footer><span>NATURAL ODDS · 1 / {odds(data.ore,data.mineral,biome)}</span><span>ATTEMPT #{data.attempt} · ALBUM {data.total}/225</span></footer></div><p>Screenshot this. Nobody will believe you, but try.</p><button onClick={onClose}>CONTINUE</button></div>}
 
