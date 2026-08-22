@@ -7,7 +7,7 @@ type Rarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Mythic";
 type Item = { id: string; name: string; rarity: Rarity; weight: number; color: string; note: string };
 type Biome = "old" | "deep";
 type Settings = { master:number;sfx:number;reducedShake:boolean;reducedMotion:boolean;vibration:boolean;highContrast:boolean;helpSeen:boolean };
-type Save = { digs: number; strikes: number; distance: number; combos: Record<string, number>; ores: Record<string, number>; minerals: Record<string, number>; first: Record<string, number>; achievements: string[]; streak: number; longestStreak:number; dust: number; dustEarned:number;dustSpent:number; biome: Biome; milestones: Record<string, number>; lastDigAt: number; schema: number; settings:Settings;unlocks:string[];equipped:string };
+type Save = { digs: number; strikes: number; distance: number; combos: Record<string, number>; ores: Record<string, number>; minerals: Record<string, number>; first: Record<string, number>; achievements: string[]; streak: number; longestStreak:number; dust: number; dustEarned:number;dustSpent:number; biome: Biome; milestones: Record<string, number>; lastDigAt: number; schema: number; settings:Settings;unlocks:string[];equipped:string;huntTarget:string|null };
 
 const ores: Item[] = [
   { id: "copper", name: "Copper Ore", rarity: "Common", weight: 48, color: "#d88156", note: "Honest rock for dishonest amounts of time." },
@@ -34,7 +34,7 @@ const achievements = [
 ];
 
 const defaultSettings:Settings={master:.7,sfx:.8,reducedShake:false,reducedMotion:false,vibration:true,highContrast:false,helpSeen:false};
-const blank: Save = { digs: 0, strikes: 0, distance: 0, combos: {}, ores: {}, minerals: {}, first: {}, achievements: [], streak: 0,longestStreak:0, dust: 0,dustEarned:0,dustSpent:0, biome: "old", milestones: {}, lastDigAt: 0, schema: 3,settings:defaultSettings,unlocks:[],equipped:"standard" };
+const blank: Save = { digs: 0, strikes: 0, distance: 0, combos: {}, ores: {}, minerals: {}, first: {}, achievements: [], streak: 0,longestStreak:0, dust: 0,dustEarned:0,dustSpent:0, biome: "old", milestones: {}, lastDigAt: 0, schema: 3,settings:defaultSettings,unlocks:[],equipped:"standard",huntTarget:null };
 const cosmetics=[{id:"rust",name:"Rustbite Pick",cost:15,kind:"PICKAXE"},{id:"neon",name:"Toxic Impact",cost:30,kind:"IMPACT"},{id:"gilded",name:"Gilded Album",cost:45,kind:"ALBUM"},{id:"deepframe",name:"Deep-Mine Frame",cost:60,kind:"ALBUM"},{id:"menace",name:"Geological Menace",cost:75,kind:"TITLE"},{id:"void",name:"Void Pick",cost:100,kind:"PICKAXE"}];
 const biomeWeights: Record<Biome, number[]> = { old: [55,28,12,4,1], deep: [24,28,25,15,8] };
 const dustByRarity: Record<Rarity,number> = { Common:1, Uncommon:2, Rare:3, Epic:5, Legendary:8, Mythic:12 };
@@ -60,7 +60,7 @@ export default function Home() {
   const rng = useRef<()=>number>(makeRng(seed || Date.now()));
   const sessionDigs = useRef(0);
 
-  useEffect(() => { try { const raw = localStorage.getItem("ore-whore-save-v1"); if (raw){const old=JSON.parse(raw);setSave({...blank,...old,settings:{...defaultSettings,...old.settings},schema:3});setOnboarding(!old.settings?.helpSeen&&!(old.digs>0));}else setOnboarding(true); } catch {setOnboarding(true)} setLoaded(true); track("session_start",{seed:seed||null}); const end=()=>track("session_end",{session_digs:sessionDigs.current}); addEventListener("pagehide",end); return()=>removeEventListener("pagehide",end); }, []);
+  useEffect(() => { try { const last=Number(localStorage.getItem("ore-whore-last-session")||0);if(last)track("return_visit",{hours_since_previous_session:(Date.now()-last)/3600000}); const raw = localStorage.getItem("ore-whore-save-v1"); if (raw){const old=JSON.parse(raw);setSave({...blank,...old,settings:{...defaultSettings,...old.settings},schema:3});setOnboarding(!old.settings?.helpSeen&&!(old.digs>0));}else setOnboarding(true); } catch {setOnboarding(true)} setLoaded(true); track("session_start",{seed:seed||null}); const end=()=>{localStorage.setItem("ore-whore-last-session",String(Date.now()));track("session_end",{session_digs:sessionDigs.current})}; addEventListener("pagehide",end); return()=>removeEventListener("pagehide",end); }, []);
   useEffect(() => { if (loaded) localStorage.setItem("ore-whore-save-v1", JSON.stringify(save)); }, [save, loaded]);
 
   const unlocked = (next: Save, ore: Item, mineral: Item) => {
@@ -145,6 +145,7 @@ export default function Home() {
     {tab === "mine" && <section className={`mine-screen ${impact ? "screen-hit" : ""} stage-${stage}`}>
       <div className="mine-copy"><p className="eyebrow">{stage === "ore" ? "CLANK · DEPOSIT EXPOSED" : "SHIFT 01 · THE LONG WALL"}</p><h1>{stage === "ore" ? <><i>ORE</i> FOUND.</> : <>KEEP <i>DIGGING.</i></>}</h1><p>{stage === "ore" ? `${pendingOre?.name}. Crack it open and see what ruined your evening.` : <>The rock does not care about your album.<br/>Unfortunately, you do.</>}</p></div>
       <div className="stats-row"><span><small>DEPOSITS</small>{save.digs}</span><span><small>UNIQUE</small>{unique}<em>/ 25</em></span><span><small>DRY STREAK</small>{save.streak}</span></div>
+      {save.huntTarget&&<div className="hunt-banner"><span>ACTIVE HUNT</span><strong>{ores.find(o=>o.id===save.huntTarget)?.name} — {minerals.filter(m=>!save.combos[`${save.huntTarget}-${m.id}`]).map(m=>m.name).join(", ")||"PAGE COMPLETE"}</strong><button onClick={()=>setTab("wanted")}>VIEW TARGET</button></div>}
       <div className="biomes" aria-label="Mine location"><button className={save.biome==="old"?"chosen":""} onClick={()=>{setSave(s=>({...s,biome:"old"}));track("biome_selected",{biome:"old"})}}><span>OLD MINE</span><small>55% Copper · 1% Titanium</small></button><button className={save.biome==="deep"?"chosen":""} onClick={()=>{setSave(s=>({...s,biome:"deep"}));track("biome_selected",{biome:"deep"})}}><span>DEEP MINE</span><small>24% Copper · 8% Titanium</small></button></div>
       <button className={`rock ${impact ? "hit" : ""} ${stage === "ore" ? "ore-rock" : ""} damage-${Math.floor((1-rockHp/maxHp)*4)} ${rockHp===1?"final-hit":""}`} onClick={strike} aria-label={stage === "ore" ? "Crack the exposed ore deposit" : "Strike the rock wall"}>
         {Array.from({ length: 18 }, (_, i) => <span key={i} className={`stone s${i}`} />)}
@@ -158,9 +159,9 @@ export default function Home() {
     </section>}
 
     {tab === "album" && <Album save={save} />}
-    {tab === "wanted" && <Wanted save={save} onHunt={(biome)=>{setSave(s=>({...s,biome}));setTab("mine");continueMine();}} />}
+    {tab === "wanted" && <Wanted save={save} onHunt={(biome,ore)=>{setSave(s=>({...s,biome,huntTarget:ore}));track("hunt_started",{biome,ore_id:ore});setTab("mine");continueMine();}} />}
     {tab === "records" && <Records save={save} onReset={reset} />}
-    {tab === "more" && <More save={save} setSave={setSave} onHelp={()=>setOnboarding(true)} />}
+    {tab === "more" && <More save={save} setSave={setSave} onHelp={()=>{setTab("mine");setOnboarding(true)}} />}
 
     {found && <Reveal found={found} total={unique} biome={save.biome} onContinue={continueMine} />}
     {milestone && <Milestone data={milestone} biome={save.biome} onClose={()=>setMilestone(null)} onAlbum={()=>{setMilestone(null);setTab("album")}} />}
@@ -180,10 +181,10 @@ function Album({ save }: { save: Save }) {
   </section>;
 }
 
-function Wanted({save,onHunt}:{save:Save;onHunt:(b:Biome)=>void}){
+function Wanted({save,onHunt}:{save:Save;onHunt:(b:Biome,ore:string)=>void}){
   const [sort,setSort]=useState("closest");
   const rows=ores.map(o=>({ore:o,missing:minerals.filter(m=>!save.combos[`${o.id}-${m.id}`]),found:minerals.filter(m=>save.combos[`${o.id}-${m.id}`]).length})).filter(r=>r.missing.length).sort((a,b)=>sort==="ore"?a.ore.name.localeCompare(b.ore.name):sort==="rarest"?Math.max(...b.missing.map(m=>odds(b.ore,m,save.biome)))-Math.max(...a.missing.map(m=>odds(a.ore,m,save.biome))):sort==="easiest"?Math.min(...a.missing.map(m=>odds(a.ore,m,save.biome)))-Math.min(...b.missing.map(m=>odds(b.ore,m,save.biome))):b.found-a.found);
-  return <section className="page wanted-page"><div className="page-head"><div><p className="eyebrow">SPECIFIC REASONS TO KEEP SUFFERING</p><h2>MISSING <i>SPECIMENS</i></h2></div><div className="completion"><span>STILL HIDING</span><strong>{25-Object.keys(save.combos).length}</strong></div></div><div className="wanted-sort"><span>SORT HUNTS</span>{[["closest","CLOSEST"],["rarest","RAREST"],["easiest","EASIEST"],["ore","ORE"]].map(x=><button className={sort===x[0]?"active":""} key={x[0]} onClick={()=>setSort(x[0])}>{x[1]}</button>)}</div><div className="wanted-list">{rows.map(r=><article className={r.found===4?"last-one":""} key={r.ore.id}><header><span className="ore-gem" style={{"--gem":r.ore.color} as React.CSSProperties}>◆</span><div><small>{r.found===4?"FINAL TARGET":"INCOMPLETE PAGE"}</small><h3>{r.ore.name} — {r.found}/5</h3></div></header><div className="missing-grid">{r.missing.map(m=><div key={m.id}><span style={{color:m.color}}>◆</span><strong>{m.name}</strong><small>OLD 1/{odds(r.ore,m,"old")} · DEEP 1/{odds(r.ore,m,"deep")}</small></div>)}</div><footer><span>BEST LOCATION: {biomeWeights.deep[ores.indexOf(r.ore)]>biomeWeights.old[ores.indexOf(r.ore)]?"DEEP MINE":"OLD MINE"}</span><button onClick={()=>onHunt(biomeWeights.deep[ores.indexOf(r.ore)]>biomeWeights.old[ores.indexOf(r.ore)]?"deep":"old")}>HUNT THIS PAGE →</button></footer></article>)}</div></section>
+  return <section className="page wanted-page"><div className="page-head"><div><p className="eyebrow">SPECIFIC REASONS TO KEEP SUFFERING</p><h2>MISSING <i>SPECIMENS</i></h2></div><div className="completion"><span>STILL HIDING</span><strong>{25-Object.keys(save.combos).length}</strong></div></div><div className="wanted-sort"><span>SORT HUNTS</span>{[["closest","CLOSEST"],["rarest","RAREST"],["easiest","EASIEST"],["ore","ORE"]].map(x=><button className={sort===x[0]?"active":""} key={x[0]} onClick={()=>setSort(x[0])}>{x[1]}</button>)}</div><div className="wanted-list">{rows.map(r=><article className={r.found===4?"last-one":""} key={r.ore.id}><header><span className="ore-gem" style={{"--gem":r.ore.color} as React.CSSProperties}>◆</span><div><small>{r.found===4?"FINAL TARGET":"INCOMPLETE PAGE"}</small><h3>{r.ore.name} — {r.found}/5</h3></div></header><div className="missing-grid">{r.missing.map(m=><div key={m.id}><span style={{color:m.color}}>◆</span><strong>{m.name}</strong><small>OLD 1/{odds(r.ore,m,"old")} · DEEP 1/{odds(r.ore,m,"deep")}</small></div>)}</div><footer><span>BEST LOCATION: {biomeWeights.deep[ores.indexOf(r.ore)]>biomeWeights.old[ores.indexOf(r.ore)]?"DEEP MINE":"OLD MINE"}</span><button onClick={()=>onHunt(biomeWeights.deep[ores.indexOf(r.ore)]>biomeWeights.old[ores.indexOf(r.ore)]?"deep":"old",r.ore.id)}>HUNT THIS PAGE →</button></footer></article>)}</div></section>
 }
 
 function Milestone({data,biome,onClose,onAlbum}:{data:{ore:Item;level:number;missing?:Item;attempts:number};biome:Biome;onClose:()=>void;onAlbum:()=>void}){

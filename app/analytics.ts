@@ -2,7 +2,8 @@ export type AnalyticsEvent =
   | "session_start" | "session_end" | "mine_started" | "tunnel_broken"
   | "ore_found" | "mineral_found" | "combination_new" | "combination_duplicate"
   | "album_opened" | "ore_page_opened" | "missing_view_opened" | "biome_selected"
-  | "page_milestone_3" | "page_milestone_4" | "page_completed" | "achievement_unlocked";
+  | "page_milestone_3" | "page_milestone_4" | "page_completed" | "achievement_unlocked"
+  | "hunt_started" | "return_visit";
 
 const started = Date.now();
 export function track(event: AnalyticsEvent, context: Record<string, unknown> = {}) {
