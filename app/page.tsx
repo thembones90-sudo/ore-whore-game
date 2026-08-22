@@ -37,7 +37,10 @@ export default function Home() {
   const [save, setSave] = useState<Save>(blank);
   const [loaded, setLoaded] = useState(false);
   const [tab, setTab] = useState<"mine" | "album" | "records">("mine");
-  const [rockHp, setRockHp] = useState(6);
+  const [stage, setStage] = useState<"tunnel" | "ore">("tunnel");
+  const [maxHp, setMaxHp] = useState(21);
+  const [rockHp, setRockHp] = useState(21);
+  const [pendingOre, setPendingOre] = useState<Item | null>(null);
   const [impact, setImpact] = useState<number | null>(null);
   const [found, setFound] = useState<{ ore: Item; mineral: Item; isNew: boolean; count: number } | null>(null);
   const [toast, setToast] = useState<{ name: string; text: string } | null>(null);
@@ -60,9 +63,18 @@ export default function Home() {
     const hit = rockHp - 1;
     setImpact(Date.now());
     setTimeout(() => setImpact(null), 180);
-    setSave(s => ({ ...s, strikes: s.strikes + 1, distance: +(s.distance + 0.4).toFixed(1) }));
+    if (navigator.vibrate) navigator.vibrate(stage === "ore" ? 35 : 12);
+    setSave(s => ({ ...s, strikes: s.strikes + 1, distance: +(s.distance + (stage === "tunnel" ? 0.4 : 0)).toFixed(1) }));
     if (hit > 0) return setRockHp(hit);
-    const ore = pick(ores), mineral = pick(minerals), key = `${ore.id}-${mineral.id}`;
+    if (stage === "tunnel") {
+      const ore = pick(ores);
+      setPendingOre(ore);
+      setStage("ore");
+      setMaxHp(3);
+      setRockHp(3);
+      return;
+    }
+    const ore = pendingOre || pick(ores), mineral = pick(minerals), key = `${ore.id}-${mineral.id}`;
     setSave(s => {
       const isNew = !s.combos[key];
       const next: Save = { ...s, digs: s.digs + 1, combos: { ...s.combos, [key]: (s.combos[key] || 0) + 1 }, ores: { ...s.ores, [ore.id]: (s.ores[ore.id] || 0) + 1 }, minerals: { ...s.minerals, [mineral.id]: (s.minerals[mineral.id] || 0) + 1 }, first: isNew ? { ...s.first, [key]: s.digs + 1 } : s.first, streak: isNew ? 0 : s.streak + 1 };
@@ -82,9 +94,9 @@ export default function Home() {
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  const continueMine = () => { setFound(null); setRockHp(5 + Math.floor(Math.random() * 4)); };
+  const continueMine = () => { const hp=18+Math.floor(Math.random()*7); setFound(null); setPendingOre(null); setStage("tunnel"); setMaxHp(hp); setRockHp(hp); };
   const unique = Object.keys(save.combos).length;
-  const reset = () => { if (confirm("Erase every discovery and return to the cold, uncaring rock?")) { setSave(blank); setFound(null); setRockHp(6); } };
+  const reset = () => { if (confirm("Erase every discovery and return to the cold, uncaring rock?")) { setSave(blank); setFound(null); setPendingOre(null); setStage("tunnel"); setMaxHp(21); setRockHp(21); } };
 
   return <main>
     <header className="topbar">
@@ -97,15 +109,17 @@ export default function Home() {
       <div className="depth"><span>DEPTH</span><strong>{save.distance.toFixed(1)}m</strong></div>
     </header>
 
-    {tab === "mine" && <section className="mine-screen">
-      <div className="mine-copy"><p className="eyebrow">SHIFT 01 · THE LONG WALL</p><h1>KEEP <i>DIGGING.</i></h1><p>The rock does not care about your album.<br/>Unfortunately, you do.</p></div>
+    {tab === "mine" && <section className={`mine-screen ${impact ? "screen-hit" : ""} stage-${stage}`}>
+      <div className="mine-copy"><p className="eyebrow">{stage === "ore" ? "CLANK · DEPOSIT EXPOSED" : "SHIFT 01 · THE LONG WALL"}</p><h1>{stage === "ore" ? <><i>ORE</i> FOUND.</> : <>KEEP <i>DIGGING.</i></>}</h1><p>{stage === "ore" ? `${pendingOre?.name}. Crack it open and see what ruined your evening.` : <>The rock does not care about your album.<br/>Unfortunately, you do.</>}</p></div>
       <div className="stats-row"><span><small>DEPOSITS</small>{save.digs}</span><span><small>UNIQUE</small>{unique}<em>/ 25</em></span><span><small>DRY STREAK</small>{save.streak}</span></div>
-      <button className={`rock ${impact ? "hit" : ""}`} onClick={strike} aria-label="Strike the rock wall">
+      <button className={`rock ${impact ? "hit" : ""} ${stage === "ore" ? "ore-rock" : ""}`} onClick={strike} aria-label={stage === "ore" ? "Crack the exposed ore deposit" : "Strike the rock wall"}>
         {Array.from({ length: 18 }, (_, i) => <span key={i} className={`stone s${i}`} />)}
         <span className="crack c1"/><span className="crack c2"/><span className="crack c3"/>
+        {stage === "ore" && pendingOre && <span className="exposed-ore" style={{"--ore":pendingOre.color} as React.CSSProperties}><i>◆</i><strong>{pendingOre.name}</strong><small>{pendingOre.rarity.toUpperCase()}</small></span>}
+        {impact && <span className="debris">{Array.from({length:8},(_,i)=><i key={i}/>)}</span>}
         <span className="pickaxe">⛏</span>
       </button>
-      <div className="dig-panel"><div><span className="mouse-icon">↙</span><strong>CLICK TO STRIKE</strong><small>or press SPACE</small></div><div className="integrity"><span>ROCK INTEGRITY</span><i>{Array.from({length: 8},(_,i)=><b key={i} className={i < rockHp ? "full" : ""}/>)}</i></div></div>
+      <div className="dig-panel"><div><span className="mouse-icon">↙</span><strong>{stage === "ore" ? "CRACK DEPOSIT" : "CLICK TO STRIKE"}</strong><small>or press SPACE</small></div><div className="integrity"><span>{stage === "ore" ? "ORE SHELL" : `TUNNEL PROGRESS · ${Math.round((1-rockHp/maxHp)*100)}%`}</span><i>{Array.from({length: 12},(_,i)=><b key={i} className={i < Math.ceil((rockHp/maxHp)*12) ? "full" : ""}/>)}</i></div></div>
       <button className="album-link" onClick={() => setTab("album")}>VIEW COMBINATION ALBUM <span>→</span></button>
     </section>}
 
