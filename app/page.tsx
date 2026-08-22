@@ -96,6 +96,7 @@ export default function Home() {
   const [rockHp, setRockHp] = useState(12);
   const [pendingOre, setPendingOre] = useState<Item | null>(null);
   const [impact, setImpact] = useState<number | null>(null);
+  const [hitPoint, setHitPoint] = useState({x:50,y:48});
   const [found, setFound] = useState<{ ore: Item; mineral: Item; isNew: boolean; count: number } | null>(null);
   const [toast, setToast] = useState<{ name: string; text: string } | null>(null);
   const [milestone, setMilestone] = useState<{ore:Item;level:number;missing?:Item;attempts:number} | null>(null);
@@ -131,8 +132,9 @@ export default function Home() {
     return ids.filter(id => !next.achievements.includes(id));
   };
 
-  const strike = () => {
+  const strike = (point?:{x:number;y:number}) => {
     if (found) return;
+    setHitPoint(point||{x:50,y:48});
     const hit = rockHp - 1;
     setImpact(Date.now());
     setTimeout(() => setImpact(null), 180);
@@ -174,6 +176,8 @@ export default function Home() {
     });
   };
 
+  const strikeAtPointer=(event:React.MouseEvent<HTMLButtonElement>)=>{const rect=event.currentTarget.getBoundingClientRect();strike({x:Math.max(4,Math.min(96,(event.clientX-rect.left)/rect.width*100)),y:Math.max(5,Math.min(95,(event.clientY-rect.top)/rect.height*100))})};
+
   const playImpact=(kind:"rock"|"clank"|"crack")=>{if(save.settings.master<=0||save.settings.sfx<=0)return;try{const C=window.AudioContext;const c=new C(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);const base=kind==="clank"?720:kind==="crack"?145:82+Math.random()*36;o.type=kind==="clank"?"triangle":"square";o.frequency.setValueAtTime(base,c.currentTime);o.frequency.exponentialRampToValueAtTime(kind==="clank"?340:45,c.currentTime+.09);g.gain.setValueAtTime((kind==="clank"?.18:.08)*save.settings.master*save.settings.sfx,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.12);o.start();o.stop(c.currentTime+.13);}catch{}};
 
   useEffect(() => {
@@ -206,7 +210,7 @@ export default function Home() {
       <div className="stats-row"><span><small>DEPOSITS</small>{save.digs}</span><span><small>UNIQUE</small>{unique}<em>/ 225</em></span><span><small>DRY STREAK</small>{save.streak}</span></div>
       {save.huntTarget&&<div className="hunt-banner"><span>HUNTING</span><strong>{(()=>{const p=save.huntTarget!.lastIndexOf("-");return `${ores.find(o=>o.id===save.huntTarget!.slice(0,p))?.name} + ${minerals.find(m=>m.id===save.huntTarget!.slice(p+1))?.name}`})()}</strong><button onClick={()=>setTab("wanted")}>VIEW TARGET</button></div>}
       <div className="biomes volume-biomes" aria-label="Mine location">{biomeOrder.map((b,i)=>{const open=save.unlockedBiomes.includes(b),done=completedPages(save,b),previous=i?biomeOrder[i-1]:b;return <button key={b} disabled={!open} className={`${save.biome===b?"chosen":""} ${open?"":"locked"}`} onClick={()=>{setSave(s=>({...s,biome:b}));track("biome_selected",{biome:b})}}><span>{open?biomeNames[b]:`🔒 ${biomeNames[b]}`}</span><small>{open?`${done}/${biomePages[b].length} PAGES · ${distributionLabel(b)}`:`COMPLETE ${biomeNames[previous]} · ${completedPages(save,previous)}/${biomePages[previous].length} PAGES`}</small></button>})}</div>
-      <button className={`rock ${impact ? "hit" : ""} ${stage === "ore" ? "ore-rock" : ""} damage-${Math.floor((1-rockHp/maxHp)*4)} ${rockHp===1?"final-hit":""}`} onClick={strike} aria-label={stage === "ore" ? "Crack the exposed ore deposit" : "Strike the rock wall"}>
+      <button className={`rock ${impact ? "hit" : ""} ${stage === "ore" ? "ore-rock" : ""} damage-${Math.floor((1-rockHp/maxHp)*4)} ${rockHp===1?"final-hit":""}`} style={{"--hit-x":`${hitPoint.x}%`,"--hit-y":`${hitPoint.y}%`} as React.CSSProperties} onClick={strikeAtPointer} aria-label={stage === "ore" ? "Crack the exposed ore deposit" : "Strike the rock wall"}>
         {Array.from({ length: 18 }, (_, i) => <span key={i} className={`stone s${i}`} />)}
         <span className="crack c1"/><span className="crack c2"/><span className="crack c3"/>
         {stage === "ore" && pendingOre && <span className="exposed-ore" style={{"--ore":pendingOre.color} as React.CSSProperties}><i>◆</i><strong>{pendingOre.name}</strong><small>{pendingOre.rarity.toUpperCase()}</small></span>}
