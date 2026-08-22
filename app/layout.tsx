@@ -11,6 +11,7 @@ import "./v044.css";
 import "./v045.css";
 import "./v046.css";
 import "./v047.css";
+import "./v048.css";
 import "./v047.css";
 
 export const metadata: Metadata = { title: "ORE WHORE — Compulsive Geology", description: "Dig. Clank. Crack. Collect every ore and mineral combination." };
