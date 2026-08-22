@@ -1,0 +1,45 @@
+/* v0.4.6 — unified mine materials, ore specimens and strike art */
+.mine-screen{--mine-tint:#62665c;--mine-glow:#b8c18a;--mine-dark:#090b09;--pick:#b8bdaf;--pick-edge:#eef0e9;--handle:#754c2c;--dust:#8b8b7c;background-image:radial-gradient(ellipse at 50% 38%,color-mix(in srgb,var(--mine-glow) 8%,transparent),transparent 42%),linear-gradient(var(--mine-dark),#080908 72%)}
+.mine-screen.biome-old{--mine-tint:#666962;--mine-glow:#b7ad83;--mine-dark:#0d0e0d;--dust:#8d8879}
+.mine-screen.biome-deep{--mine-tint:#5e3430;--mine-glow:#ed573b;--mine-dark:#100606;--dust:#8c5141}
+.mine-screen.biome-outland{--mine-tint:#405d39;--mine-glow:#87ff48;--mine-dark:#060d06;--dust:#5d8450}
+.mine-screen.biome-northrend{--mine-tint:#3d5663;--mine-glow:#73d9ff;--mine-dark:#061017;--dust:#7899a5}
+.rock{position:relative;background-color:var(--mine-dark);background-blend-mode:color,normal;transition:filter .25s,box-shadow .25s}
+.biome-old .rock{background-image:linear-gradient(#504d4022,#1a191655),url('/mine-wall-v2.png');filter:saturate(.72) sepia(.08)}
+.biome-deep .rock{background-image:radial-gradient(circle at 58% 74%,#ff3a161f,transparent 36%),linear-gradient(#3c090930,#19050466),url('/mine-wall-v2.png');background-blend-mode:screen,color,normal;filter:saturate(1.18) contrast(1.08)}
+.biome-outland .rock{background-image:radial-gradient(circle at 28% 30%,#8cff3e20,transparent 32%),linear-gradient(120deg,#254b1d44,#06120777),url('/mine-wall-v2.png');background-blend-mode:screen,color,normal;filter:saturate(1.22) hue-rotate(12deg)}
+.biome-northrend .rock{background-image:linear-gradient(150deg,#d9f7ff20 0 8%,transparent 9% 52%,#85dfff18 53% 58%,transparent 59%),linear-gradient(#17374b33,#06121c66),url('/mine-wall-v2.png');background-blend-mode:screen,color,normal;filter:saturate(.9) contrast(1.08)}
+.mine-atmosphere{position:absolute;inset:0;z-index:3;border-radius:inherit;pointer-events:none;opacity:.72;background:radial-gradient(circle at 24% 18%,color-mix(in srgb,var(--mine-glow) 14%,transparent) 0 1px,transparent 2px),radial-gradient(circle at 72% 76%,color-mix(in srgb,var(--mine-glow) 10%,transparent) 0 1px,transparent 2px);background-size:63px 57px,79px 71px;mix-blend-mode:screen}
+.biome-deep .mine-atmosphere{background:linear-gradient(118deg,transparent 28%,#ff3b1d1b 29% 30%,transparent 31% 68%,#ff7a3618 69% 70%,transparent 71%)}
+.biome-outland .mine-atmosphere{background:radial-gradient(ellipse at 20% 64%,#82ff4522 0 2px,transparent 3px),radial-gradient(ellipse at 78% 25%,#b4ff7b20 0 2px,transparent 3px);background-size:46px 59px,71px 53px}
+.biome-northrend .mine-atmosphere{background:linear-gradient(142deg,transparent 19%,#b8ecff24 20% 21%,transparent 22% 57%,#69cfff18 58% 59%,transparent 60%)}
+.impact-scar{position:absolute;left:var(--hit-x);top:var(--hit-y);z-index:7;width:clamp(42px,9vw,82px);aspect-ratio:1;translate:-50% -50%;pointer-events:none;border-radius:50%;opacity:calc(.12 + var(--damage,0)*.18);background:radial-gradient(circle,#050605 0 5%,transparent 7%),conic-gradient(from 8deg,transparent 0 8%,#030403 9% 10%,transparent 11% 21%,#060706 22% 24%,transparent 25% 39%,#020302 40% 42%,transparent 43% 58%,#090a08 59% 61%,transparent 62% 76%,#030403 77% 79%,transparent 80%);filter:drop-shadow(0 0 2px #000)}
+.damage-0{--damage:0}.damage-1{--damage:1}.damage-2{--damage:2}.damage-3,.damage-4{--damage:3}
+.damage-1 .impact-scar{scale:1.08}.damage-2 .impact-scar{scale:1.3}.damage-3 .impact-scar,.damage-4 .impact-scar{scale:1.55;opacity:.9}
+.crack{left:var(--hit-x)!important;top:var(--hit-y)!important;transform-origin:0 0;pointer-events:none}.c1{transform:rotate(-18deg)}.c2{transform:rotate(102deg)}.c3{transform:rotate(216deg)}
+.impact-flash{position:absolute;left:var(--hit-x);top:var(--hit-y);z-index:12;width:72px;aspect-ratio:1;translate:-50% -50%;border-radius:50%;pointer-events:none;background:radial-gradient(circle,#fff 0 2%,var(--mine-glow) 4%,transparent 48%);animation:v46flash .18s ease-out both}
+.pickaxe{display:block;position:absolute!important;left:var(--hit-x)!important;top:var(--hit-y)!important;z-index:15;width:108px;height:108px;translate:-14% -82%;transform:rotate(-32deg);transform-origin:18px 88px;pointer-events:none;color:inherit!important;font-size:0!important;filter:drop-shadow(0 6px 4px #000b)}
+.pickaxe i{display:block;position:absolute}.pick-head{left:5px;top:7px;width:82px;height:18px;background:linear-gradient(#f0f2ec,var(--pick-edge) 15%,var(--pick) 48%,#4a4f49 100%);clip-path:polygon(0 48%,14% 16%,67% 4%,100% 34%,68% 42%,60% 80%,51% 100%,48% 43%,15% 57%);box-shadow:inset 0 -4px #252925}
+.pick-handle{left:46px;top:24px;width:13px;height:78px;border-radius:5px;background:linear-gradient(90deg,#3b2316,var(--handle) 28%,#a47447 52%,#50301c);transform:rotate(-3deg);box-shadow:inset -2px 0 #20130c,0 2px 3px #000}
+.pick-grip{left:43px;top:75px;width:19px;height:24px;border-radius:3px;background:repeating-linear-gradient(0deg,#1e211d 0 3px,#4d5149 4px 6px);transform:rotate(-3deg)}
+.rock.hit .pickaxe{animation:v46swing .19s cubic-bezier(.2,.8,.25,1)}
+.cosmetic-rust{--pick:#ad5e37;--pick-edge:#e99a68;--handle:#58311d}.cosmetic-void{--pick:#6d4885;--pick-edge:#d58cff;--handle:#24172e}.cosmetic-frost{--pick:#70cfff;--pick-edge:#e5fbff;--handle:#3d5966}.cosmetic-titan,.cosmetic-orewhorepick{--pick:#55b7cb;--pick-edge:#d5fbff;--handle:#536066}
+.exposed-ore{z-index:9;min-width:150px;background:radial-gradient(ellipse,#020302ef 0 42%,#050605b8 56%,transparent 73%)}
+.ore-cluster{position:relative;display:block!important;width:102px;height:78px;margin:auto;filter:drop-shadow(0 0 10px color-mix(in srgb,var(--ore) 72%,transparent)) drop-shadow(0 9px 7px #000)!important}
+.ore-cluster b{position:absolute;bottom:8px;width:28px;height:58px;background:linear-gradient(100deg,#fff8 0 8%,var(--ore) 18% 68%,color-mix(in srgb,var(--ore) 38%,#050605) 70%);clip-path:polygon(50% 0,88% 18%,100% 78%,68% 100%,18% 91%,0 31%);border-bottom:5px solid #111}
+.ore-cluster b:nth-child(1){left:36px;height:70px}.ore-cluster b:nth-child(2){left:10px;height:48px;transform:rotate(-18deg)}.ore-cluster b:nth-child(3){right:7px;height:51px;transform:rotate(18deg)}.ore-cluster b:nth-child(4){left:28px;width:22px;height:39px;transform:rotate(-7deg)}.ore-cluster b:nth-child(5){right:25px;width:20px;height:37px;transform:rotate(8deg)}
+.debris{left:var(--hit-x)!important;top:var(--hit-y)!important;z-index:13}.debris i{background:linear-gradient(135deg,color-mix(in srgb,var(--dust) 80%,#fff),var(--dust) 40%,#151714)!important}
+.gem-art{position:relative;display:inline-block;width:1em;height:1.12em;font-size:inherit;background:linear-gradient(112deg,#fff9 0 7%,var(--gem) 15% 62%,color-mix(in srgb,var(--gem) 38%,#030403) 64% 100%);clip-path:polygon(50% 0,84% 16%,100% 53%,68% 100%,24% 91%,0 48%,17% 18%);filter:drop-shadow(0 0 .18em color-mix(in srgb,var(--gem) 65%,transparent)) drop-shadow(0 .12em .08em #000);box-shadow:none!important;color:transparent!important}
+.gem-art::after{content:"";position:absolute;inset:14% 22% 45% 24%;background:linear-gradient(135deg,#fffbd,#fff0);clip-path:polygon(0 0,100% 12%,62% 100%,18% 68%)}
+.ore-gem.gem-art{font-size:42px;flex:none}.mineral-gem.gem-art{display:block;font-size:78px;margin:18px auto 16px}.big-gem.gem-art{font-size:86px}.combo-art{align-items:center}.combo-art>b{color:#73786e;text-shadow:0 2px #000}.slots article.found{background:radial-gradient(circle at 50% 32%,color-mix(in srgb,var(--acid) 4%,#1b1e1a),#151815 62%)}
+.wanted-gem.gem-art{font-size:23px;grid-row:1/3}
+.reveal-card{overflow:hidden;background:radial-gradient(circle at 50% 21%,#30372e,#151815 57%,#0a0c0a);box-shadow:0 28px 100px #000,0 0 70px color-mix(in srgb,var(--acid) 12%,transparent)}
+.reveal-card::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(125deg,transparent 0 30%,#ffffff08 31%,transparent 32% 65%,#d9ff4507 66%,transparent 67%);background-size:180px 180px}
+.share-card .gem-art{font-size:66px}.completion-row .gem-art{font-size:28px}
+.high-contrast .gem-art{filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 8px var(--gem))}.high-contrast .ore-cluster{filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 12px var(--ore))!important}
+.reduced-motion .impact-flash,.reduced-motion .rock.hit .pickaxe{animation:none!important}.reduced-shake .rock.hit .pickaxe{animation:v46swingSoft .12s ease-out}
+@keyframes v46swing{0%{transform:rotate(30deg) translate(22px,-15px)}70%{transform:rotate(-9deg) translate(0,0)}100%{transform:rotate(0)}}
+@keyframes v46swingSoft{from{transform:rotate(7deg)}to{transform:rotate(0)}}
+@keyframes v46flash{from{opacity:1;scale:.25}to{opacity:0;scale:1.5}}
+@media(max-width:760px){.pickaxe{width:86px;height:90px;scale:.82}.exposed-ore{min-width:124px;padding:12px 16px}.ore-cluster{width:82px;height:65px;scale:.82}.mineral-gem.gem-art{font-size:62px}.big-gem.gem-art{font-size:68px}}
+@media(max-width:450px){.pickaxe{scale:.68}.impact-scar{width:48px}.exposed-ore strong{font-size:10px}.mine-atmosphere{opacity:.5}}
