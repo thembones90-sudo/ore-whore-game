@@ -32,9 +32,13 @@ test("Peon Technology Tree uses canonical display names without changing stable 
   for(const id of ["forge-advanced-drill","forge-advanced-excavator","forge-endgame-machine","forge-ultimate-machine"])assert.ok(data.includes(`id:"${id}"`));
 });
 
-test("save migration preserves cumulative ores while adding spendable inventories and tool ownership",()=>{
-  assert.match(game,/rawResources=old\.rawResources/);
-  assert.match(game,/processedMaterials:old\.processedMaterials\|\|\{\}/);
+test("schema 14 migration preserves lifetime records and reconstructs separate spendable inventories",()=>{
+  assert.match(game,/oreResources=old\.oreResources/);
+  assert.match(game,/mineralResources=old\.mineralResources/);
+  assert.match(game,/processedResources=old\.processedResources/);
   assert.match(game,/ownedTools=Array\.isArray\(old\.ownedTools\)/);
-  assert.match(game,/rawResources:\{\.\.\.s\.rawResources/);
+  assert.match(game,/toolTier=Math\.max/);
+  assert.match(game,/schema:14/);
+  assert.match(game,/oreResources:\{\.\.\.s\.oreResources/);
+  assert.match(game,/mineralResources:\{\.\.\.s\.mineralResources/);
 });

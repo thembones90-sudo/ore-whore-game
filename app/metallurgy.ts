@@ -14,7 +14,7 @@ export type ForgedItem = {
   trueArtifactChance:number; description: string;
 };
 export type ForgeRecipe = {
-  id: string; resultingItemId: string; inputs: Ingredient[];
+  id: string; resultingItemId: string; processedInputs: Ingredient[]; mineralInputs: Ingredient[];
   unlock?: RecipeUnlock; category: "MINING TOOL"; description?: string;
 };
 
@@ -25,6 +25,8 @@ export const processedMaterials: ProcessedMaterial[] = [
   {id:"darksteel",name:"Darksteel",description:"Dense, ancient, and unpleasantly warm."},
   {id:"felsteel",name:"Felsteel",description:"Industrial-grade corruption."},
   {id:"khorium-alloy",name:"Khorium Alloy",description:"Khorium stabilized with Cobalt."},
+  {id:"saronite-assembly",name:"Saronite Assembly",description:"Saronite chassis with conductive Gold controls."},
+  {id:"titanium-assembly",name:"Titanium Assembly",description:"Titanium structure with Silver precision plating and Cobalt bracing."},
 ];
 
 // Quantities are intentionally centralized and easy to rebalance.
@@ -35,6 +37,8 @@ export const metallurgyRecipes: MetallurgyRecipe[] = [
   {id:"alloy-darksteel",name:"Smelt Darksteel",operation:"ALLOY",inputs:[{id:"dark",quantity:1},{id:"thorium",quantity:1}],outputId:"darksteel",outputQuantity:1,unlock:{mine:"deep"}},
   {id:"alloy-felsteel",name:"Smelt Felsteel",operation:"ALLOY",inputs:[{id:"feliron",quantity:2},{id:"adamantite",quantity:1}],outputId:"felsteel",outputQuantity:1,unlock:{mine:"outland"}},
   {id:"alloy-khorium",name:"Smelt Khorium Alloy",operation:"ALLOY",inputs:[{id:"cobalt",quantity:2},{id:"khorium",quantity:1}],outputId:"khorium-alloy",outputQuantity:1,unlock:{mine:"northrend"}},
+  {id:"assembly-saronite",name:"Build Saronite Assembly",operation:"ALLOY",inputs:[{id:"saronite",quantity:2},{id:"gold",quantity:1}],outputId:"saronite-assembly",outputQuantity:1,unlock:{mine:"northrend"}},
+  {id:"assembly-titanium",name:"Build Titanium Assembly",operation:"ALLOY",inputs:[{id:"titanium",quantity:1},{id:"silver",quantity:1},{id:"cobalt",quantity:1}],outputId:"titanium-assembly",outputQuantity:1,unlock:{mine:"northrend"}},
 ];
 
 export const forgedItems: ForgedItem[] = [
@@ -52,16 +56,16 @@ export const forgedItems: ForgedItem[] = [
 ];
 
 export const forgeRecipes: ForgeRecipe[] = [
-  {id:"forge-bronze-pickaxe",resultingItemId:"bronze-pickaxe",inputs:[{id:"bronze",quantity:4}],category:"MINING TOOL"},
-  {id:"forge-iron-pickaxe",resultingItemId:"iron-pickaxe",inputs:[{id:"iron-ingot",quantity:5}],category:"MINING TOOL",unlock:{tool:"bronze-pickaxe"}},
-  {id:"forge-mithril-pickaxe",resultingItemId:"mithril-pickaxe",inputs:[{id:"mithrilsteel",quantity:4}],category:"MINING TOOL",unlock:{mine:"deep",tool:"iron-pickaxe"}},
-  {id:"forge-dark-iron-pickaxe",resultingItemId:"dark-iron-pickaxe",inputs:[{id:"darksteel",quantity:4}],category:"MINING TOOL",unlock:{mine:"deep",tool:"mithril-pickaxe"}},
-  {id:"forge-felsteel-jackhammer",resultingItemId:"felsteel-jackhammer",inputs:[{id:"felsteel",quantity:6},{id:"iron-ingot",quantity:3}],category:"MINING TOOL",unlock:{mine:"outland",tool:"dark-iron-pickaxe"}},
-  {id:"forge-khorium-drill",resultingItemId:"khorium-drill",inputs:[{id:"khorium-alloy",quantity:6},{id:"felsteel",quantity:2}],category:"MINING TOOL",unlock:{mine:"northrend",tool:"felsteel-jackhammer"}},
-  {id:"forge-advanced-drill",resultingItemId:"advanced-drill",inputs:[{id:"khorium-alloy",quantity:8},{id:"mithrilsteel",quantity:4}],category:"MINING TOOL",unlock:{mine:"northrend",tool:"khorium-drill"}},
-  {id:"forge-advanced-excavator",resultingItemId:"advanced-excavator",inputs:[{id:"khorium-alloy",quantity:10},{id:"darksteel",quantity:6}],category:"MINING TOOL",unlock:{mine:"northrend",tool:"advanced-drill"}},
-  {id:"forge-endgame-machine",resultingItemId:"endgame-machine",inputs:[{id:"khorium-alloy",quantity:12},{id:"felsteel",quantity:8},{id:"iron-ingot",quantity:5}],category:"MINING TOOL",unlock:{mine:"northrend",tool:"advanced-excavator"}},
-  {id:"forge-ultimate-machine",resultingItemId:"ultimate-machine",inputs:[{id:"khorium-alloy",quantity:16},{id:"felsteel",quantity:10},{id:"darksteel",quantity:8},{id:"mithrilsteel",quantity:6},{id:"bronze",quantity:10}],category:"MINING TOOL",unlock:{mine:"northrend",tool:"endgame-machine"}},
+  {id:"forge-bronze-pickaxe",resultingItemId:"bronze-pickaxe",processedInputs:[{id:"bronze",quantity:3}],mineralInputs:[{id:"malachite",quantity:2},{id:"tigerseye",quantity:1}],category:"MINING TOOL",unlock:{tool:"rusty-pickaxe"}},
+  {id:"forge-iron-pickaxe",resultingItemId:"iron-pickaxe",processedInputs:[{id:"iron-ingot",quantity:4},{id:"bronze",quantity:1}],mineralInputs:[{id:"shadowgem",quantity:2}],category:"MINING TOOL",unlock:{tool:"bronze-pickaxe"}},
+  {id:"forge-mithril-pickaxe",resultingItemId:"mithril-pickaxe",processedInputs:[{id:"mithrilsteel",quantity:3},{id:"iron-ingot",quantity:2}],mineralInputs:[{id:"mossagate",quantity:2},{id:"jade",quantity:1}],category:"MINING TOOL",unlock:{mine:"deep",tool:"iron-pickaxe"}},
+  {id:"forge-dark-iron-pickaxe",resultingItemId:"dark-iron-pickaxe",processedInputs:[{id:"darksteel",quantity:3},{id:"mithrilsteel",quantity:1}],mineralInputs:[{id:"moonstone",quantity:2},{id:"citrine",quantity:1}],category:"MINING TOOL",unlock:{mine:"deep",tool:"mithril-pickaxe"}},
+  {id:"forge-felsteel-jackhammer",resultingItemId:"felsteel-jackhammer",processedInputs:[{id:"felsteel",quantity:4},{id:"darksteel",quantity:2}],mineralInputs:[{id:"aquamarine",quantity:2},{id:"starruby",quantity:1}],category:"MINING TOOL",unlock:{mine:"outland",tool:"dark-iron-pickaxe"}},
+  {id:"forge-khorium-drill",resultingItemId:"khorium-drill",processedInputs:[{id:"khorium-alloy",quantity:4},{id:"felsteel",quantity:2}],mineralInputs:[{id:"vitriol",quantity:1},{id:"largeopal",quantity:1}],category:"MINING TOOL",unlock:{mine:"northrend",tool:"felsteel-jackhammer"}},
+  {id:"forge-advanced-drill",resultingItemId:"advanced-drill",processedInputs:[{id:"khorium-alloy",quantity:5},{id:"darksteel",quantity:2}],mineralInputs:[{id:"sapphire",quantity:1}],category:"MINING TOOL",unlock:{mine:"northrend",tool:"khorium-drill"}},
+  {id:"forge-advanced-excavator",resultingItemId:"advanced-excavator",processedInputs:[{id:"khorium-alloy",quantity:6},{id:"felsteel",quantity:4}],mineralInputs:[{id:"diamond",quantity:1}],category:"MINING TOOL",unlock:{mine:"northrend",tool:"advanced-drill"}},
+  {id:"forge-endgame-machine",resultingItemId:"endgame-machine",processedInputs:[{id:"titanium-assembly",quantity:5},{id:"saronite-assembly",quantity:3}],mineralInputs:[{id:"emerald",quantity:1},{id:"arcane",quantity:1}],category:"MINING TOOL",unlock:{mine:"northrend",tool:"advanced-excavator"}},
+  {id:"forge-ultimate-machine",resultingItemId:"ultimate-machine",processedInputs:[{id:"titanium-assembly",quantity:8},{id:"saronite-assembly",quantity:5},{id:"khorium-alloy",quantity:5}],mineralInputs:[{id:"diamond",quantity:1},{id:"emerald",quantity:1},{id:"arcane",quantity:2}],category:"MINING TOOL",unlock:{mine:"northrend",tool:"endgame-machine"}},
 ];
 
 export const MAX_TRUE_ARTIFACT_CHANCE = 0.01;
@@ -70,3 +74,11 @@ export const equippedTrueArtifactChance=(tool:ForgedItem)=>Math.min(MAX_TRUE_ART
 
 export const canAfford=(inventory:Record<string,number>,inputs:Ingredient[])=>inputs.every(i=>(inventory[i.id]||0)>=i.quantity);
 export const spend=(inventory:Record<string,number>,inputs:Ingredient[])=>inputs.reduce((next,i)=>({...next,[i.id]:(next[i.id]||0)-i.quantity}),{...inventory});
+
+export type ResourceState={oreResources:Record<string,number>;mineralResources:Record<string,number>;processedResources:Record<string,number>;ownedTools:string[];toolTier:number};
+export const smeltAtomic=(state:ResourceState,recipe:MetallurgyRecipe):ResourceState|null=>canAfford(state.oreResources,recipe.inputs)?{...state,oreResources:spend(state.oreResources,recipe.inputs),processedResources:{...state.processedResources,[recipe.outputId]:(state.processedResources[recipe.outputId]||0)+recipe.outputQuantity}}:null;
+export const forgeAtomic=(state:ResourceState,recipe:ForgeRecipe):ResourceState|null=>{
+  const tool=forgedItems.find(t=>t.id===recipe.resultingItemId),previous=forgedItems.find(t=>t.tier===(tool?.tier||0)-1);
+  if(!tool||state.ownedTools.includes(tool.id)||(previous&&!state.ownedTools.includes(previous.id))||!canAfford(state.processedResources,recipe.processedInputs)||!canAfford(state.mineralResources,recipe.mineralInputs))return null;
+  return {...state,processedResources:spend(state.processedResources,recipe.processedInputs),mineralResources:spend(state.mineralResources,recipe.mineralInputs),ownedTools:[...state.ownedTools,tool.id],toolTier:tool.tier};
+};
