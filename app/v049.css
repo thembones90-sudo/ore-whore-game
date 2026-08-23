@@ -1,0 +1,80 @@
+/* v0.4.9 — Miss/Perfect/Critical feedback, Vein banner, session summary,
+   Last-One escalation tiers, and Depth indicator. Stays inside the existing
+   near-black/off-white/acid-lime industrial-editorial language: acid-lime
+   for skill (Perfect), a warm amber for chance (Crit/Vein), muted red-gray
+   for failure (Miss) — no new hues invented outside that logic. */
+
+/* ---- Vein banner: mirrors .hunt-banner's placement/shape, opposite side
+   so both can be visible at once, warm amber to read as "temporary bonus"
+   rather than "target" (which stays gold via .hunt-banner). ---- */
+.vein-banner{position:absolute;right:4vw;bottom:32px;z-index:8;width:min(300px,30vw);border:1px solid #e08a2e;background:#1c150dee;padding:12px 14px;box-shadow:0 0 28px #e08a2e22;animation:veinPulse 1.4s ease-in-out infinite}
+.vein-banner span{display:block;font-size:7px;letter-spacing:2px;color:#e08a2e;font-weight:900}
+.vein-banner strong{display:block;font-size:10px;line-height:1.4;margin:5px 0;color:#eee}
+.vein-banner small{font-size:7px;letter-spacing:1.3px;color:#c9945a}
+@keyframes veinPulse{0%,100%{box-shadow:0 0 28px #e08a2222}50%{box-shadow:0 0 36px #e08a2244}}
+
+/* ---- Perfect Strike ring: a quiet ring on the rock that brightens during
+   the timing window. Acid-lime — the one skill-driven mechanic gets the
+   game's "correct answer" color. ---- */
+.perfect-ring{position:absolute;inset:14%;z-index:6;border-radius:50%;border:2px solid transparent;pointer-events:none;transition:border-color .15s ease,box-shadow .15s ease,transform .15s ease;transform:scale(.96)}
+.perfect-ring.ready{border-color:var(--acid);box-shadow:0 0 24px #d9ff4560,inset 0 0 24px #d9ff4530;transform:scale(1)}
+
+/* ---- Strike-result callouts on the rock: text pop at the hit point,
+   reusing the --hit-x/--hit-y custom properties already driving
+   impact-scar/impact-flash/pickaxe. ---- */
+.hit-callout{position:absolute;left:var(--hit-x);top:var(--hit-y);translate:-50% -140%;z-index:16;font-size:11px;font-weight:900;letter-spacing:2px;white-space:nowrap;pointer-events:none;animation:calloutPop .45s cubic-bezier(.2,1.8,.4,1) both}
+.rock.hit-perfect .hit-callout{color:var(--acid);text-shadow:0 0 10px #d9ff45aa}
+.rock.hit-crit .hit-callout{color:#f0ba52;text-shadow:0 0 10px #f0ba5299}
+.rock.hit-perfect-crit .hit-callout{color:#ff8fd6;text-shadow:0 0 14px #ff8fd6bb;font-size:12px}
+.rock.hit-perfect{box-shadow:0 0 0 3px #d9ff4555 inset,0 28px 22px #000}
+.rock.hit-crit{box-shadow:0 0 0 3px #f0ba5255 inset,0 28px 22px #000}
+.rock.hit-perfect-crit{box-shadow:0 0 0 3px #ff8fd670 inset,0 28px 22px #000}
+
+/* ---- Miss feedback: dismissive, low-key, deliberately unglamorous —
+   failure gets muted gray-red, never the same visual weight as a hit. ---- */
+.miss-bark{position:absolute;left:50%;top:12%;translate:-50% 0;z-index:16;max-width:80%;text-align:center;font-size:11px;font-weight:800;letter-spacing:.5px;color:#c98d8d;background:#1a1414ee;border:1px solid #4a3232;padding:8px 14px;pointer-events:none;animation:missIn .25s ease both,missOut .25s ease .45s both}
+.rock.hit-miss{filter:saturate(.4)}
+
+/* ---- Session summary (Records "TODAY" line). ---- */
+.today-summary{margin:24px 0 4px;padding:14px 18px;background:#171a17;border:1px solid var(--line);border-left:3px solid var(--acid)}
+.today-summary span{display:block;font-size:7px;letter-spacing:2.5px;color:#777;margin-bottom:5px}
+.today-summary strong{font:12px monospace;letter-spacing:.5px;color:#d6d8d2}
+
+/* ---- Last-One escalation: intensity grows with tier (0 mild → 4 severe).
+   Reuses the existing gold "one remains" identity at low tiers, drifts
+   toward the acid/urgent register as the drought lengthens. ---- */
+.wanted-list>article.last-one-1,.album-title.last-one-1{box-shadow:0 0 30px #f0ba521c}
+.wanted-list>article.last-one-2,.album-title.last-one-2{border-color:#e0a23f;box-shadow:0 0 32px #e0a23f22}
+.wanted-list>article.last-one-3,.album-title.last-one-3{border-color:#e0a23f;box-shadow:0 0 36px #e0a23f2c;animation:lastOneBreathe 2.4s ease-in-out infinite}
+.wanted-list>article.last-one-4,.album-title.last-one-4{border-color:var(--acid);box-shadow:0 0 42px #d9ff4530;animation:lastOneBreathe 1.6s ease-in-out infinite}
+.wanted-list>article.last-one-4 h3,.album-title.last-one-4 h3{color:var(--acid)}
+@keyframes lastOneBreathe{0%,100%{box-shadow:0 0 32px #e0a23f22}50%{box-shadow:0 0 44px #e0a23f3c}}
+
+/* ---- Depth indicator: small colored word inline in the tunnel-progress
+   label. Shallow stays neutral (canonical/no change); Deep and Bedrock
+   escalate toward the same amber→intense register as chance-based bonuses. ---- */
+.depth-band{font-weight:900;letter-spacing:1.5px}
+.depth-shallow{color:#777}
+.depth-deep{color:#e0a23f}
+.depth-bedrock{color:#ff8a3d;text-shadow:0 0 8px #ff8a3d55}
+
+@keyframes calloutPop{from{opacity:0;transform:translateY(6px) scale(.85)}30%{opacity:1;transform:translateY(0) scale(1.08)}to{opacity:0;transform:translateY(-10px) scale(1)}}
+@keyframes missIn{from{opacity:0;transform:translate(-50%,-6px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes missOut{to{opacity:0}}
+
+/* Reduced-motion collapses all of the above via the existing global rule
+   (`.reduced-motion *{animation-duration:.001ms!important}`); reduced-shake
+   only needs to neutralize the perfect-ring's scale transform, since that's
+   a transform-based micro-motion rather than a full animation. */
+.reduced-shake .perfect-ring{transition:border-color .15s ease,box-shadow .15s ease}
+.reduced-shake .perfect-ring.ready{transform:none}
+
+@media(max-width:760px){
+  .vein-banner{position:static;width:min(560px,86vw);margin:10px auto 0;text-align:center}
+  .hit-callout{font-size:10px}
+  .today-summary{margin:15px 0}
+}
+@media(max-width:450px){
+  .vein-banner strong{font-size:9px}
+  .miss-bark{font-size:10px;padding:7px 11px}
+}

@@ -1,0 +1,21 @@
+.volume-biomes button.locked {
+  border-color: #292d2c;
+  background: linear-gradient(145deg, #101312, #080a09);
+  color: #737977;
+  cursor: not-allowed;
+  filter: grayscale(1);
+  opacity: .68;
+}
+
+.volume-biomes button.locked:hover {
+  transform: none;
+  border-color: #292d2c;
+}
+
+.volume-biomes button small {
+  line-height: 1.35;
+}
+
+.volume-biomes button.locked small {
+  color: #8f7b55;
+}

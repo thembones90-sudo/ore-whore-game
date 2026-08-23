@@ -1,0 +1,73 @@
+/* v0.4.7 — canonical ore sprites + centralized biome environment layer */
+.mine-screen{
+  --biome-accent:#d88156;--biome-secondary:#a77a50;--biome-canvas:#18130f;
+  --biome-cavity:#120d09;--biome-debris:#8d7b68;--biome-particle:#b59a76;--biome-light:#d49a63;
+  background:radial-gradient(ellipse at 50% 38%,color-mix(in srgb,var(--biome-light) 15%,transparent),transparent 42%),linear-gradient(180deg,var(--biome-canvas),#080908 78%);
+  isolation:isolate;transition:background .45s ease
+}
+.mine-screen::before,.mine-screen::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:opacity .45s ease}
+.biome-old::before{background:linear-gradient(90deg,#24170e88 0 3.4%,transparent 3.5% 96.5%,#24170e88 96.6%),linear-gradient(90deg,transparent 0 8%,#5e3d2638 8.2% 10%,transparent 10.2% 90%,#5e3d2638 90.2% 92%,transparent 92.2%),radial-gradient(ellipse at 50% 48%,transparent 0 38%,#7b4b2b12 63%,#05040399 100%)}
+.biome-old::after{background:repeating-linear-gradient(94deg,transparent 0 86px,#c6915d0a 87px 88px);opacity:.7}
+.biome-deep::before{background:linear-gradient(108deg,transparent 0 24%,#9a53691c 24.3% 25%,transparent 25.3% 67%,#5d35441c 67.2% 68%,transparent 68.3%),radial-gradient(ellipse at 50% 48%,#210d171d 0 28%,#09060999 72%)}
+.biome-deep::after{background:repeating-linear-gradient(164deg,transparent 0 110px,#9a53690a 111px 113px);opacity:.8}
+.biome-outland::before{background:radial-gradient(circle at 18% 34%,#83b85c13 0 2px,transparent 3px),radial-gradient(circle at 82% 64%,#6e8a4b15 0 2px,transparent 3px),linear-gradient(121deg,transparent 0 29%,#67874616 29.4% 30.2%,transparent 30.5% 73%,#83b85c12 73.3% 74%,transparent 74.3%);background-size:58px 67px,73px 61px,auto}
+.biome-outland::after{background:radial-gradient(ellipse at 50% 50%,transparent 0 35%,#101c0d55 65%,#030603bb 100%)}
+.biome-northrend::before{background:linear-gradient(143deg,transparent 0 19%,#a6e7f422 19.3% 20%,transparent 20.3% 54%,#6dc6df17 54.3% 55%,transparent 55.3% 81%,#d5f7ff13 81.3% 82%,transparent 82.3%),radial-gradient(ellipse at 50% 48%,#12314319 0 30%,#030810aa 78%)}
+.biome-northrend::after{background:linear-gradient(180deg,#d6f7ff10,transparent 18%),repeating-linear-gradient(108deg,transparent 0 135px,#6dc6df0b 136px 138px)}
+
+/* Grade only the wall paint layers; never filter the ore sprite through a parent. */
+.mine-screen .rock,.stage-ore .rock,.biome-old .rock,.biome-deep .rock,.biome-outland .rock,.biome-northrend .rock{filter:none!important}
+.biome-old .rock{background-image:linear-gradient(#5d402b28,#1b130d63),url('/mine-wall-v2.webp');background-blend-mode:color,normal;border-color:#71503c;box-shadow:inset 0 0 55px #130b06,inset 0 -35px 55px #080503bb,0 28px 35px #000b,0 0 32px #d8815612}
+.biome-deep .rock{background-image:radial-gradient(circle at 58% 74%,#9a53691c,transparent 35%),linear-gradient(#240b163b,#0904077d),url('/mine-wall-v2.webp');background-blend-mode:screen,color,normal;border-color:#573342;box-shadow:inset 0 0 72px #020102,inset 0 -42px 65px #020102dd,0 30px 40px #000d,0 0 38px #9a536916}
+.biome-outland .rock{background-image:radial-gradient(circle at 27% 31%,#83b85c1c,transparent 31%),linear-gradient(121deg,#26391e52,#0509047d),url('/mine-wall-v2.webp');background-blend-mode:screen,color,normal;border-color:#47633a;box-shadow:inset 0 0 60px #030703,inset 0 -40px 60px #020502cc,0 28px 38px #000c,0 0 38px #83b85c12}
+.biome-northrend .rock{background-image:linear-gradient(150deg,#d9f7ff20 0 8%,transparent 9% 52%,#85dfff18 53% 58%,transparent 59%),linear-gradient(#17374b42,#04101a78),url('/mine-wall-v2.webp');background-blend-mode:screen,color,normal;border-color:#3f6c7d;box-shadow:inset 0 0 60px #02070c,inset 0 -38px 60px #02070ccc,0 28px 38px #000c,0 0 42px #6dc6df16}
+.rock::before{background:radial-gradient(circle at 50% 46%,transparent 20%,color-mix(in srgb,var(--biome-cavity) 48%,transparent) 58%,var(--biome-cavity) 100%)!important}
+.mine-atmosphere{color:var(--biome-particle)}
+
+/* Local mine progress uses biome identity; global app progress remains acid lime. */
+.mine-mastery{border-color:color-mix(in srgb,var(--biome-accent) 38%,#303331)!important;background:color-mix(in srgb,var(--biome-canvas) 74%,#111)!important;box-shadow:inset 3px 0 var(--biome-accent)}
+.mine-mastery span,.mine-mastery strong{color:color-mix(in srgb,var(--biome-accent) 78%,#e8e5dc)!important}.mine-mastery i b{background:var(--biome-accent)!important}
+
+/* Selector cards retain biome identity while global navigation stays acid lime. */
+.volume-biomes{border-color:#2b2e2b;background:#0b0d0c;box-shadow:0 18px 38px #0008}
+.volume-biomes::before{background:#0c0e0d;color:#8a8d87;border-bottom:1px solid #292c29}
+.volume-biomes .mine-card{position:relative;overflow:hidden;background:linear-gradient(105deg,var(--card-bg),#111412)!important;border-top:1px solid color-mix(in srgb,var(--card-accent) 22%,#303331)!important;box-shadow:inset 2px 0 color-mix(in srgb,var(--card-accent) 42%,transparent)!important;transition:background .2s,border-color .2s,box-shadow .2s,opacity .2s}
+.volume-biomes .mine-card::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.38;background:repeating-linear-gradient(128deg,transparent 0 24px,color-mix(in srgb,var(--card-secondary) 11%,transparent) 25px 26px)}
+.volume-biomes .mine-card span,.volume-biomes .mine-card small{position:relative;z-index:1}.volume-biomes .mine-card span{color:color-mix(in srgb,var(--card-accent) 68%,#e8e5dc)}
+.volume-biomes .mine-card.chosen{background:linear-gradient(105deg,color-mix(in srgb,var(--card-bg) 80%,var(--card-accent)),var(--card-bg))!important;border-color:var(--card-accent)!important;box-shadow:inset 4px 0 var(--card-accent),inset 0 0 22px color-mix(in srgb,var(--card-accent) 12%,transparent),0 0 16px color-mix(in srgb,var(--card-accent) 8%,transparent)!important}
+.volume-biomes .mine-card.chosen span{color:#f1eee6;text-shadow:0 0 10px color-mix(in srgb,var(--card-accent) 45%,transparent)}
+.volume-biomes .mine-card.locked{filter:grayscale(.65);opacity:.52}
+
+/* During CLANK the ore owns the hierarchy. */
+.stage-ore .volume-biomes{width:190px;opacity:.58;border-color:color-mix(in srgb,var(--biome-accent) 25%,#303331);box-shadow:none}
+.stage-ore .volume-biomes::before{content:"CURRENT LOCATION"}.stage-ore .volume-biomes .mine-card:not(.chosen){display:none}.stage-ore .volume-biomes .mine-card.chosen{padding:9px 10px}.stage-ore .volume-biomes .mine-card.chosen small{display:none}
+.stage-ore .mine-copy h1{font-size:clamp(34px,4vw,56px);opacity:.68}.stage-ore .mine-copy>p:last-child{opacity:.62}
+
+/* Canonical raster ores — no CSS geometry and no biome recoloring. */
+.ore-sprite{display:block;object-fit:contain;object-position:center;max-width:none;color:initial;clip-path:none!important;background:none!important;box-shadow:none!important;filter:drop-shadow(0 10px 10px #000a);image-rendering:auto}
+.exposed-ore{width:min(330px,48vw);min-width:220px;padding:18px 22px 14px;border-radius:48%;background:radial-gradient(ellipse at 50% 50%,var(--biome-cavity) 0 42%,color-mix(in srgb,var(--biome-accent) 9%,var(--biome-cavity)) 55%,transparent 73%);z-index:9}
+.exposed-ore::before{content:"";position:absolute;inset:7% 4% 17%;z-index:-1;border-radius:48%;border:1px solid color-mix(in srgb,var(--biome-accent) 24%,#111);box-shadow:inset 0 0 32px #000,0 0 20px color-mix(in srgb,var(--biome-accent) 8%,transparent)}
+.ore-sprite-exposed{width:clamp(190px,24vw,270px);height:clamp(190px,24vw,270px);margin:-58px auto -45px;filter:drop-shadow(0 15px 10px #000c) drop-shadow(0 0 12px color-mix(in srgb,var(--ore) 34%,transparent));animation:oreSpriteEnter .48s cubic-bezier(.2,1.35,.4,1)}
+.exposed-ore strong{position:relative;z-index:2;font-size:14px;letter-spacing:1.8px;margin-top:3px;color:#f1eee6!important;text-shadow:0 2px 8px #000,0 0 12px #000}.exposed-ore small{position:relative;z-index:2;font-size:8px;color:var(--ore);font-weight:900}
+.ore-rock.hit .exposed-ore{transform:translate(-50%,-50%)}.ore-rock.hit .ore-sprite-exposed{transform:translate(2px,2px) rotate(1deg)}
+.ore-sprite-album{width:82px;height:82px;flex:none;margin:-11px 0;filter:drop-shadow(0 7px 5px #0009)}
+.ore-sprite-wanted{width:64px!important;height:64px!important;flex:none;margin:-12px -5px -12px -10px;filter:drop-shadow(0 6px 5px #0008)}
+.ore-sprite-reveal{width:142px;height:142px;font-size:0!important;animation:pop .5s cubic-bezier(.2,1.8,.4,1);filter:drop-shadow(0 15px 10px #000b)}
+.reveal.quick .ore-sprite-reveal{width:100px;height:100px}.ore-sprite-share{width:116px;height:116px;margin:-24px 0;filter:drop-shadow(0 12px 8px #000a)}
+.share-card>div{align-items:center}.share-card>div .gem-art{flex:none}
+
+/* Cavity scars, debris and impact accents follow biome tokens. */
+.impact-scar{filter:drop-shadow(0 0 3px var(--biome-cavity))}.crack{background:linear-gradient(var(--biome-cavity),#070807 72%,color-mix(in srgb,var(--biome-accent) 25%,transparent))!important}
+.debris i{background:linear-gradient(135deg,color-mix(in srgb,var(--biome-debris) 78%,#ddd),var(--biome-debris) 42%,#151714)!important}
+.biome-outland .debris i:nth-child(3n){box-shadow:0 0 6px #83b85c66}.biome-northrend .debris i:nth-child(4n){background:linear-gradient(135deg,#d8f5ff,#6f95a4)!important}.biome-deep .impact-flash{background:radial-gradient(circle,#fff 0 2%,#9a5369 5%,transparent 48%)}
+.biome-northrend .impact-flash{background:radial-gradient(circle,#fff 0 2%,#b5eeff 5%,transparent 48%)}
+
+.mine-transition{position:absolute;inset:0;z-index:19;display:grid;place-content:center;text-align:center;pointer-events:none;background:radial-gradient(circle at 50% 48%,color-mix(in srgb,var(--biome-accent) 18%,#080a08),#050605e8 66%);animation:mineTransition .72s ease both}
+.mine-transition small{font-size:8px;letter-spacing:3px;color:var(--biome-accent)}.mine-transition strong{font-size:clamp(34px,6vw,68px);letter-spacing:-2px;margin:6px}.mine-transition span{font:italic 13px Georgia;color:#9b9d97}
+.high-contrast .mine-screen::before,.high-contrast .mine-screen::after{opacity:.35}.high-contrast .volume-biomes .mine-card.chosen{outline:2px solid #fff;outline-offset:-3px}.high-contrast .ore-sprite{filter:drop-shadow(0 0 2px #fff) drop-shadow(0 10px 8px #000)}
+.reduced-motion .ore-sprite-exposed,.reduced-motion .mine-transition{animation:none!important}.reduced-motion .mine-transition{display:none}.reduced-shake .ore-rock.hit .ore-sprite-exposed{transform:none}
+@keyframes oreSpriteEnter{from{opacity:0;transform:scale(.35) translateY(18px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes mineTransition{0%{opacity:0}22%{opacity:1}68%{opacity:1}100%{opacity:0}}
+@media(max-width:900px){.stage-ore .volume-biomes{width:min(300px,86vw);display:block}.stage-ore .volume-biomes::before{display:block}.stage-ore .volume-biomes .mine-card.chosen{display:block}.ore-sprite-exposed{margin:-50px auto -42px}}
+@media(max-width:760px){.volume-biomes .mine-card{min-height:62px}.exposed-ore{width:min(300px,70vw)}.ore-sprite-exposed{width:220px;height:220px}.ore-sprite-reveal{width:112px;height:112px}.ore-sprite-album{width:68px;height:68px}}
+@media(max-width:450px){.stage-ore .mine-copy h1{font-size:34px}.exposed-ore{min-width:190px;width:72vw;padding:12px}.ore-sprite-exposed{width:184px;height:184px;margin:-36px auto -34px}.ore-sprite-wanted{width:54px!important;height:54px!important}.ore-sprite-reveal{width:92px;height:92px}.reveal.quick .ore-sprite-reveal{width:76px;height:76px}.mine-transition span{font-size:11px;padding:0 30px}}
