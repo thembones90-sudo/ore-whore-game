@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
-import {forgeAtomic,forgeRecipes,forgedItems,maxCraftable,metallurgyRecipes,processedMaterials,smeltAtomic,smeltBatchAtomic} from "../app/metallurgy.ts";
+import {forgeAtomic,forgeRecipes,forgedItems,forgeWithPrerequisitesAtomic,maxCraftable,metallurgyRecipes,planForgePrerequisites,processedMaterials,smeltAtomic,smeltBatchAtomic} from "../app/metallurgy.ts";
 
 const game=readFileSync(new URL("../app/page.tsx",import.meta.url),"utf8");
 const ores=["copper","tin","silver","iron","gold","mithril","truesilver","dark","thorium","feliron","adamantite","khorium","cobalt","saronite","titanium"];
@@ -47,6 +47,17 @@ test("forging spends processed and mineral stock only and enforces sequence",()=
   const skip=forgeRecipes.find(r=>r.resultingItemId==="mithril-pickaxe");assert.equal(forgeAtomic(base({processedResources:{mithrilsteel:99,"iron-ingot":99},mineralResources:{mossagate:99,jade:99}}),skip),null);
 });
 
+test("upgrade path plans and atomically builds missing prerequisites before forging",()=>{
+  const recipe=forgeRecipes.find(r=>r.id==="forge-bronze-pickaxe");
+  const state=base({oreResources:{copper:6,tin:3},mineralResources:{malachite:2,tigerseye:1}});
+  const plan=planForgePrerequisites(state,recipe);
+  assert.deepEqual(plan.oreInputs,[{id:"copper",quantity:6},{id:"tin",quantity:3}]);
+  assert.deepEqual(plan.crafts,[{recipeId:"alloy-bronze",count:3,outputId:"bronze",quantity:3}]);
+  const next=forgeWithPrerequisitesAtomic(state,recipe);
+  assert.deepEqual(next.oreResources,{copper:0,tin:0});assert.equal(next.processedResources.bronze,0);assert.equal(next.mineralResources.malachite,0);assert.ok(next.ownedTools.includes("bronze-pickaxe"));
+  assert.equal(forgeWithPrerequisitesAtomic(base({oreResources:{copper:5,tin:3},mineralResources:{malachite:2,tigerseye:1}}),recipe),null,"partial raw stock cannot be consumed");
+});
+
 test("all canonical tools have merged processed and mineral recipes",()=>{
   assert.equal(forgeRecipes.length,10);
   for(const recipe of forgeRecipes){assert.ok(recipe.processedInputs.length);assert.ok(recipe.mineralInputs.length);const tool=forgedItems.find(t=>t.id===recipe.resultingItemId);assert.equal(recipe.unlock?.tool,forgedItems.find(t=>t.tier===tool.tier-1)?.id)}
@@ -65,6 +76,7 @@ test("recipe eras are obtainable and do not create mine-unlock circles",()=>{
 test("UI separates lifetime history from stock, confirms transactions, and preserves cosmetics",()=>{
   assert.match(game,/combos: \{ \.\.\.s\.combos/);assert.match(game,/ores: \{ \.\.\.s\.ores/);assert.match(game,/minerals: \{ \.\.\.s\.minerals/);
   assert.match(game,/className="craft-confirm-overlay"/);assert.match(game,/CONFIRM & CONSUME/);assert.match(game,/BUILD ALL ×/);assert.match(game,/transactionBusy/);
+  assert.match(game,/BUILD ALL PREREQUISITES \+ FORGE/);assert.match(game,/SELECTED TECHNOLOGY PATH/);
   assert.match(game,/Cosmetic model unchanged/);assert.doesNotMatch(game,/toolSkinId:tool\.id/);
 });
 

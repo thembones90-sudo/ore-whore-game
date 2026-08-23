@@ -78,6 +78,29 @@ const scaledInputs=(inputs:Ingredient[],count:number)=>inputs.map(i=>({...i,quan
 export type ResourceState={oreResources:Record<string,number>;mineralResources:Record<string,number>;processedResources:Record<string,number>;ownedTools:string[];toolTier:number};
 export const smeltAtomic=(state:ResourceState,recipe:MetallurgyRecipe):ResourceState|null=>canAfford(state.oreResources,recipe.inputs)?{...state,oreResources:spend(state.oreResources,recipe.inputs),processedResources:{...state.processedResources,[recipe.outputId]:(state.processedResources[recipe.outputId]||0)+recipe.outputQuantity}}:null;
 export const smeltBatchAtomic=(state:ResourceState,recipe:MetallurgyRecipe,count:number):ResourceState|null=>{const quantity=Math.floor(count),inputs=scaledInputs(recipe.inputs,quantity);return quantity>0&&canAfford(state.oreResources,inputs)?{...state,oreResources:spend(state.oreResources,inputs),processedResources:{...state.processedResources,[recipe.outputId]:(state.processedResources[recipe.outputId]||0)+recipe.outputQuantity*quantity}}:null};
+export type ForgePrerequisitePlan={oreInputs:Ingredient[];processedFromStock:Ingredient[];mineralInputs:Ingredient[];crafts:{recipeId:string;count:number;outputId:string;quantity:number}[]};
+const combineInputs=(inputs:Ingredient[])=>Object.entries(inputs.reduce<Record<string,number>>((all,i)=>({...all,[i.id]:(all[i.id]||0)+i.quantity}),{})).map(([id,quantity])=>({id,quantity}));
+export const planForgePrerequisites=(state:ResourceState,recipe:ForgeRecipe):ForgePrerequisitePlan|null=>{
+  const crafts:ForgePrerequisitePlan["crafts"]=[],oreInputs:Ingredient[]=[],processedFromStock:Ingredient[]=[];
+  for(const input of recipe.processedInputs){
+    const stock=Math.min(state.processedResources[input.id]||0,input.quantity),deficit=input.quantity-stock;
+    if(stock)processedFromStock.push({id:input.id,quantity:stock});
+    if(!deficit)continue;
+    const source=metallurgyRecipes.find(r=>r.outputId===input.id);
+    if(!source)return null;
+    const count=Math.ceil(deficit/source.outputQuantity);
+    crafts.push({recipeId:source.id,count,outputId:source.outputId,quantity:source.outputQuantity*count});
+    oreInputs.push(...scaledInputs(source.inputs,count));
+  }
+  const combinedOre=combineInputs(oreInputs);
+  return {oreInputs:combinedOre,processedFromStock,mineralInputs:recipe.mineralInputs,crafts};
+};
+export const forgeWithPrerequisitesAtomic=(state:ResourceState,recipe:ForgeRecipe):ResourceState|null=>{
+  const tool=forgedItems.find(t=>t.id===recipe.resultingItemId),previous=forgedItems.find(t=>t.tier===(tool?.tier||0)-1),plan=planForgePrerequisites(state,recipe);
+  if(!tool||!plan||state.ownedTools.includes(tool.id)||(previous&&!state.ownedTools.includes(previous.id))||!canAfford(state.oreResources,plan.oreInputs)||!canAfford(state.mineralResources,recipe.mineralInputs))return null;
+  const produced=plan.crafts.reduce((all,c)=>({...all,[c.outputId]:(all[c.outputId]||0)+c.quantity}),{...state.processedResources});
+  return {...state,oreResources:spend(state.oreResources,plan.oreInputs),processedResources:spend(produced,recipe.processedInputs),mineralResources:spend(state.mineralResources,recipe.mineralInputs),ownedTools:[...state.ownedTools,tool.id],toolTier:tool.tier};
+};
 export const forgeAtomic=(state:ResourceState,recipe:ForgeRecipe):ResourceState|null=>{
   const tool=forgedItems.find(t=>t.id===recipe.resultingItemId),previous=forgedItems.find(t=>t.tier===(tool?.tier||0)-1);
   if(!tool||state.ownedTools.includes(tool.id)||(previous&&!state.ownedTools.includes(previous.id))||!canAfford(state.processedResources,recipe.processedInputs)||!canAfford(state.mineralResources,recipe.mineralInputs))return null;
