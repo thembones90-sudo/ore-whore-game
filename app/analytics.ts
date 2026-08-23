@@ -3,7 +3,8 @@ export type AnalyticsEvent =
   | "ore_found" | "mineral_found" | "combination_new" | "combination_duplicate"
   | "album_opened" | "ore_page_opened" | "missing_view_opened" | "biome_selected"
   | "page_milestone_3" | "page_milestone_4" | "page_completed" | "achievement_unlocked"
-  | "hunt_started" | "return_visit";
+  | "hunt_started" | "return_visit"
+  | "dig_empty" | "biome_completed" | "biome_unlocked" | "true_artifact_found";
 
 const started = Date.now();
 export function track(event: AnalyticsEvent, context: Record<string, unknown> = {}) {

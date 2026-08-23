@@ -5,10 +5,10 @@
 .mine-screen.biome-outland{--mine-tint:#405d39;--mine-glow:#87ff48;--mine-dark:#060d06;--dust:#5d8450}
 .mine-screen.biome-northrend{--mine-tint:#3d5663;--mine-glow:#73d9ff;--mine-dark:#061017;--dust:#7899a5}
 .rock{position:relative;background-color:var(--mine-dark);background-blend-mode:color,normal;transition:filter .25s,box-shadow .25s}
-.biome-old .rock{background-image:linear-gradient(#504d4022,#1a191655),url('/mine-wall-v2.png');filter:saturate(.72) sepia(.08)}
-.biome-deep .rock{background-image:radial-gradient(circle at 58% 74%,#ff3a161f,transparent 36%),linear-gradient(#3c090930,#19050466),url('/mine-wall-v2.png');background-blend-mode:screen,color,normal;filter:saturate(1.18) contrast(1.08)}
-.biome-outland .rock{background-image:radial-gradient(circle at 28% 30%,#8cff3e20,transparent 32%),linear-gradient(120deg,#254b1d44,#06120777),url('/mine-wall-v2.png');background-blend-mode:screen,color,normal;filter:saturate(1.22) hue-rotate(12deg)}
-.biome-northrend .rock{background-image:linear-gradient(150deg,#d9f7ff20 0 8%,transparent 9% 52%,#85dfff18 53% 58%,transparent 59%),linear-gradient(#17374b33,#06121c66),url('/mine-wall-v2.png');background-blend-mode:screen,color,normal;filter:saturate(.9) contrast(1.08)}
+.biome-old .rock{background-image:linear-gradient(#504d4022,#1a191655),url('/mine-wall-v2.webp');filter:saturate(.72) sepia(.08)}
+.biome-deep .rock{background-image:radial-gradient(circle at 58% 74%,#ff3a161f,transparent 36%),linear-gradient(#3c090930,#19050466),url('/mine-wall-v2.webp');background-blend-mode:screen,color,normal;filter:saturate(1.18) contrast(1.08)}
+.biome-outland .rock{background-image:radial-gradient(circle at 28% 30%,#8cff3e20,transparent 32%),linear-gradient(120deg,#254b1d44,#06120777),url('/mine-wall-v2.webp');background-blend-mode:screen,color,normal;filter:saturate(1.22) hue-rotate(12deg)}
+.biome-northrend .rock{background-image:linear-gradient(150deg,#d9f7ff20 0 8%,transparent 9% 52%,#85dfff18 53% 58%,transparent 59%),linear-gradient(#17374b33,#06121c66),url('/mine-wall-v2.webp');background-blend-mode:screen,color,normal;filter:saturate(.9) contrast(1.08)}
 .mine-atmosphere{position:absolute;inset:0;z-index:3;border-radius:inherit;pointer-events:none;opacity:.72;background:radial-gradient(circle at 24% 18%,color-mix(in srgb,var(--mine-glow) 14%,transparent) 0 1px,transparent 2px),radial-gradient(circle at 72% 76%,color-mix(in srgb,var(--mine-glow) 10%,transparent) 0 1px,transparent 2px);background-size:63px 57px,79px 71px;mix-blend-mode:screen}
 .biome-deep .mine-atmosphere{background:linear-gradient(118deg,transparent 28%,#ff3b1d1b 29% 30%,transparent 31% 68%,#ff7a3618 69% 70%,transparent 71%)}
 .biome-outland .mine-atmosphere{background:radial-gradient(ellipse at 20% 64%,#82ff4522 0 2px,transparent 3px),radial-gradient(ellipse at 78% 25%,#b4ff7b20 0 2px,transparent 3px);background-size:46px 59px,71px 53px}

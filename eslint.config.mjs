@@ -23,6 +23,16 @@ const eslintConfig = defineConfig([
   jsxA11y.flatConfigs.recommended,
   next.configs["core-web-vitals"],
   {
+    // This project runs on Vinext/Vite/Cloudflare Workers, not Next.js — the
+    // `next` package is not a dependency, so `next/image` is unavailable.
+    // The core-web-vitals preset's no-img-element rule assumes a real Next.js
+    // app and doesn't apply here; raw <img> is the correct choice for
+    // ore-sprite/album/share-card renders.
+    rules: {
+      "@next/next/no-img-element": "off",
+    },
+  },
+  {
     languageOptions: {
       globals: {
         ...globals.browser,
