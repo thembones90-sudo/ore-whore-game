@@ -22,4 +22,8 @@ test("active TRUE Artefact encounters persist and restore without granting owner
 
 test("R9 receives the canonical Peon tribute", () => {
   assert.match(page, /peonBark:"Boss\.\.\. this not man\. This Ronaldo\. Peon take hat off\."/);
+  assert.match(page, /\{text:"Boss\.\.\. this not man\.",delayMs:0\}/);
+  assert.match(page, /\{text:"This Ronaldo\.",delayMs:700\}/);
+  assert.match(page, /\{text:"Peon take hat off\.",delayMs:1700\}/);
+  assert.match(page, /data\.artifact\.peonBarkSequence\?5700:2700/);
 });

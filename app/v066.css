@@ -96,3 +96,6 @@
 .true-inspection-copy .true-inspection-instruction{margin:0 0 10px}.true-inspection-copy .true-inspection-lore{margin:0 auto 13px}.true-inspection-copy .true-inspection-peon{width:max-content;max-width:100%;margin:0 auto}.true-inspection-copy footer{justify-content:center;margin-top:13px}
 @media(max-height:850px){.true-inspection .true-art-slot{height:clamp(260px,38vh,390px)!important}.true-inspection h2{font-size:clamp(32px,4.2vw,58px)}}
 @media(max-width:720px){.true-inspection-card{max-height:100vh}.true-inspection .true-art-slot{width:88vw!important;height:min(42vh,390px)!important}.true-inspection-copy{width:94%;padding:14px 10px}.true-inspection-copy .true-inspection-peon{width:100%;justify-content:center}}
+
+/* R9's Peon tribute is delivered as three solemn beats, then silence. */
+.true-peon-sequence{min-width:min(520px,82vw);align-items:flex-start!important}.true-peon-sequence>small{padding-top:5px}.true-peon-sequence>div{display:flex;flex-direction:column;gap:4px}.true-peon-sequence p{animation:r9TributeIn .3s ease-out both}.true-peon-sequence p.spoken{color:#9f927f;opacity:.64}.true-peon-sequence p.current{color:#fff3d3;font-size:15px;text-shadow:0 0 16px #ffd86a55}@keyframes r9TributeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}.reduced-motion .true-peon-sequence p{animation:none}

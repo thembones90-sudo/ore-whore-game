@@ -177,9 +177,9 @@ const toughnessStrikes = (toughness: number) => {
 // no rarity, no biome, no album slot. Per-artifact selection weights are
 // evaluated only after the equipped tool's per-excavation TRUE gate has hit;
 // changing the artifact pool never changes the tool-defined chance.
-type TrueArtifact = {id:string;name:string;announcement:string;lore:string;lockedClue:string;peonBark:string;image:string;selectionWeight:number|null;theme?:"gold"|"fel"|"biological"|"shadow"|"archive"|"glitch"|"frost"|"infernal";ultimate?:boolean;instruction?:string;systemResponse?:string};
+type TrueArtifact = {id:string;name:string;announcement:string;lore:string;lockedClue:string;peonBark:string;peonBarkSequence?:{text:string;delayMs:number}[];image:string;selectionWeight:number|null;theme?:"gold"|"fel"|"biological"|"shadow"|"archive"|"glitch"|"frost"|"infernal";ultimate?:boolean;instruction?:string;systemResponse?:string};
 const trueArtifactPool: TrueArtifact[] = [
-  {id:"ronaldo",name:"PANINI GOLDEN STICKER OF RONALDO NAZÁRIO",announcement:"THE PHENOMENON HAS BEEN DETECTED.",lore:"Some things are rarer than minerals. Some things are simply eternal.",lockedClue:"Some numbers are worn. One was worshipped.",peonBark:"Boss... this not man. This Ronaldo. Peon take hat off.",image:"/assets/true/ronaldo.webp",selectionWeight:1,theme:"gold"},
+  {id:"ronaldo",name:"PANINI GOLDEN STICKER OF RONALDO NAZÁRIO",announcement:"THE PHENOMENON HAS BEEN DETECTED.",lore:"Some things are rarer than minerals. Some things are simply eternal.",lockedClue:"Some numbers are worn. One was worshipped.",peonBark:"Boss... this not man. This Ronaldo. Peon take hat off.",peonBarkSequence:[{text:"Boss... this not man.",delayMs:0},{text:"This Ronaldo.",delayMs:700},{text:"Peon take hat off.",delayMs:1700}],image:"/assets/true/ronaldo.webp",selectionWeight:1,theme:"gold"},
   {id:"warglaive",name:"WARGLAIVE OF ILLIDAN",announcement:"YOU ARE NOT PREPARED.",lore:"A crescent of fel-forged defiance. It remembers every hand unworthy of holding it.",lockedClue:"A small thing carrying a very large grudge.",peonBark:"Sharp rock.",image:"/assets/true/warglaive.webp",selectionWeight:1,theme:"fel"},
   {id:"blaizeballs",name:"BLAIZE'S BALLS",announcement:"BIOLOGICAL MATERIAL DETECTED. UNFORTUNATELY.",lore:"Two matching specimens. Classification was attempted and immediately abandoned.",lockedClue:"An image was preserved that should have died with the scanner.",peonBark:"...two rock?",image:"/assets/true/blaizeballs.webp",selectionWeight:1,theme:"biological"},
   {id:"shadow",name:"SHADOW THE PANTHER",announcement:"SOMETHING IS WATCHING FROM THE DARK.",lore:"The eyes appeared first. The rest waited until you were already afraid.",lockedClue:"He cannot see it. He knows exactly where it is. WUUUUUUUUUU",peonBark:"Kitty?",image:"/assets/true/shadow.webp",selectionWeight:1,theme:"shadow"},
@@ -628,6 +628,15 @@ function TrueArtifactArt({artifact,locked=false}:{artifact:TrueArtifact;locked?:
   </span>;
 }
 
+function TimedPeonBark({artifact,reducedMotion}:{artifact:TrueArtifact;reducedMotion:boolean}){
+  const sequence=artifact.peonBarkSequence;
+  const [visible,setVisible]=useState(1);
+  useEffect(()=>{if(!sequence||reducedMotion)return;const timers=sequence.slice(1).map((beat,index)=>setTimeout(()=>setVisible(index+2),beat.delayMs));return()=>timers.forEach(clearTimeout)},[artifact.id,reducedMotion,sequence]);
+  if(!sequence)return <div className="true-peon"><small>PEON</small><p>&ldquo;{artifact.peonBark}&rdquo;</p></div>;
+  const shown=reducedMotion?sequence.length:visible;
+  return <div className="true-peon true-peon-sequence"><small>PEON</small><div>{sequence.slice(0,shown).map((beat,index)=><p key={beat.text} className={index===shown-1?"current":"spoken"}>&ldquo;{beat.text}&rdquo;</p>)}</div></div>;
+}
+
 function TrueReveal({data,reducedMotion,onContinue}:{data:{artifact:TrueArtifact;digNumber:number};reducedMotion:boolean;onContinue:()=>void}){
   const [stage,setStage]=useState<"announcement"|"pause"|"ground"|"deep-pause"|"impossible"|"reveal">("announcement");
   const [canClose,setCanClose]=useState(false);
@@ -644,10 +653,10 @@ function TrueReveal({data,reducedMotion,onContinue}:{data:{artifact:TrueArtifact
     }else{
       after(reducedMotion?200:1150,()=>setStage("pause"));
       after(reducedMotion?400:2200,()=>setStage("reveal"));
-      after(reducedMotion?500:2700,()=>setCanClose(true));
+      after(reducedMotion?500:data.artifact.peonBarkSequence?5700:2700,()=>setCanClose(true));
     }
     return ()=>timers.forEach(clearTimeout);
-  },[data.artifact.ultimate,reducedMotion]);
+  },[data.artifact.ultimate,data.artifact.peonBarkSequence,reducedMotion]);
   const stageAnnouncement=stage==="announcement"?data.artifact.announcement:stage==="ground"?"GROUND INSTABILITY DETECTED":stage==="impossible"?"...IMPOSSIBLE.":null;
   return <div className={`true-reveal stage-${stage} theme-${data.artifact.theme||"shadow"}`} role="status" aria-live="assertive">
     <div className="true-reveal-card">
@@ -659,7 +668,7 @@ function TrueReveal({data,reducedMotion,onContinue}:{data:{artifact:TrueArtifact
         <TrueArtifactArt artifact={data.artifact}/>
         {data.artifact.instruction&&<p className="true-instruction">{data.artifact.instruction}</p>}
         <p className="true-lore">{data.artifact.lore}</p>
-        <div className="true-peon"><small>PEON</small><p>&ldquo;{data.artifact.peonBark}&rdquo;</p></div>
+        <TimedPeonBark artifact={data.artifact} reducedMotion={reducedMotion}/>
         {data.artifact.systemResponse&&<div className="true-system"><small>SYSTEM</small><p>{data.artifact.systemResponse}</p></div>}
         <p className="true-meta">FOUND AFTER {data.digNumber.toLocaleString()} DIGS</p>
         <button className="continue" disabled={!canClose} onClick={onContinue}>ARCHIVE IT <span>→</span></button>
