@@ -348,6 +348,11 @@ export default function Home() {
       const line = MISS_LINES[Math.floor(Math.random() * MISS_LINES.length)];
       setMissFlash(line);
       setLastHitKind("miss");
+      // A miss is still a visible swing: it glances off the selected point
+      // instead of silently updating the counters.
+      // eslint-disable-next-line react-hooks/purity -- strike() only runs from input handlers.
+      setImpact(Date.now());
+      setTimeout(() => setImpact(null), 430);
       if(hitFeedbackTimer.current)clearTimeout(hitFeedbackTimer.current);
       hitFeedbackTimer.current=setTimeout(() => { setMissFlash(null); setLastHitKind(null); }, 1700);
       playImpact("miss");
@@ -370,6 +375,10 @@ export default function Home() {
       setLastHitKind(hitKind);
       if(hitFeedbackTimer.current)clearTimeout(hitFeedbackTimer.current);
       hitFeedbackTimer.current=setTimeout(() => setLastHitKind(null), 1500);
+    } else {
+      setLastHitKind("normal");
+      if(hitFeedbackTimer.current)clearTimeout(hitFeedbackTimer.current);
+      hitFeedbackTimer.current=setTimeout(() => setLastHitKind(null), 900);
     }
 
     const hit = rockHp - damage;
@@ -377,7 +386,7 @@ export default function Home() {
     if(hit<=0){setCollapseBurst({id:fractureId.current,x:strikePoint.x,y:strikePoint.y});if(collapseTimer.current)clearTimeout(collapseTimer.current);collapseTimer.current=setTimeout(()=>setCollapseBurst(null),460)}
     // eslint-disable-next-line react-hooks/purity -- strike() only runs from click/keydown handlers, never during render.
     setImpact(Date.now());
-    setTimeout(() => setImpact(null), 180);
+    setTimeout(() => setImpact(null), 430);
     if (save.settings.vibration&&navigator.vibrate) navigator.vibrate(hitKind!=="normal" ? 45 : stage === "ore" ? 35 : 12);
     setSave(s => ({ ...s, strikes: s.strikes + 1, distance: +(s.distance + (stage === "tunnel" ? 0.4 : 0)).toFixed(1) }));
     if (hit > 0) { playImpact(impactKind ?? (stage==="ore"?"crack":"rock")); return setRockHp(hit); }
@@ -493,7 +502,7 @@ export default function Home() {
       {save.veinOre&&<div className="vein-banner"><span>VEIN EXPOSED</span><strong>{ores.find(o=>o.id===save.veinOre)?.name}</strong><small>{save.veinDigsRemaining} {save.veinDigsRemaining===1?"DIG":"DIGS"} REMAIN</small></div>}
       {(()=>{const found=biomeQuotaProgress(save,save.biome),target=biomeQuotaTotal(save.biome),reached=biomeQuotaComplete(save,save.biome);return <div className="mine-mastery extraction-quota"><div><span>{biomeNames[save.biome]} EXTRACTION QUOTA</span><strong>{found} / {target}</strong></div><i><b style={{width:`${Math.min(100,found/target*100)}%`}}/></i><div className="quota-list">{biomePages[save.biome].map(id=>{const ore=ores.find(o=>o.id===id)!,count=Math.min(save.ores[id]||0,oreQuota(id)),targetCount=oreQuota(id);return <span key={id} className={count>=targetCount?"met":""}><img src={oreAsset(id)} alt=""/><b>{ore.name.replace(" Ore","")}</b><em>{count}/{targetCount}</em>{count>=targetCount&&<strong>✓</strong>}</span>})}</div><small>{reached?(save.biome==="northrend"?"VOLUME I MINING PROGRESSION COMPLETE · Album mastery remains separate.":"PASSAGE OPEN · all native ore quotas satisfied."):"Complete every extraction quota to unlock the next mine."}</small></div>})()}
       <div className="biomes volume-biomes" aria-label="Mine location">{biomeOrder.map((b,i)=>{const open=save.unlockedBiomes.includes(b),done=biomeQuotaProgress(save,b),previous=i?biomeOrder[i-1]:b,v=biomeVisuals[b];return <button key={b} disabled={!open} style={{"--card-accent":v.accent,"--card-secondary":v.secondary,"--card-bg":v.card} as React.CSSProperties} className={`mine-card biome-card-${b} ${save.biome===b?"chosen":""} ${open?"":"locked"}`} onClick={()=>{setSave(s=>({...s,biome:b}));track("biome_selected",{biome:b})}}><span>{open?biomeNames[b]:`🔒 ${biomeNames[b]}`}</span><small>{open?`${done}/${biomeQuotaTotal(b)} EXTRACTED · ${distributionLabel(b)}`:`COMPLETE ALL ${biomeNames[previous]} EXTRACTION QUOTAS · ${biomeQuotaProgress(save,previous)}/${biomeQuotaTotal(previous)}`}</small></button>})}</div>
-      <button className={`rock ${impact ? "hit" : ""} ${stage === "ore" ? "ore-rock" : ""} damage-${Math.floor((1-rockHp/maxHp)*4)} ${rockHp===1?"final-hit":""} ${lastHitKind&&lastHitKind!=="normal"?`hit-${lastHitKind==="perfectCrit"?"perfect-crit":lastHitKind}`:""}`} style={{"--hit-x":`${hitPoint.x}%`,"--hit-y":`${hitPoint.y}%`} as React.CSSProperties} onClick={strikeAtPointer} aria-label={stage === "ore" ? "Crack the exposed ore deposit" : "Strike the rock wall"}>
+      <button className={`rock ${impact ? "hit" : ""} ${stage === "ore" ? "ore-rock" : ""} damage-${Math.floor((1-rockHp/maxHp)*4)} ${rockHp===1?"final-hit":""} ${lastHitKind?`hit-${lastHitKind==="perfectCrit"?"perfect-crit":lastHitKind}`:""}`} style={{"--hit-x":`${hitPoint.x}%`,"--hit-y":`${hitPoint.y}%`} as React.CSSProperties} onClick={strikeAtPointer} aria-label={stage === "ore" ? "Crack the exposed ore deposit" : "Strike the rock wall"}>
         <span className="mine-atmosphere" aria-hidden="true"/>
         <span className="ambient-fx" aria-hidden="true">
           {Array.from({length:12},(_,i)=><i key={i}/>) }
@@ -508,7 +517,7 @@ export default function Home() {
         <span className="pickaxe" aria-hidden="true"><i className="pick-head"/><i className="pick-handle"/><i className="pick-grip"/></span>
         {impact && <span className="impact-flash" aria-hidden="true"/>}
         {collapseBurst&&<span key={collapseBurst.id} className="collapse-rift" style={{"--collapse-x":`${collapseBurst.x}%`,"--collapse-y":`${collapseBurst.y}%`} as React.CSSProperties} aria-hidden="true"><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/></span>}
-        {lastHitKind&&lastHitKind!=="normal"&&lastHitKind!=="miss"&&<span className="hit-callout" aria-hidden="true">{lastHitKind==="perfectCrit"?"PERFECT CRIT":lastHitKind==="perfect"?"PERFECT":"CRITICAL"}</span>}
+        {lastHitKind&&lastHitKind!=="miss"&&<span className="hit-callout" aria-hidden="true">{lastHitKind==="perfectCrit"?"PERFECT CRIT":lastHitKind==="perfect"?"PERFECT":lastHitKind==="crit"?"CRITICAL":"SOLID HIT"}</span>}
         {missFlash && <span className="miss-bark" role="status">{missFlash}</span>}
       </button>
       <div className="dig-panel"><div><span className="mouse-icon">↙</span><strong>{stage === "ore" ? "CRACK DEPOSIT" : "CLICK TO STRIKE"}</strong><small>or press SPACE</small></div><div className="integrity"><span>{stage === "ore" ? "ORE SHELL" : <>TUNNEL PROGRESS · {Math.round((1-rockHp/maxHp)*100)}% · <b className={`depth-band depth-${depthBand(maxHp)}`}>{depthBand(maxHp).toUpperCase()}</b></>}</span><i>{Array.from({length: 12},(_,i)=><b key={i} className={i < Math.ceil((rockHp/maxHp)*12) ? "full" : ""}/>)}</i></div></div>

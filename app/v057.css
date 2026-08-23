@@ -1,0 +1,32 @@
+/* v0.5.7 — readable Peon strike choreography: wind-up, contact, recoil, recovery. */
+.rock.hit .pickaxe{animation:peonStrike .43s cubic-bezier(.2,.72,.23,1)!important}
+@keyframes peonStrike{
+  0%{transform:rotate(-34deg) scale(1.03);translate:calc(-17% + 54px) calc(-84% - 58px)}
+  18%{transform:rotate(18deg) scale(1.05);translate:calc(-17% + 66px) calc(-84% - 69px)}
+  48%{transform:rotate(-41deg) scale(1.09);translate:-17% -84%}
+  57%{transform:rotate(-37deg) scale(.98);translate:calc(-17% + 4px) calc(-84% + 4px)}
+  76%{transform:rotate(-29deg) scale(1.02);translate:calc(-17% + 9px) calc(-84% - 7px)}
+  100%{transform:rotate(-34deg) scale(1.03);translate:-17% -84%}
+}
+.rock.hit-miss .pickaxe{animation:peonGlance .43s ease-out!important}
+@keyframes peonGlance{
+  0%{transform:rotate(-34deg) scale(1.03);translate:calc(-17% + 48px) calc(-84% - 52px)}
+  42%{transform:rotate(-28deg) scale(1.05);translate:calc(-17% + 8px) calc(-84% + 3px)}
+  62%{transform:rotate(-8deg) scale(.98);translate:calc(-17% + 31px) calc(-84% + 10px)}
+  100%{transform:rotate(-34deg) scale(1.03);translate:-17% -84%}
+}
+.rock.hit{animation:wallRecoil .43s ease-out!important}
+@keyframes wallRecoil{0%,38%,100%{transform:none}49%{transform:translate(5px,4px) scale(.992)}58%{transform:translate(-3px,-2px) scale(1.002)}70%{transform:translate(1px,1px)}}
+.rock.hit-perfect{animation:wallRecoilStrong .43s ease-out!important}.rock.hit-crit,.rock.hit-perfect-crit{animation:wallRecoilHeavy .43s ease-out!important}
+@keyframes wallRecoilStrong{0%,38%,100%{transform:none}49%{transform:translate(8px,5px) scale(.988)}61%{transform:translate(-5px,-3px) scale(1.004)}75%{transform:translate(2px,1px)}}
+@keyframes wallRecoilHeavy{0%,38%,100%{transform:none}47%{transform:translate(11px,7px) rotate(.25deg) scale(.983)}58%{transform:translate(-7px,-4px) rotate(-.15deg) scale(1.006)}72%{transform:translate(3px,2px)}}
+.impact-flash{width:96px!important;animation:contactFlash .43s ease-out both!important}
+.impact-flash::before,.impact-flash::after{content:"";position:absolute;inset:50%;border:2px solid color-mix(in srgb,var(--biome-accent) 82%,#fff);border-radius:50%;translate:-50% -50%;opacity:0}
+.impact-flash::before{animation:impactRing .43s ease-out .18s both}.impact-flash::after{animation:impactRing .43s ease-out .23s both}
+@keyframes contactFlash{0%,38%{opacity:0;scale:.2}48%{opacity:1;scale:1}68%,100%{opacity:0;scale:1.45}}
+@keyframes impactRing{0%{width:10px;height:10px;opacity:.9}100%{width:150px;height:150px;opacity:0}}
+.hit-callout{translate:-50% -170%!important;padding:5px 8px;background:#080a08c9;border-left:3px solid currentColor;animation:strikeReadout 1.35s ease both!important}
+.rock.hit-normal .hit-callout{color:#d8d5cb;text-shadow:0 2px 4px #000;font-size:9px;letter-spacing:1.6px}
+@keyframes strikeReadout{0%{opacity:0;transform:translateY(8px) scale(.7)}12%{opacity:1;transform:translateY(0) scale(1.12)}22%{transform:scale(1)}72%{opacity:1}100%{opacity:0;transform:translate(24px,-13px)}}
+.reduced-shake .rock.hit{animation:none!important}.reduced-shake .rock.hit .pickaxe{animation:peonSwingSoft .18s ease-out!important}
+.reduced-motion .impact-flash::before,.reduced-motion .impact-flash::after{animation:none!important}
