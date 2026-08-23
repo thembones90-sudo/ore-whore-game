@@ -169,18 +169,19 @@ const toughnessStrikes = (toughness: number) => {
   return 7;
 };
 // TRUE Artifacts exist outside the 15x15 geological taxonomy entirely —
-// no rarity, no weight, no biome, no album slot. Uniform 1/7 selection
-// within the pool once the outer 0.05% gate (TRUE_CHANCE) has already
-// hit; adding artifacts later changes only the pool split, never the gate.
-type TrueArtifact = { id:string;name:string;announcement:string;lore:string;peonBark:string;image:string;theme?:"gold"|"fel"|"biological"|"shadow"|"archive"|"glitch"|"frost" };
+// no rarity, no biome, no album slot. Per-artifact selection weights are
+// evaluated only after the outer 0.05% gate (TRUE_CHANCE) has already hit;
+// changing the pool never changes that global gate.
+type TrueArtifact = {id:string;name:string;announcement:string;lore:string;lockedClue:string;peonBark:string;image:string;selectionWeight:number|null;theme?:"gold"|"fel"|"biological"|"shadow"|"archive"|"glitch"|"frost"|"infernal";ultimate?:boolean;instruction?:string;systemResponse?:string};
 const trueArtifactPool: TrueArtifact[] = [
-  {id:"ronaldo",name:"PANINI GOLDEN STICKER OF RONALDO NAZÁRIO",announcement:"THE PHENOMENON HAS BEEN DETECTED.",lore:"Some things are rarer than minerals. Some things are simply eternal.",peonBark:"Good kick man.",image:"/assets/true/ronaldo.webp",theme:"gold"},
-  {id:"warglaive",name:"WARGLAIVE OF ILLIDAN",announcement:"YOU ARE NOT PREPARED.",lore:"A crescent of fel-forged defiance. It remembers every hand unworthy of holding it.",peonBark:"Sharp rock.",image:"/assets/true/warglaive.webp",theme:"fel"},
-  {id:"blaizeballs",name:"BLAIZE'S BALLS",announcement:"BIOLOGICAL MATERIAL DETECTED. UNFORTUNATELY.",lore:"Two matching specimens. Classification was attempted and immediately abandoned.",peonBark:"...two rock?",image:"/assets/true/blaizeballs.webp",theme:"biological"},
-  {id:"shadow",name:"SHADOW THE PANTHER",announcement:"SOMETHING IS WATCHING FROM THE DARK.",lore:"The eyes appeared first. The rest waited until you were already afraid.",peonBark:"Kitty?",image:"/assets/true/shadow.webp",theme:"shadow"},
-  {id:"whorearchives",name:"WHORE ARCHIVES",announcement:"RESTRICTED RECORDS HAVE SURFACED.",lore:"A sealed record of names, depths, and decisions the mountain denies preserving.",peonBark:"Me can read?",image:"/assets/true/whorearchives.webp",theme:"archive"},
-  {id:"patike",name:"PATIKE",announcement:"DIRECTORY DETECTED. ACCESS SHOULD NOT EXIST.",lore:"The folder opened itself. The access log insists that you were never here.",peonBark:"Me open folder.",image:"/assets/true/patike.webp",theme:"glitch"},
-  {id:"invincible",name:"INVINCIBLE'S REINS",announcement:"MOUNT EQUIPMENT DETECTED. MOUNT ABSENT.",lore:"The reins are immaculate. Their owner remains committed to being elsewhere.",peonBark:"...where horse?",image:"/assets/true/invincible.webp",theme:"frost"},
+  {id:"ronaldo",name:"PANINI GOLDEN STICKER OF RONALDO NAZÁRIO",announcement:"THE PHENOMENON HAS BEEN DETECTED.",lore:"Some things are rarer than minerals. Some things are simply eternal.",lockedClue:"Some numbers are worn. One was worshipped.",peonBark:"Good kick man.",image:"/assets/true/ronaldo.webp",selectionWeight:1,theme:"gold"},
+  {id:"warglaive",name:"WARGLAIVE OF ILLIDAN",announcement:"YOU ARE NOT PREPARED.",lore:"A crescent of fel-forged defiance. It remembers every hand unworthy of holding it.",lockedClue:"A small thing carrying a very large grudge.",peonBark:"Sharp rock.",image:"/assets/true/warglaive.webp",selectionWeight:1,theme:"fel"},
+  {id:"blaizeballs",name:"BLAIZE'S BALLS",announcement:"BIOLOGICAL MATERIAL DETECTED. UNFORTUNATELY.",lore:"Two matching specimens. Classification was attempted and immediately abandoned.",lockedClue:"An image was preserved that should have died with the scanner.",peonBark:"...two rock?",image:"/assets/true/blaizeballs.webp",selectionWeight:1,theme:"biological"},
+  {id:"shadow",name:"SHADOW THE PANTHER",announcement:"SOMETHING IS WATCHING FROM THE DARK.",lore:"The eyes appeared first. The rest waited until you were already afraid.",lockedClue:"He cannot see it. He knows exactly where it is. WUUUUUUUUUU",peonBark:"Kitty?",image:"/assets/true/shadow.webp",selectionWeight:1,theme:"shadow"},
+  {id:"whorearchives",name:"WHORE ARCHIVES",announcement:"RESTRICTED RECORDS HAVE SURFACED.",lore:"A sealed record of names, depths, and decisions the mountain denies preserving.",lockedClue:"There are records beneath the records.",peonBark:"Me can read?",image:"/assets/true/whorearchives.webp",selectionWeight:1,theme:"archive"},
+  {id:"patike",name:"PATIKE",announcement:"DIRECTORY DETECTED. ACCESS SHOULD NOT EXIST.",lore:"The folder opened itself. The access log insists that you were never here.",lockedClue:"The folder exists. This is already too much information.",peonBark:"Me open folder.",image:"/assets/true/patike.webp",selectionWeight:1,theme:"glitch"},
+  {id:"invincible",name:"INVINCIBLE'S REINS",announcement:"MOUNT EQUIPMENT DETECTED. MOUNT ABSENT.",lore:"The reins are immaculate. Their owner remains committed to being elsewhere.",lockedClue:"A loyal servant, both in life and death.",peonBark:"...where horse?",image:"/assets/true/invincible.webp",selectionWeight:1,theme:"frost"},
+  {id:"asoc",name:"ASOC TICKET",announcement:"ANOMALOUS OBJECT DETECTED",lore:"The ultimate TRUE discovery. Entry to one game of ASOC.",lockedClue:"Someone is waiting for an invitation to be presented.",peonBark:"Me win?",image:"/assets/true/true-asoc-ticket.webp",selectionWeight:null,theme:"infernal",ultimate:true,instruction:"SHOW THIS TO SUMMON THE GAME MASTER",systemResponse:"NO. YOU HAVE BEEN INVITED."},
 ];
 const TRUE_CHANCE = 0.0005;
 // Miss / Perfect / Critical pipeline constants — tunable after playtesting.
@@ -200,7 +201,16 @@ const MISS_LINES = [
   "GRAVITY ASSISTED. YOU DID NOT.",
   "GEOLOGICALLY UNBOTHERED.",
 ];
-const pickTrue = (random: () => number) => trueArtifactPool[Math.min(trueArtifactPool.length - 1, Math.floor(random() * trueArtifactPool.length))];
+const EMPTY_INSULTS_NORMAL:[string,string][]=[
+  ["NOTHING","Exactly what you are."],["BARREN","Just like your thought process."],["EMPTY","Like your head."],["WORTHLESS","The excavation wasn't much better."],
+  ["DUST","Your greatest contribution so far."],["VACANT","A familiar condition."],["USELESS","We meant the dig. Mostly."],["FAILURE","At least you're consistent."],
+  ["NOTHING","You have a gift for finding it."],["BARREN","Your instincts remain undefeated."],["EMPTY","Another successful search for nothing."],["ZERO","Finally, a number you understand."],
+  ["NOTHING","Even geology is avoiding you."],["BARREN","Excellent choice, Peon."],["EMPTY","Somehow you made the hole dumber."],["ARE YOU CLINICALLY BLIND","Well, are you?"]
+];
+const EMPTY_INSULTS_MILD:[string,string][]=[["NOTHING","Again. Interesting."],["EMPTY","Are you choosing these?"],["BARREN","Your pattern is emerging."]];
+const EMPTY_INSULTS_HARSH:[string,string][]=[["BARREN","Stop helping."],["EMPTY","Competence remains theoretical."],["NOTHING","The SYSTEM has concerns."]];
+const EMPTY_INSULTS_STRONG:[string,string][]=[["NOTHING","Please locate a smarter Peon."],["FAILURE","This now appears intentional."],["EMPTY","Stand aside and find an adult."]];
+const pickTrue=(random:()=>number)=>{const configured=trueArtifactPool.filter(a=>a.selectionWeight!==null&&a.selectionWeight>0),total=configured.reduce((sum,a)=>sum+a.selectionWeight!,0);let roll=random()*total;return configured.find(a=>(roll-=a.selectionWeight!)<=0)||configured[0]};
 const makeRng = (seed:number) => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; };
 const pick = (items: Item[], random:()=>number, weights?:number[]) => { const ws=weights||items.map(i=>i.weight); let n=random()*ws.reduce((s,w)=>s+w,0); return items.find((_,i)=>(n-=ws[i])<=0)||items[0]; };
 const odds = (ore:Item,mineral:Item,biome:Biome) => {const ow=biomeWeights[biome],oi=ores.indexOf(ore);if(!ow[oi])return Infinity;return Math.round((ow.reduce((a,b)=>a+b,0)*minerals.reduce((a,b)=>a+b.weight,0))/(ow[oi]*mineral.weight))};
@@ -224,8 +234,9 @@ export default function Home() {
   const [impact, setImpact] = useState<number | null>(null);
   const [hitPoint, setHitPoint] = useState({x:50,y:48});
   const [found, setFound] = useState<{ ore: Item; mineral: Item; isNew: boolean; count: number } | null>(null);
-  const [emptyFind,setEmptyFind]=useState(false);
+  const [emptyNotice,setEmptyNotice]=useState<{id:number;result:string;insult:string}|null>(null);
   const [trueFind,setTrueFind]=useState<{artifact:TrueArtifact;digNumber:number}|null>(null);
+  const [duplicateNotice,setDuplicateNotice]=useState<{id:number;ore:Item;mineral:Item;count:number;dust:number}|null>(null);
   const [toast, setToast] = useState<{ name: string; text: string } | null>(null);
   const [milestone, setMilestone] = useState<{ore:Item;level:number;missing?:Item;attempts:number} | null>(null);
   const [mineCompletion,setMineCompletion]=useState<{completed:Biome;next?:Biome}|null>(null);
@@ -245,6 +256,9 @@ export default function Home() {
   const perfectPhase = useState<{current:number}>(() => ({current: Date.now()}))[0];
   const perfectIntervalRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
   const hitFeedbackTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const duplicateNoticeId = useRef(0);
+  const emptyNoticeId = useRef(0);
+  const emptyDigStreak = useRef(0);
   const spaceHeld = useRef(false);
   const sessionDigs = useRef(0);
   const [sessionDigsCount,setSessionDigsCount]=useState(0);
@@ -265,6 +279,8 @@ export default function Home() {
   // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps -- derives mine-completion/unlock strictly from persisted ore extraction counts; deps intentionally exclude album combinations and unrelated save fields.
   useEffect(()=>{if(!loaded||mineCompletion)return;const completed=biomeOrder.find(b=>save.unlockedBiomes.includes(b)&&biomeQuotaComplete(save,b)&&!save.completedBiomes.includes(b));if(!completed)return;const i=biomeOrder.indexOf(completed),next=i<biomeOrder.length-1?biomeOrder[i+1]:undefined;setSave(s=>({...s,completedBiomes:[...s.completedBiomes,completed],unlockedBiomes:next&&!s.unlockedBiomes.includes(next)?[...s.unlockedBiomes,next]:s.unlockedBiomes}));setMineCompletion({completed,next});track("biome_completed",{biome:completed,digs:save.digs,ore_extractions:biomeQuotaProgress(save,completed),quota:biomeQuotaTotal(completed)});emitGameplayEvent("MINE_COMPLETED",{biome:completed});if(next)track("biome_unlocked",{biome:next});},[loaded,save.ores,save.unlockedBiomes,save.completedBiomes,mineCompletion]);
   useEffect(()=>{if(!loaded){previousBiome.current=save.biome;return}if(previousBiome.current===save.biome)return;previousBiome.current=save.biome;setMineTransition(save.biome);const timer=setTimeout(()=>setMineTransition(null),720);return()=>clearTimeout(timer)},[loaded,save.biome]);
+  useEffect(()=>{if(!duplicateNotice)return;const timer=setTimeout(()=>setDuplicateNotice(null),2800);return()=>clearTimeout(timer)},[duplicateNotice]);
+  useEffect(()=>{if(!emptyNotice)return;const timer=setTimeout(()=>setEmptyNotice(null),1400);return()=>clearTimeout(timer)},[emptyNotice]);
 
   // Perfect Strike metronome: a fixed-phase repeating window, so the timing
   // challenge is a learnable rhythm rather than randomized per strike.
@@ -301,8 +317,10 @@ export default function Home() {
     return ids.filter(id => !next.achievements.includes(id));
   };
 
+  const continueMine = () => { const hp=10+Math.floor(rng.current()*6); setFound(null); setPendingOre(null); setStage("tunnel"); setMaxHp(hp); setRockHp(hp); track("mine_started",{attempt:save.digs+1,biome:save.biome}); };
+
   const strike = (point?:{x:number;y:number}) => {
-    if (found||emptyFind||trueFind) return;
+    if (found||trueFind) return;
     setHitPoint(point||{x:50,y:48});
 
     // PERFECT CHECK — timing-skill, not RNG. Fixed metronome phase so the
@@ -360,11 +378,14 @@ export default function Home() {
       // TRUE roll happens once per completed dig, independent of and before
       // the ordinary empty/ore result — including on digs that would
       // otherwise be empty. It overrides that dig's normal outcome entirely.
-      if(rng.current()<TRUE_CHANCE){const artifact=pickTrue(rng.current);playImpact(impactKind??"crack");setSave(s=>{const digNumber=s.digs+1,isFirst=!s.trueArtifacts[artifact.id],veinDigsRemaining=Math.max(0,s.veinDigsRemaining-1),veinExpired=s.veinDigsRemaining>0&&veinDigsRemaining===0;if(veinExpired)emitGameplayEvent("VEIN_EXPIRED",{ore:s.veinOre});return {...s,digs:digNumber,trueArtifacts:{...s.trueArtifacts,[artifact.id]:(s.trueArtifacts[artifact.id]||0)+1},trueFirst:isFirst?{...s.trueFirst,[artifact.id]:digNumber}:s.trueFirst,lastDigAt:Date.now(),veinDigsRemaining,veinOre:veinExpired?null:s.veinOre}});sessionDigs.current++;setSessionDigsCount(c=>c+1);setTrueFind({artifact,digNumber:save.digs+1});track("true_artifact_found",{artifact_id:artifact.id,attempt:save.digs+1,biome:save.biome,trigger:"empty"});emitGameplayEvent("TRUE_ARTIFACT_FOUND",{artifact_id:artifact.id,trigger:"empty"});return;}
-      if(rng.current()<.2){playImpact(impactKind??"crack");setSave(s=>{const streak=s.streak+1,veinDigsRemaining=Math.max(0,s.veinDigsRemaining-1),veinExpired=s.veinDigsRemaining>0&&veinDigsRemaining===0;if(veinExpired)emitGameplayEvent("VEIN_EXPIRED",{ore:s.veinOre});return {...s,digs:s.digs+1,emptyDigs:s.emptyDigs+1,streak,longestStreak:Math.max(s.longestStreak,streak),newStreak:0,lastDigAt:Date.now(),veinDigsRemaining,veinOre:veinExpired?null:s.veinOre}});sessionDigs.current++;setSessionDigsCount(c=>c+1);setSessionDrought(d=>{const next=d+1;setSessionLongestDrought(l=>Math.max(l,next));return next;});setEmptyFind(true);track("dig_empty",{attempt:save.digs+1,biome:save.biome,empty_rate:.2});return;}
+      if(rng.current()<TRUE_CHANCE){const artifact=pickTrue(rng.current);emptyDigStreak.current=0;playImpact(impactKind??"crack");setSave(s=>{const digNumber=s.digs+1,isFirst=!s.trueArtifacts[artifact.id],veinDigsRemaining=Math.max(0,s.veinDigsRemaining-1),veinExpired=s.veinDigsRemaining>0&&veinDigsRemaining===0;if(veinExpired)emitGameplayEvent("VEIN_EXPIRED",{ore:s.veinOre});return {...s,digs:digNumber,trueArtifacts:{...s.trueArtifacts,[artifact.id]:(s.trueArtifacts[artifact.id]||0)+1},trueFirst:isFirst?{...s.trueFirst,[artifact.id]:digNumber}:s.trueFirst,lastDigAt:Date.now(),veinDigsRemaining,veinOre:veinExpired?null:s.veinOre}});sessionDigs.current++;setSessionDigsCount(c=>c+1);setTrueFind({artifact,digNumber:save.digs+1});track("true_artifact_found",{artifact_id:artifact.id,attempt:save.digs+1,biome:save.biome,trigger:"empty"});emitGameplayEvent("TRUE_ARTIFACT_FOUND",{artifact_id:artifact.id,trigger:"empty"});return;}
+      if(rng.current()<.2){playImpact(impactKind??"crack");setSave(s=>{const streak=s.streak+1,veinDigsRemaining=Math.max(0,s.veinDigsRemaining-1),veinExpired=s.veinDigsRemaining>0&&veinDigsRemaining===0;if(veinExpired)emitGameplayEvent("VEIN_EXPIRED",{ore:s.veinOre});return {...s,digs:s.digs+1,emptyDigs:s.emptyDigs+1,streak,longestStreak:Math.max(s.longestStreak,streak),newStreak:0,lastDigAt:Date.now(),veinDigsRemaining,veinOre:veinExpired?null:s.veinOre}});sessionDigs.current++;setSessionDigsCount(c=>c+1);setSessionDrought(d=>{const next=d+1;setSessionLongestDrought(l=>Math.max(l,next));return next;});const emptyRun=++emptyDigStreak.current,pool=emptyRun===1?EMPTY_INSULTS_NORMAL:emptyRun===2?EMPTY_INSULTS_MILD:emptyRun===3?EMPTY_INSULTS_HARSH:EMPTY_INSULTS_STRONG;
+        // eslint-disable-next-line react-hooks/purity -- cosmetic copy selection runs only from a completed-dig event handler.
+        const [result,insult]=pool[Math.floor(Math.random()*pool.length)];setEmptyNotice({id:++emptyNoticeId.current,result,insult});track("dig_empty",{attempt:save.digs+1,biome:save.biome,empty_rate:.2,consecutive_empty:emptyRun});continueMine();return;}
       const band = depthBand(maxHp);
       const weights = applyVein(depthWeights(save.biome, band), save.veinOre);
       const ore = pick(ores,rng.current,weights);
+      emptyDigStreak.current=0;
       playImpact(impactKind??"clank");
       setPendingOre(ore);
       setStage("ore");
@@ -376,12 +397,13 @@ export default function Home() {
       if ((ore.toughness ?? 1) > 1) emitGameplayEvent("TOUGH_ORE_EXPOSED", { ore_id: ore.id, toughness: ore.toughness });
       return;
     }
-    if(rng.current()<TRUE_CHANCE){const artifact=pickTrue(rng.current);playImpact(impactKind??"crack");setSave(s=>{const digNumber=s.digs+1,isFirst=!s.trueArtifacts[artifact.id],veinDigsRemaining=Math.max(0,s.veinDigsRemaining-1),veinExpired=s.veinDigsRemaining>0&&veinDigsRemaining===0;if(veinExpired)emitGameplayEvent("VEIN_EXPIRED",{ore:s.veinOre});return {...s,digs:digNumber,trueArtifacts:{...s.trueArtifacts,[artifact.id]:(s.trueArtifacts[artifact.id]||0)+1},trueFirst:isFirst?{...s.trueFirst,[artifact.id]:digNumber}:s.trueFirst,lastDigAt:Date.now(),veinDigsRemaining,veinOre:veinExpired?null:s.veinOre}});sessionDigs.current++;setSessionDigsCount(c=>c+1);setTrueFind({artifact,digNumber:save.digs+1});track("true_artifact_found",{artifact_id:artifact.id,attempt:save.digs+1,biome:save.biome,trigger:"ore"});emitGameplayEvent("TRUE_ARTIFACT_FOUND",{artifact_id:artifact.id,trigger:"ore"});return;}
+    if(rng.current()<TRUE_CHANCE){const artifact=pickTrue(rng.current);emptyDigStreak.current=0;playImpact(impactKind??"crack");setSave(s=>{const digNumber=s.digs+1,isFirst=!s.trueArtifacts[artifact.id],veinDigsRemaining=Math.max(0,s.veinDigsRemaining-1),veinExpired=s.veinDigsRemaining>0&&veinDigsRemaining===0;if(veinExpired)emitGameplayEvent("VEIN_EXPIRED",{ore:s.veinOre});return {...s,digs:digNumber,trueArtifacts:{...s.trueArtifacts,[artifact.id]:(s.trueArtifacts[artifact.id]||0)+1},trueFirst:isFirst?{...s.trueFirst,[artifact.id]:digNumber}:s.trueFirst,lastDigAt:Date.now(),veinDigsRemaining,veinOre:veinExpired?null:s.veinOre}});sessionDigs.current++;setSessionDigsCount(c=>c+1);setTrueFind({artifact,digNumber:save.digs+1});track("true_artifact_found",{artifact_id:artifact.id,attempt:save.digs+1,biome:save.biome,trigger:"ore"});emitGameplayEvent("TRUE_ARTIFACT_FOUND",{artifact_id:artifact.id,trigger:"ore"});return;}
     const band = depthBand(maxHp);
     const fallbackWeights = applyVein(depthWeights(save.biome, band), save.veinOre);
     const ore = pendingOre || pick(ores,rng.current,fallbackWeights);
     const targetParts=save.huntTarget?.split("-")||[],boost=huntBoost(save),mineralWeights=minerals.map(m=>m.weight*(targetParts[0]===ore.id&&targetParts[1]===m.id?boost:1));
     const mineral = pick(minerals,rng.current,mineralWeights), key = `${ore.id}-${mineral.id}`;
+    const isNewResult=!save.combos[key],duplicateCount=(save.combos[key]||0)+1;
     playImpact(impactKind??"crack");
     setSave(s => {
       const isNew = !s.combos[key];
@@ -403,7 +425,7 @@ export default function Home() {
       const fresh = unlocked(next, ore, mineral);
       next.achievements = [...s.achievements, ...fresh];
       if (fresh[0]) { const a = achievements.find(x => x.id === fresh[0])!; setTimeout(() => setToast(a), 650); }
-      setFound({ ore, mineral, isNew, count: next.combos[key] });
+      if(isNew)setFound({ ore, mineral, isNew, count: next.combos[key] });
       sessionDigs.current++;setSessionDigsCount(c=>c+1);
       const context={attempt:next.digs,session_dig:sessionDigs.current,ore_id:ore.id,mineral_id:mineral.id,combination_id:key,rarity:mineral.rarity,biome:s.biome,duplicate_count:next.combos[key],album_completion:Object.keys(next.combos).length/225,time_since_previous_dig_ms:s.lastDigAt?Date.now()-s.lastDigAt:null,hunt_boost:boost};
       track("mineral_found",context); track(isNew?"combination_new":"combination_duplicate",context);
@@ -413,6 +435,10 @@ export default function Home() {
       if(isNew&&(ore.rarity==="Legendary"||mineral.rarity==="Mythic"||odds(ore,mineral,s.biome)>=500))setTimeout(()=>setShare({ore,mineral,attempt:next.digs,total:Object.keys(next.combos).length}),700);
       return next;
     });
+    if(!isNewResult){
+      setDuplicateNotice({id:++duplicateNoticeId.current,ore,mineral,count:duplicateCount,dust:dustByRarity[mineral.rarity]});
+      continueMine();
+    }
   };
 
   const strikeAtPointer=(event:React.MouseEvent<HTMLButtonElement>)=>{const rect=event.currentTarget.getBoundingClientRect();strike({x:Math.max(4,Math.min(96,(event.clientX-rect.left)/rect.width*100)),y:Math.max(5,Math.min(95,(event.clientY-rect.top)/rect.height*100))})};
@@ -425,7 +451,7 @@ export default function Home() {
       if(tab==="mine")event.preventDefault();
       if(event.repeat||spaceHeld.current)return;
       spaceHeld.current=true;
-      if(tab === "mine" && !found && !emptyFind && !trueFind)strike();
+      if(tab === "mine" && !found && !trueFind)strike();
     };
     const onKeyUp=(event:KeyboardEvent)=>{if(event.code==="Space")spaceHeld.current=false};
     const releaseSpace=()=>{spaceHeld.current=false};
@@ -435,9 +461,8 @@ export default function Home() {
     return () => {window.removeEventListener("keydown", onKey);window.removeEventListener("keyup",onKeyUp);window.removeEventListener("blur",releaseSpace)};
   });
 
-  const continueMine = () => { const hp=10+Math.floor(rng.current()*6); setFound(null); setEmptyFind(false); setPendingOre(null); setStage("tunnel"); setMaxHp(hp); setRockHp(hp); track("mine_started",{attempt:save.digs+1,biome:save.biome}); };
   const unique = Object.keys(save.combos).length;
-  const reset = () => { if (confirm("Erase every discovery and return to the cold, uncaring rock?")) { setSave(blank); setFound(null); setPendingOre(null); setStage("tunnel"); setMaxHp(12); setRockHp(12); sessionDigs.current=0; setSessionDigsCount(0); setSessionMisses(0); setSessionVeins(0); setSessionNew(0); setSessionDrought(0); setSessionLongestDrought(0); consecutiveMisses.current=0; } };
+  const reset = () => { if (confirm("Erase every discovery and return to the cold, uncaring rock?")) { setSave(blank); setFound(null); setPendingOre(null); setEmptyNotice(null); setStage("tunnel"); setMaxHp(12); setRockHp(12); sessionDigs.current=0; setSessionDigsCount(0); setSessionMisses(0); setSessionVeins(0); setSessionNew(0); setSessionDrought(0); setSessionLongestDrought(0); consecutiveMisses.current=0; emptyDigStreak.current=0; } };
 
   return <main className={`${save.settings.reducedMotion?"reduced-motion":""} ${save.settings.reducedShake?"reduced-shake":""} ${save.settings.highContrast?"high-contrast":""} cosmetic-${save.equipped}`}>
     <header className="topbar">
@@ -485,7 +510,8 @@ export default function Home() {
 
     {trueFind && <TrueReveal data={trueFind} reducedMotion={save.settings.reducedMotion} onContinue={()=>{setTrueFind(null);continueMine();}} />}
     {found && <Reveal found={found} total={unique} biome={save.biome} onContinue={continueMine} />}
-    {emptyFind&&<EmptyReveal attempt={save.digs} onContinue={continueMine}/>}
+    {duplicateNotice&&<div key={duplicateNotice.id} className="duplicate-float" role="status" aria-live="polite"><span>DUPLICATE ×{duplicateNotice.count}</span><strong>{duplicateNotice.ore.name} + {duplicateNotice.mineral.name}</strong><small>+{duplicateNotice.dust} SPECIMEN DUST</small></div>}
+    {emptyNotice&&<div key={emptyNotice.id} className="empty-insult" role="status" aria-live="polite"><small>SYSTEM</small><p><strong>{emptyNotice.result}</strong><span> — {emptyNotice.insult}</span></p></div>}
     {milestone && <Milestone data={milestone} onClose={()=>setMilestone(null)} onAlbum={()=>{if(milestone.level===14&&milestone.missing){const target=`${milestone.ore.id}-${milestone.missing.id}`,b=bestBiome(milestone.ore);setSave(s=>({...s,biome:b,huntTarget:target,huntStartedAtDig:s.digs,huntCounts:{...s.huntCounts,[target]:(s.huntCounts[target]||0)+1}}));track("hunt_started",{biome:b,combination_id:target});setTab("mine")}else setTab("album");setMilestone(null)}} />}
     {onboarding&&<Onboarding onDone={()=>{setOnboarding(false);setSave(s=>({...s,settings:{...s.settings,helpSeen:true}}));track("mine_started",{attempt:save.digs+1,biome:save.biome})}}/>}
     {share&&<ShareCard data={share} biome={save.biome} onClose={()=>setShare(null)}/>} 
@@ -529,40 +555,62 @@ function Milestone({data,onClose,onAlbum}:{data:{ore:Item;level:number;missing?:
 }
 
 function MineCompletion({data,digs,onContinue}:{data:{completed:Biome;next?:Biome};digs:number;onContinue:()=>void}){
- return <div className="mine-completion"><div><p className="eyebrow">EXTRACTION QUOTA COMPLETE</p><div className="completion-seal">◆</div><h2>{biomeNames[data.completed]} SURVEY<br/><i>SATISFIED.</i></h2><p>Every native ore quota has been fulfilled after {digs} total deposits. Album combinations and TRUE Artifacts remain independent.</p>{data.next?<div className="next-mine-reveal"><small>NEW DESCENT UNLOCKED</small><strong>{biomeNames[data.next]} UNLOCKED</strong></div>:<div className="next-mine-reveal"><small>VOLUME I MINING PROGRESSION</small><strong>COMPLETE</strong></div>}<button onClick={onContinue}>{data.next?`ENTER ${biomeNames[data.next]}`:"RETURN TO THE MOUNTAIN"} <span>→</span></button></div></div>
+ const destination=data.next||data.completed,v=biomeVisuals[destination],shaft=String(biomeOrder.indexOf(destination)+1).padStart(2,"0");
+ return <div className={`mine-completion unlock-${destination}`} style={{"--completion-accent":v.accent,"--completion-secondary":v.secondary,"--completion-canvas":v.canvas,"--completion-card":v.card} as React.CSSProperties}>
+   <div className="completion-strata" aria-hidden="true"/><section className="completion-certificate">
+     <header><div className="completion-status"><span className="status-pulse"/>SYSTEM SURVEY AUTHORITY</div><p>EXTRACTION QUOTA COMPLETE · SHAFT {String(biomeOrder.indexOf(data.completed)+1).padStart(2,"0")}</p></header>
+     <div className="completion-hero"><div className="completion-seal" aria-hidden="true"><span>◆</span><i>✓</i></div><div><small>{biomeNames[data.completed]}</small><h2>SURVEY <i>SATISFIED</i></h2><p>Native extraction requirements verified after <strong>{digs.toLocaleString()}</strong> total deposits.</p></div></div>
+     <div className="completed-quota-strip" aria-label={`${biomeNames[data.completed]} completed extraction quotas`}>{biomePages[data.completed].map(id=>{const ore=ores.find(o=>o.id===id)!;return <div key={id}><img src={oreAsset(id)} alt=""/><span><strong>{ore.name.replace(" Ore","")}</strong><small>{oreQuota(id)} / {oreQuota(id)} EXTRACTED</small></span><b>✓</b></div>})}</div>
+     <div className="completion-divider"><span>DESCENT AUTHORIZATION</span></div>
+     <div className="next-mine-reveal"><div className="shaft-number"><small>SHAFT</small><strong>{shaft}</strong></div><div className="next-mine-copy"><small>{data.next?"NEW MINE ACCESS GRANTED":"VOLUME I SURVEY STATUS"}</small><h3>{data.next?biomeNames[data.next]:"PROGRESSION COMPLETE"}</h3><p>{data.next?v.flavor:"The mountain is out of excuses. The Album is not."}</p>{data.next&&<em>{distributionLabel(data.next)}</em>}</div><span className="descent-arrow" aria-hidden="true">↓</span></div>
+     <footer><p>ALBUM COMBINATIONS AND TRUE ARTIFACTS REMAIN INDEPENDENT.</p><button onClick={onContinue}><small>{data.next?"BEGIN NEXT SHIFT":"SURVEY CLOSED"}</small>{data.next?`ENTER ${biomeNames[data.next]}`:"RETURN TO THE MOUNTAIN"}<span>→</span></button></footer>
+   </section>
+ </div>
 }
 
-function EmptyReveal({attempt,onContinue}:{attempt:number;onContinue:()=>void}){
- return <div className="reveal empty-reveal"><div className="reveal-card"><button className="close" onClick={onContinue}>×</button><p className="eyebrow">THE MOUNTAIN HAS SPOKEN</p><div className="empty-mark">∅</div><h2>NOTHING.</h2><p>Absolutely nothing. Twenty percent of excavations produce only dust, regret, and a slightly wider tunnel.</p><div className="verdict duplicate"><span>EMPTY DIG</span><strong>ATTEMPT #{attempt}</strong><small>NO ORE · NO MINERAL · NO ALBUM PROGRESS</small></div><button className="continue" onClick={onContinue}>DIG SOMEWHERE ELSE <span>→</span></button></div></div>
-}
-
-function TrueArtifactArt({artifact}:{artifact:TrueArtifact}){
+function TrueArtifactArt({artifact,locked=false}:{artifact:TrueArtifact;locked?:boolean}){
   const [missing,setMissing]=useState(false);
-  return <span className="true-art-slot">
-    {!missing && <img className="true-art-img" src={artifact.image} alt="" onError={()=>setMissing(true)}/>}
-    {missing && <span className="true-art-placeholder" aria-hidden="true">◆<small>ARTWORK PENDING</small></span>}
+  return <span className={`true-art-slot${locked?" locked-art":""}${artifact.id==="asoc"?" asoc-art":""}`} role={locked?"img":undefined} aria-label={locked?"Undiscovered TRUE Artifact silhouette":undefined}>
+    {locked&&!missing&&<span className="true-art-silhouette" style={{"--artifact-mask":`url(${artifact.image})`} as React.CSSProperties}/>}
+    {!locked&&!missing&&<img className="true-art-img" src={artifact.image} alt="" onError={()=>setMissing(true)}/>}
+    {missing && <span className={`true-art-placeholder${locked?" locked-placeholder":""}`} aria-hidden="true">◆{!locked&&<small>ARTWORK PENDING</small>}</span>}
+    {locked&&<img className="true-mask-probe" src={artifact.image} alt="" onError={()=>setMissing(true)}/>}
   </span>;
 }
 
 function TrueReveal({data,reducedMotion,onContinue}:{data:{artifact:TrueArtifact;digNumber:number};reducedMotion:boolean;onContinue:()=>void}){
-  const [stage,setStage]=useState<"announcement"|"pause"|"reveal">("announcement");
+  const [stage,setStage]=useState<"announcement"|"pause"|"ground"|"deep-pause"|"impossible"|"reveal">("announcement");
   const [canClose,setCanClose]=useState(false);
   useEffect(()=>{
-    const t1=setTimeout(()=>setStage("pause"), reducedMotion?200:1150);
-    const t2=setTimeout(()=>setStage("reveal"), reducedMotion?400:2200);
-    const t3=setTimeout(()=>setCanClose(true), reducedMotion?500:2700);
-    return ()=>{clearTimeout(t1);clearTimeout(t2);clearTimeout(t3)};
-  },[reducedMotion]);
+    const timers:ReturnType<typeof setTimeout>[]=[];
+    const after=(delay:number,next:()=>void)=>timers.push(setTimeout(next,delay));
+    if(data.artifact.ultimate){
+      after(reducedMotion?180:1400,()=>setStage("pause"));
+      after(reducedMotion?340:2400,()=>setStage("ground"));
+      after(reducedMotion?520:3900,()=>setStage("deep-pause"));
+      after(reducedMotion?700:5400,()=>setStage("impossible"));
+      after(reducedMotion?900:6900,()=>setStage("reveal"));
+      after(reducedMotion?1100:7900,()=>setCanClose(true));
+    }else{
+      after(reducedMotion?200:1150,()=>setStage("pause"));
+      after(reducedMotion?400:2200,()=>setStage("reveal"));
+      after(reducedMotion?500:2700,()=>setCanClose(true));
+    }
+    return ()=>timers.forEach(clearTimeout);
+  },[data.artifact.ultimate,reducedMotion]);
+  const stageAnnouncement=stage==="announcement"?data.artifact.announcement:stage==="ground"?"GROUND INSTABILITY DETECTED":stage==="impossible"?"...IMPOSSIBLE.":null;
   return <div className={`true-reveal stage-${stage} theme-${data.artifact.theme||"shadow"}`} role="status" aria-live="assertive">
     <div className="true-reveal-card">
-      {stage==="announcement" && <p className="true-alert">{data.artifact.announcement}</p>}
-      {stage==="pause" && <div className="true-pause-mark" aria-hidden="true">◆</div>}
+      {stageAnnouncement && <p className="true-alert">{stageAnnouncement}</p>}
+      {(stage==="pause"||stage==="deep-pause") && <div className="true-pause-mark" aria-hidden="true">◆</div>}
       {stage==="reveal" && <>
         <p className="true-classification">TRUE ARTIFACT</p>
         <h2>{data.artifact.name}</h2>
         <TrueArtifactArt artifact={data.artifact}/>
+        {data.artifact.instruction&&<p className="true-instruction">{data.artifact.instruction}</p>}
         <p className="true-lore">{data.artifact.lore}</p>
         <div className="true-peon"><small>PEON</small><p>&ldquo;{data.artifact.peonBark}&rdquo;</p></div>
+        {data.artifact.systemResponse&&<div className="true-system"><small>SYSTEM</small><p>{data.artifact.systemResponse}</p></div>}
         <p className="true-meta">FOUND AFTER {data.digNumber.toLocaleString()} DIGS</p>
         <button className="continue" disabled={!canClose} onClick={onContinue}>ARCHIVE IT <span>→</span></button>
       </>}
@@ -576,11 +624,14 @@ function TrueArchive({save}:{save:Save}){
   return <section className="page true-archive-page">
     <div className="page-head"><div><p className="eyebrow">NOT GEOLOGY. SOMETHING ELSE.</p><h2>TRUE <i>ARCHIVE</i></h2></div><div className="completion"><span>ARTIFACTS FOUND</span><strong>{owned.length}<small> / {trueArtifactPool.length}</small></strong></div></div>
     <p className="true-archive-intro">Common through Legendary belongs to the mountain. These do not. Each is independently possible on any dig, at any depth, regardless of mine, biome, streak, or luck. Odds: 1 in 2,000. No protection. No pattern.{totalFound?` Total anomalies logged: ${totalFound}.`:""}</p>
-    <div className="true-grid">{trueArtifactPool.map(a=>{const count=save.trueArtifacts[a.id]||0,first=save.trueFirst[a.id];return <article key={a.id} className={count?"found":"locked"}>
-      <TrueArtifactArt artifact={a}/>
-      <h3>{count?a.name:"UNKNOWN ANOMALY"}</h3>
-      <p>{count?a.lore:"Its outline refuses to resolve."}</p>
-      <footer>{count?<><span>FOUND ×{count}</span>{first!==undefined&&<small>FOUND AFTER {first.toLocaleString()} DIGS</small>}</>:<span>???</span>}</footer>
+    <div className="true-grid">{trueArtifactPool.map(a=>{const count=save.trueArtifacts[a.id]||0,first=save.trueFirst[a.id];return <article key={a.id} className={`${count?"found":"locked"}${a.ultimate?" ultimate":""}`}>
+      <TrueArtifactArt artifact={a} locked={!count}/>
+      {count&&a.ultimate&&<strong className="true-ultimate-label">ULTIMATE TRUE ARTIFACT</strong>}
+      <h3>{count?a.name:"???"}</h3>
+      <p>{count?a.lore:<em>&ldquo;{a.lockedClue}&rdquo;</em>}</p>
+      {count&&a.ultimate&&<div className="true-issued"><span>STATUS: ISSUED</span><strong>HOLDER: YOU</strong></div>}
+      {count&&a.instruction&&<p className="true-archive-instruction">{a.instruction}</p>}
+      <footer>{count?<><span>FOUND ×{count}</span>{first!==undefined&&<small>FOUND AFTER {first.toLocaleString()} DIGS</small>}</>:<span>{a.ultimate?"STATUS: NOT ISSUED":"NOT DISCOVERED"}</span>}</footer>
     </article>})}</div>
   </section>;
 }

@@ -1,0 +1,12 @@
+/* v0.5.2 — repeat combinations never interrupt the mining loop. */
+.duplicate-float{position:fixed;z-index:65;right:clamp(18px,5vw,78px);top:46%;width:min(360px,calc(100vw - 36px));padding:14px 18px 13px;border-right:4px solid var(--acid);background:linear-gradient(90deg,#171a17f2,#0b0d0be8);box-shadow:0 14px 38px #000b;pointer-events:none;text-align:right;animation:duplicateRoll 2.8s cubic-bezier(.2,.7,.2,1) both}
+.duplicate-float span,.duplicate-float small{display:block;font-size:7px;font-weight:900;letter-spacing:2px;color:#898e86}.duplicate-float strong{display:block;margin:5px 0 4px;font-size:13px;line-height:1.25;letter-spacing:.5px;color:#f0eee7}.duplicate-float small{color:var(--acid)}
+@keyframes duplicateRoll{0%{opacity:0;transform:translateX(70px) rotate(1deg)}10%,68%{opacity:1;transform:translateX(0) rotate(0)}100%{opacity:0;transform:translateX(150px) rotate(2deg)}}
+.reduced-motion .duplicate-float{animation:none;opacity:1}
+@media(max-width:600px){.duplicate-float{right:14px;top:auto;bottom:112px;width:calc(100vw - 28px)}}
+
+.empty-insult{position:fixed;z-index:64;left:50%;top:30%;width:min(540px,calc(100vw - 40px));padding:12px 20px;transform:translateX(-50%);background:#0a0c0ad9;border-left:3px solid #8b9188;box-shadow:0 12px 34px #0009;pointer-events:none;text-align:center;animation:emptyAbuse 1.4s ease both}
+.empty-insult small{display:block;margin-bottom:4px;font-size:7px;font-weight:900;letter-spacing:3px;color:#888f85}.empty-insult p{margin:0;font:14px/1.35 Georgia,serif;color:#b5b9b1}.empty-insult strong{font:900 11px/1 Arial,sans-serif;letter-spacing:1.8px;color:#e5e7e1}.empty-insult span{color:#a7aaa4}
+@keyframes emptyAbuse{0%{opacity:0;transform:translate(-50%,-8px)}12%,72%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-5px)}}
+.reduced-motion .empty-insult{animation:none;opacity:1}
+@media(max-width:600px){.empty-insult{top:24%;padding:10px 14px}.empty-insult p{font-size:12px}}
