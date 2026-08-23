@@ -1,0 +1,30 @@
+/* v0.5.5 — biome-specific ambient motion. Purely decorative and input transparent. */
+.ambient-fx{position:absolute;inset:0;z-index:5;overflow:hidden;border-radius:inherit;pointer-events:none;contain:paint}
+.ambient-fx i{position:absolute;display:block;pointer-events:none}
+
+/* Old Mine: warm dust motes periodically swept sideways by a tunnel gust. */
+.biome-old .ambient-fx i{left:-12%;top:var(--y);width:clamp(46px,8vw,105px);height:2px;border-radius:50%;opacity:0;background:linear-gradient(90deg,transparent,#d5b17a8f 45%,#f1d4a544 72%,transparent);filter:blur(.45px);animation:oldGust 7.2s linear infinite;animation-delay:var(--delay)}
+.biome-old .ambient-fx i:nth-child(1){--y:18%;--delay:-1s}.biome-old .ambient-fx i:nth-child(2){--y:31%;--delay:-5.1s}.biome-old .ambient-fx i:nth-child(3){--y:44%;--delay:-2.7s}.biome-old .ambient-fx i:nth-child(4){--y:62%;--delay:-6.3s}.biome-old .ambient-fx i:nth-child(5){--y:77%;--delay:-3.8s}.biome-old .ambient-fx i:nth-child(6){--y:87%;--delay:-.2s}.biome-old .ambient-fx i:nth-child(n+7){width:4px;height:4px;background:#e2c69788;box-shadow:0 0 5px #d9b77b;animation-duration:9.4s}
+
+/* Deep Mine: embers rise while intermittent pressure vents breathe across the wall. */
+.biome-deep .ambient-fx i{left:var(--x);bottom:-5%;width:4px;height:7px;border-radius:50%;background:#ff6a38;box-shadow:0 0 8px #ff3d20,0 0 16px #8f1830;opacity:0;animation:deepEmber 5.5s ease-in infinite;animation-delay:var(--delay)}
+.biome-deep .ambient-fx i:nth-child(1){--x:12%;--delay:-1s}.biome-deep .ambient-fx i:nth-child(2){--x:23%;--delay:-4s}.biome-deep .ambient-fx i:nth-child(3){--x:38%;--delay:-2.1s}.biome-deep .ambient-fx i:nth-child(4){--x:57%;--delay:-5s}.biome-deep .ambient-fx i:nth-child(5){--x:74%;--delay:-3.2s}.biome-deep .ambient-fx i:nth-child(6){--x:88%;--delay:-.3s}.biome-deep .ambient-fx i:nth-child(n+7){left:-20%;top:var(--y);bottom:auto;width:42%;height:18px;border-radius:50%;background:linear-gradient(90deg,transparent,#c5bbb327,transparent);box-shadow:none;filter:blur(7px);animation:steamVent 9s ease-in-out infinite}.biome-deep .ambient-fx i:nth-child(7){--y:28%;--delay:-2s}.biome-deep .ambient-fx i:nth-child(8){--y:69%;--delay:-7s}.biome-deep .ambient-fx i:nth-child(n+9){display:none}
+
+/* Outland: viscous fel acid forms at the ceiling, elongates, then drops and splashes. */
+.biome-outland .ambient-fx i{top:-3%;left:var(--x);width:6px;height:18px;border-radius:0 0 70% 70%;opacity:0;background:linear-gradient(#d8ff78,#71ff32 45%,#1ea725);box-shadow:0 0 7px #8eff48,0 0 15px #4dff2366;animation:acidDrip 5.8s cubic-bezier(.55,.05,.72,.4) infinite;animation-delay:var(--delay)}
+.biome-outland .ambient-fx i::after{content:"";position:absolute;left:50%;bottom:-2px;width:22px;height:6px;translate:-50% 0;border:2px solid #82ff45;border-radius:50%;opacity:0;animation:acidSplash 5.8s ease-out infinite;animation-delay:var(--delay)}
+.biome-outland .ambient-fx i:nth-child(1){--x:9%;--delay:-.8s}.biome-outland .ambient-fx i:nth-child(2){--x:21%;--delay:-4.4s}.biome-outland .ambient-fx i:nth-child(3){--x:35%;--delay:-2.7s}.biome-outland .ambient-fx i:nth-child(4){--x:51%;--delay:-5.5s}.biome-outland .ambient-fx i:nth-child(5){--x:66%;--delay:-1.8s}.biome-outland .ambient-fx i:nth-child(6){--x:79%;--delay:-3.7s}.biome-outland .ambient-fx i:nth-child(7){--x:91%;--delay:-.1s}.biome-outland .ambient-fx i:nth-child(n+8){width:3px;height:3px;border-radius:50%;animation-duration:8s}
+
+/* Northrend: wind-driven ice grains and occasional brighter frost streaks. */
+.biome-northrend .ambient-fx i{left:-8%;top:var(--y);width:5px;height:2px;border-radius:50%;opacity:0;background:#e9fbff;box-shadow:0 0 5px #7fdfff;animation:iceWind 4.8s linear infinite;animation-delay:var(--delay)}
+.biome-northrend .ambient-fx i:nth-child(1){--y:13%;--delay:-1s}.biome-northrend .ambient-fx i:nth-child(2){--y:24%;--delay:-3.1s}.biome-northrend .ambient-fx i:nth-child(3){--y:36%;--delay:-.2s}.biome-northrend .ambient-fx i:nth-child(4){--y:48%;--delay:-4.3s}.biome-northrend .ambient-fx i:nth-child(5){--y:59%;--delay:-2.2s}.biome-northrend .ambient-fx i:nth-child(6){--y:71%;--delay:-3.8s}.biome-northrend .ambient-fx i:nth-child(7){--y:82%;--delay:-1.7s}.biome-northrend .ambient-fx i:nth-child(8){--y:90%;--delay:-4.7s}.biome-northrend .ambient-fx i:nth-child(n+9){width:65px;height:1px;background:linear-gradient(90deg,transparent,#d6f7ff99,transparent);filter:blur(.3px);animation-duration:7.5s}
+
+@keyframes oldGust{0%,58%{translate:0 0;opacity:0}62%{opacity:.7}82%{opacity:.35}88%,100%{translate:125vw -18px;opacity:0}}
+@keyframes deepEmber{0%{translate:0 0;opacity:0}12%{opacity:.9}72%{opacity:.55}100%{translate:18px -430px;opacity:0}}
+@keyframes steamVent{0%,64%{translate:0 0;opacity:0}72%{opacity:.65}100%{translate:155vw -28px;opacity:0}}
+@keyframes acidDrip{0%,28%{translate:0 0;scale:1 .2;opacity:0}34%{scale:1 1;opacity:1}48%{translate:0 8px;scale:.8 1.7}72%{translate:0 390px;scale:.8 1.1;opacity:.9}74%,100%{translate:0 390px;opacity:0}}
+@keyframes acidSplash{0%,72%{scale:.15;opacity:0}74%{scale:.4;opacity:.8}82%,100%{scale:1.8;opacity:0}}
+@keyframes iceWind{0%{translate:0 0;opacity:0}10%{opacity:.85}88%{opacity:.45}100%{translate:118vw 78px;opacity:0}}
+
+.reduced-motion .ambient-fx{display:none!important}
+@media(max-width:600px){.ambient-fx i:nth-child(even){display:none}.biome-outland .ambient-fx i{animation-duration:7.5s}.biome-northrend .ambient-fx i{animation-duration:6.5s}}
