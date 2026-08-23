@@ -1,0 +1,5 @@
+/* v0.5.9 — inertial cursor tracking replaces the rigid event-to-event chase. */
+@media(pointer:fine){
+  .rock .pickaxe{transition:filter .14s ease!important;will-change:left,top,transform}
+  .rock.pick-following:not(.hit) .pickaxe{transform:rotate(calc(-34deg + var(--pick-lean,0deg))) scale(1.03)!important}
+}
