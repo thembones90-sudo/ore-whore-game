@@ -676,10 +676,12 @@ function TrueArtifactInspection({artifact,count,first,onClose}:{artifact:TrueArt
       <p className="true-inspection-kicker">TRUE ARTEFACT · VERIFIED ARCHIVE ENTRY</p>
       <h2>{artifact.name}</h2>
       <TrueArtifactArt artifact={artifact}/>
-      {artifact.instruction&&<p className="true-inspection-instruction">{artifact.instruction}</p>}
-      <p className="true-inspection-lore">{artifact.lore}</p>
-      <div className="true-inspection-peon"><small>PEON</small><p>&ldquo;{artifact.peonBark}&rdquo;</p></div>
-      <footer><span>ARCHIVED ×{count}</span>{first!==undefined&&<small>FIRST DISCOVERED AFTER {first.toLocaleString()} DIGS</small>}</footer>
+      <div className="true-inspection-copy">
+        {artifact.instruction&&<p className="true-inspection-instruction">{artifact.instruction}</p>}
+        <p className="true-inspection-lore">{artifact.lore}</p>
+        <div className="true-inspection-peon"><small>PEON</small><p>&ldquo;{artifact.peonBark}&rdquo;</p></div>
+        <footer><span>ARCHIVED ×{count}</span>{first!==undefined&&<small>FIRST DISCOVERED AFTER {first.toLocaleString()} DIGS</small>}</footer>
+      </div>
     </section>
   </div>;
 }
