@@ -73,10 +73,10 @@ const blank: Save = { digs: 0, emptyDigs:0, strikes: 0, distance: 0, combos: {},
 const equippedMiningTool=(save:Save)=>forgedItems.find(t=>t.id===save.equippedTool)||forgedItems[0];
 const cosmetics=[{id:"rust",name:"Rustbite Pick",cost:15,kind:"PICKAXE"},{id:"neon",name:"Toxic Impact",cost:30,kind:"IMPACT"},{id:"gilded",name:"Gilded Album",cost:45,kind:"ALBUM"},{id:"deepframe",name:"Deep-Mine Frame",cost:60,kind:"ALBUM"},{id:"menace",name:"Geological Menace",cost:75,kind:"TITLE"},{id:"void",name:"Void Pick",cost:100,kind:"PICKAXE"},{id:"fel",name:"Fel Dust",cost:35,kind:"IMPACT"},{id:"frost",name:"Frostbite Pick",cost:55,kind:"PICKAXE"},{id:"saroniteframe",name:"Saronite Whisper",cost:70,kind:"ALBUM"},{id:"prospector",name:"Master Prospector",cost:80,kind:"TITLE"},{id:"khoriumframe",name:"Khorium Prestige",cost:110,kind:"REVEAL"},{id:"titan",name:"Titanium Crown",cost:140,kind:"PICKAXE"},{id:"brdtitle",name:"Not Going Back",cost:95,kind:"TITLE"},{id:"arcaneimpact",name:"Arcane Fracture",cost:125,kind:"IMPACT"},{id:"volumeone",name:"Volume I Victor",cost:180,kind:"ALBUM"},{id:"orewhoretitle",name:"THE ORE WHORE",cost:999,kind:"TITLE"},{id:"orewhorepick",name:"The Final Pick",cost:999,kind:"PICKAXE"},{id:"orewhorealbum",name:"225 Stamp",cost:999,kind:"ALBUM"},{id:"centerpiece",name:"Mountain's Regret",cost:999,kind:"TROPHY"}];
 const biomeWeights: Record<Biome, number[]> = {
- old:[28,20,12,18,10,8,2,1,1,0,0,0,0,0,0],
- deep:[1,2,4,10,5,22,18,15,18,1,1,1,1,1,0],
- outland:[0,0,0,0,0,2,2,1,2,34,34,18,3,2,2],
- northrend:[0,0,0,0,0,0,0,1,1,1,2,2,38,35,20]
+ old:[28,20,12,18,10,0,0,0,0,0,0,0,0,0,0],
+ deep:[0,0,0,0,0,22,18,15,18,0,0,0,0,0,0],
+ outland:[0,0,0,0,0,0,0,0,0,34,34,18,0,0,0],
+ northrend:[0,0,0,0,0,0,0,0,0,0,0,0,38,35,20]
 };
 const biomeNames:Record<Biome,string>={old:"OLD MINE",deep:"DEEP MINE",outland:"OUTLAND MINE",northrend:"NORTHREND MINE"};
 const biomeVisuals:Record<Biome,{accent:string;secondary:string;canvas:string;cavity:string;debris:string;particle:string;card:string;texture:string;light:string;flavor:string}>={
