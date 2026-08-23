@@ -6,6 +6,14 @@ export type ToolSkin = {
   unlocked: boolean;
   bark?: string;
   silhouette: "pick" | "jackhammer";
+  animation: ToolAnimationProfile;
+};
+
+export type ToolAnimationProfile = {
+  id: "bonk" | "slash-hook" | "pneumatic";
+  impactFx: "dust" | "toxic-sizzle" | "dust-pulses";
+  sfxFamily: "iron-bonk" | "fel-slice" | "pneumatic-thump";
+  engagedLoop: boolean;
 };
 
 export const DEFAULT_TOOL_SKIN_ID = "rock-bonker";
@@ -19,6 +27,7 @@ export const toolSkins: ToolSkin[] = [
     unlocked: true,
     bark: "Me bonk.",
     silhouette: "pick",
+    animation: {id:"bonk",impactFx:"dust",sfxFamily:"iron-bonk",engagedLoop:false},
   },
   {
     id: "revenants-pick",
@@ -28,6 +37,7 @@ export const toolSkins: ToolSkin[] = [
     unlocked: true,
     bark: "Rock die faster.",
     silhouette: "pick",
+    animation: {id:"slash-hook",impactFx:"toxic-sizzle",sfxFamily:"fel-slice",engagedLoop:false},
   },
   {
     id: "peoples-jackhammer",
@@ -37,6 +47,7 @@ export const toolSkins: ToolSkin[] = [
     unlocked: true,
     bark: "Our rock.",
     silhouette: "jackhammer",
+    animation: {id:"pneumatic",impactFx:"dust-pulses",sfxFamily:"pneumatic-thump",engagedLoop:true},
   },
 ];
 
