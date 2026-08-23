@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { track } from "./analytics";
 import { emitGameplayEvent } from "./gameplay-events";
-import { CANONICAL_EXCAVATION_PROBABILITIES, canAfford, forgeRecipes, forgedItems, metallurgyRecipes, processedMaterials, spend, type RecipeUnlock } from "./metallurgy";
+import { CANONICAL_EXCAVATION_PROBABILITIES, canAfford, equippedTrueArtifactChance, forgeRecipes, forgedItems, metallurgyRecipes, processedMaterials, spend, type RecipeUnlock } from "./metallurgy";
 
 type Rarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Mythic";
 type Item = { id: string; name: string; rarity: Rarity; weight: number; color: string; note: string; toughness?: number };
@@ -68,6 +68,7 @@ const achievements = [
 
 const defaultSettings:Settings={master:.7,sfx:.8,reducedShake:false,reducedMotion:false,vibration:true,highContrast:false,helpSeen:false};
 const blank: Save = { digs: 0, emptyDigs:0, strikes: 0, distance: 0, combos: {}, ores: {}, rawResources:{},processedMaterials:{},ownedTools:["rusty-pickaxe"],equippedTool:"rusty-pickaxe", minerals: {}, first: {}, achievements: [], streak: 0,longestStreak:0,newStreak:0,longestNewStreak:0, dust: 0,dustEarned:0,dustSpent:0, biome: "old", unlockedBiomes:["old"], completedBiomes:[], milestones: {}, lastDigAt: 0, schema: 11,settings:defaultSettings,unlocks:[],equipped:"standard",huntTarget:null,huntCounts:{},huntStartedAtDig:0,longestHunt:0,trueArtifacts:{},trueFirst:{},misses:0,veinOre:null,veinDigsRemaining:0,milestoneDigs:{} };
+const equippedMiningTool=(save:Save)=>forgedItems.find(t=>t.id===save.equippedTool)||forgedItems[0];
 const cosmetics=[{id:"rust",name:"Rustbite Pick",cost:15,kind:"PICKAXE"},{id:"neon",name:"Toxic Impact",cost:30,kind:"IMPACT"},{id:"gilded",name:"Gilded Album",cost:45,kind:"ALBUM"},{id:"deepframe",name:"Deep-Mine Frame",cost:60,kind:"ALBUM"},{id:"menace",name:"Geological Menace",cost:75,kind:"TITLE"},{id:"void",name:"Void Pick",cost:100,kind:"PICKAXE"},{id:"fel",name:"Fel Dust",cost:35,kind:"IMPACT"},{id:"frost",name:"Frostbite Pick",cost:55,kind:"PICKAXE"},{id:"saroniteframe",name:"Saronite Whisper",cost:70,kind:"ALBUM"},{id:"prospector",name:"Master Prospector",cost:80,kind:"TITLE"},{id:"khoriumframe",name:"Khorium Prestige",cost:110,kind:"REVEAL"},{id:"titan",name:"Titanium Crown",cost:140,kind:"PICKAXE"},{id:"brdtitle",name:"Not Going Back",cost:95,kind:"TITLE"},{id:"arcaneimpact",name:"Arcane Fracture",cost:125,kind:"IMPACT"},{id:"volumeone",name:"Volume I Victor",cost:180,kind:"ALBUM"},{id:"orewhoretitle",name:"THE ORE WHORE",cost:999,kind:"TITLE"},{id:"orewhorepick",name:"The Final Pick",cost:999,kind:"PICKAXE"},{id:"orewhorealbum",name:"225 Stamp",cost:999,kind:"ALBUM"},{id:"centerpiece",name:"Mountain's Regret",cost:999,kind:"TROPHY"}];
 const biomeWeights: Record<Biome, number[]> = {
  old:[28,20,12,18,10,8,2,1,1,0,0,0,0,0,0],
@@ -171,8 +172,8 @@ const toughnessStrikes = (toughness: number) => {
 };
 // TRUE Artifacts exist outside the 15x15 geological taxonomy entirely —
 // no rarity, no biome, no album slot. Per-artifact selection weights are
-// evaluated only after the outer 0.05% gate (TRUE_CHANCE) has already hit;
-// changing the pool never changes that global gate.
+// evaluated only after the equipped tool's per-excavation TRUE gate has hit;
+// changing the artifact pool never changes the tool-defined chance.
 type TrueArtifact = {id:string;name:string;announcement:string;lore:string;lockedClue:string;peonBark:string;image:string;selectionWeight:number|null;theme?:"gold"|"fel"|"biological"|"shadow"|"archive"|"glitch"|"frost"|"infernal";ultimate?:boolean;instruction?:string;systemResponse?:string};
 const trueArtifactPool: TrueArtifact[] = [
   {id:"ronaldo",name:"PANINI GOLDEN STICKER OF RONALDO NAZÁRIO",announcement:"THE PHENOMENON HAS BEEN DETECTED.",lore:"Some things are rarer than minerals. Some things are simply eternal.",lockedClue:"Some numbers are worn. One was worshipped.",peonBark:"Good kick man.",image:"/assets/true/ronaldo.webp",selectionWeight:1,theme:"gold"},
@@ -184,7 +185,6 @@ const trueArtifactPool: TrueArtifact[] = [
   {id:"invincible",name:"INVINCIBLE'S REINS",announcement:"MOUNT EQUIPMENT DETECTED. MOUNT ABSENT.",lore:"The reins are immaculate. Their owner remains committed to being elsewhere.",lockedClue:"A loyal servant, both in life and death.",peonBark:"...where horse?",image:"/assets/true/invincible.webp",selectionWeight:1,theme:"frost"},
   {id:"asoc",name:"ASOC TICKET",announcement:"ANOMALOUS OBJECT DETECTED",lore:"The ultimate TRUE discovery. Entry to one game of ASOC.",lockedClue:"Someone is waiting for an invitation to be presented.",peonBark:"Me win?",image:"/assets/true/true-asoc-ticket.webp",selectionWeight:null,theme:"infernal",ultimate:true,instruction:"SHOW THIS TO SUMMON THE GAME MASTER",systemResponse:"NO. YOU HAVE BEEN INVITED."},
 ];
-const TRUE_CHANCE = CANONICAL_EXCAVATION_PROBABILITIES.trueArtifact;
 // Miss / Perfect / Critical pipeline constants — tunable after playtesting.
 const MISS_CHANCE = CANONICAL_EXCAVATION_PROBABILITIES.miss;
 const CRIT_CHANCE = CANONICAL_EXCAVATION_PROBABILITIES.critical;
@@ -369,7 +369,7 @@ export default function Home() {
     // CRITICAL CHECK — rolled on every successfully-landing strike (Perfect
     // or normal), independent of Perfect. Seeded/mechanical RNG.
     const isCrit = rng.current() < CRIT_CHANCE;
-    const tool=forgedItems.find(t=>t.id===save.equippedTool)||forgedItems[0];
+    const tool=equippedMiningTool(save);
     const damage = (isPerfect && isCrit ? 3 : (isPerfect || isCrit) ? 2 : 1)*tool.damage;
     const hitKind = isPerfect && isCrit ? "perfectCrit" : isPerfect ? "perfect" : isCrit ? "crit" : "normal";
     const impactKind: "perfect" | "crit" | null = isPerfect ? "perfect" : isCrit ? "crit" : null;
@@ -399,7 +399,8 @@ export default function Home() {
       // TRUE roll happens once per completed dig, independent of and before
       // the ordinary empty/ore result — including on digs that would
       // otherwise be empty. It overrides that dig's normal outcome entirely.
-      if(rng.current()<TRUE_CHANCE){const artifact=pickTrue(rng.current);emptyDigStreak.current=0;playImpact(impactKind??"crack");setSave(s=>{const digNumber=s.digs+1,isFirst=!s.trueArtifacts[artifact.id],veinDigsRemaining=Math.max(0,s.veinDigsRemaining-1),veinExpired=s.veinDigsRemaining>0&&veinDigsRemaining===0;if(veinExpired)emitGameplayEvent("VEIN_EXPIRED",{ore:s.veinOre});return {...s,digs:digNumber,trueArtifacts:{...s.trueArtifacts,[artifact.id]:(s.trueArtifacts[artifact.id]||0)+1},trueFirst:isFirst?{...s.trueFirst,[artifact.id]:digNumber}:s.trueFirst,lastDigAt:Date.now(),veinDigsRemaining,veinOre:veinExpired?null:s.veinOre}});sessionDigs.current++;setSessionDigsCount(c=>c+1);setTrueFind({artifact,digNumber:save.digs+1});track("true_artifact_found",{artifact_id:artifact.id,attempt:save.digs+1,biome:save.biome,trigger:"empty"});emitGameplayEvent("TRUE_ARTIFACT_FOUND",{artifact_id:artifact.id,trigger:"empty"});return;}
+      const trueChance=equippedTrueArtifactChance(equippedMiningTool(save));
+      if(rng.current()<trueChance){const artifact=pickTrue(rng.current);emptyDigStreak.current=0;playImpact(impactKind??"crack");setSave(s=>{const digNumber=s.digs+1,isFirst=!s.trueArtifacts[artifact.id],veinDigsRemaining=Math.max(0,s.veinDigsRemaining-1),veinExpired=s.veinDigsRemaining>0&&veinDigsRemaining===0;if(veinExpired)emitGameplayEvent("VEIN_EXPIRED",{ore:s.veinOre});return {...s,digs:digNumber,trueArtifacts:{...s.trueArtifacts,[artifact.id]:(s.trueArtifacts[artifact.id]||0)+1},trueFirst:isFirst?{...s.trueFirst,[artifact.id]:digNumber}:s.trueFirst,lastDigAt:Date.now(),veinDigsRemaining,veinOre:veinExpired?null:s.veinOre}});sessionDigs.current++;setSessionDigsCount(c=>c+1);setTrueFind({artifact,digNumber:save.digs+1});track("true_artifact_found",{artifact_id:artifact.id,attempt:save.digs+1,biome:save.biome,trigger:"empty",tool_id:save.equippedTool,true_artifact_chance:trueChance});emitGameplayEvent("TRUE_ARTIFACT_FOUND",{artifact_id:artifact.id,trigger:"empty",tool_id:save.equippedTool});return;}
       if(rng.current()<CANONICAL_EXCAVATION_PROBABILITIES.emptyDig){playImpact(impactKind??"crack");setSave(s=>{const streak=s.streak+1,veinDigsRemaining=Math.max(0,s.veinDigsRemaining-1),veinExpired=s.veinDigsRemaining>0&&veinDigsRemaining===0;if(veinExpired)emitGameplayEvent("VEIN_EXPIRED",{ore:s.veinOre});return {...s,digs:s.digs+1,emptyDigs:s.emptyDigs+1,streak,longestStreak:Math.max(s.longestStreak,streak),newStreak:0,lastDigAt:Date.now(),veinDigsRemaining,veinOre:veinExpired?null:s.veinOre}});sessionDigs.current++;setSessionDigsCount(c=>c+1);setSessionDrought(d=>{const next=d+1;setSessionLongestDrought(l=>Math.max(l,next));return next;});const emptyRun=++emptyDigStreak.current,pool=emptyRun===1?EMPTY_INSULTS_NORMAL:emptyRun===2?EMPTY_INSULTS_MILD:emptyRun===3?EMPTY_INSULTS_HARSH:EMPTY_INSULTS_STRONG;
         // eslint-disable-next-line react-hooks/purity -- cosmetic copy selection runs only from a completed-dig event handler.
         const [result,insult]=pool[Math.floor(Math.random()*pool.length)];setEmptyNotice({id:++emptyNoticeId.current,result,insult});track("dig_empty",{attempt:save.digs+1,biome:save.biome,empty_rate:.2,consecutive_empty:emptyRun});continueMine();return;}
@@ -419,7 +420,8 @@ export default function Home() {
       if ((ore.toughness ?? 1) > 1) emitGameplayEvent("TOUGH_ORE_EXPOSED", { ore_id: ore.id, toughness: ore.toughness });
       return;
     }
-    if(rng.current()<TRUE_CHANCE){const artifact=pickTrue(rng.current);emptyDigStreak.current=0;playImpact(impactKind??"crack");setSave(s=>{const digNumber=s.digs+1,isFirst=!s.trueArtifacts[artifact.id],veinDigsRemaining=Math.max(0,s.veinDigsRemaining-1),veinExpired=s.veinDigsRemaining>0&&veinDigsRemaining===0;if(veinExpired)emitGameplayEvent("VEIN_EXPIRED",{ore:s.veinOre});return {...s,digs:digNumber,trueArtifacts:{...s.trueArtifacts,[artifact.id]:(s.trueArtifacts[artifact.id]||0)+1},trueFirst:isFirst?{...s.trueFirst,[artifact.id]:digNumber}:s.trueFirst,lastDigAt:Date.now(),veinDigsRemaining,veinOre:veinExpired?null:s.veinOre}});sessionDigs.current++;setSessionDigsCount(c=>c+1);setTrueFind({artifact,digNumber:save.digs+1});track("true_artifact_found",{artifact_id:artifact.id,attempt:save.digs+1,biome:save.biome,trigger:"ore"});emitGameplayEvent("TRUE_ARTIFACT_FOUND",{artifact_id:artifact.id,trigger:"ore"});return;}
+    const trueChance=equippedTrueArtifactChance(equippedMiningTool(save));
+    if(rng.current()<trueChance){const artifact=pickTrue(rng.current);emptyDigStreak.current=0;playImpact(impactKind??"crack");setSave(s=>{const digNumber=s.digs+1,isFirst=!s.trueArtifacts[artifact.id],veinDigsRemaining=Math.max(0,s.veinDigsRemaining-1),veinExpired=s.veinDigsRemaining>0&&veinDigsRemaining===0;if(veinExpired)emitGameplayEvent("VEIN_EXPIRED",{ore:s.veinOre});return {...s,digs:digNumber,trueArtifacts:{...s.trueArtifacts,[artifact.id]:(s.trueArtifacts[artifact.id]||0)+1},trueFirst:isFirst?{...s.trueFirst,[artifact.id]:digNumber}:s.trueFirst,lastDigAt:Date.now(),veinDigsRemaining,veinOre:veinExpired?null:s.veinOre}});sessionDigs.current++;setSessionDigsCount(c=>c+1);setTrueFind({artifact,digNumber:save.digs+1});track("true_artifact_found",{artifact_id:artifact.id,attempt:save.digs+1,biome:save.biome,trigger:"ore",tool_id:save.equippedTool,true_artifact_chance:trueChance});emitGameplayEvent("TRUE_ARTIFACT_FOUND",{artifact_id:artifact.id,trigger:"ore",tool_id:save.equippedTool});return;}
     const band = depthBand(maxHp);
     const fallbackWeights = applyVein(depthWeights(save.biome, band), save.veinOre);
     const ore = pendingOre || pick(ores,rng.current,fallbackWeights);
@@ -477,7 +479,7 @@ export default function Home() {
       if(tab === "mine" && !found && !trueFind){
         strikeRef.current();
         const tool=forgedItems.find(t=>t.id===save.equippedTool);
-        if(tool?.mode==="continuous")autoMineTimer.current=setInterval(()=>strikeRef.current(),tool.intervalMs||430);
+        if(tool?.holdToMine&&tool.continuousMining)autoMineTimer.current=setInterval(()=>strikeRef.current(),tool.intervalMs||tool.actionDurationMs);
       }
     };
     const releaseSpace=()=>{spaceHeld.current=false;if(autoMineTimer.current){clearInterval(autoMineTimer.current);autoMineTimer.current=undefined}};
@@ -655,9 +657,10 @@ function TrueReveal({data,reducedMotion,onContinue}:{data:{artifact:TrueArtifact
 function TrueArchive({save}:{save:Save}){
   const owned=trueArtifactPool.filter(a=>save.trueArtifacts[a.id]);
   const totalFound=Object.values(save.trueArtifacts).reduce((s,n)=>s+n,0);
+  const tool=equippedMiningTool(save),trueChance=equippedTrueArtifactChance(tool);
   return <section className="page true-archive-page">
     <div className="page-head"><div><p className="eyebrow">NOT GEOLOGY. SOMETHING ELSE.</p><h2>TRUE <i>ARTEFACTS</i></h2></div><div className="completion"><span>ARTEFACTS FOUND</span><strong>{owned.length}<small> / {trueArtifactPool.length}</small></strong></div></div>
-    <p className="true-archive-intro">Common through Legendary belongs to the mountain. These do not. Each is independently possible on any dig, at any depth, regardless of mine, biome, streak, or luck. Odds: 1 in 2,000. No protection. No pattern.{totalFound?` Total anomalies logged: ${totalFound}.`:""}</p>
+    <p className="true-archive-intro">Common through Legendary belongs to the mountain. These do not. Each is independently possible on any completed excavation. Equipped tool: <strong>{tool.name}</strong>. Current chance: <strong>{(trueChance*100).toFixed(2)}%</strong> · approximately 1 in {Math.round(1/trueChance).toLocaleString()}. No pity system. No stacking.{totalFound?` Total anomalies logged: ${totalFound}.`:""}</p>
     <div className="true-grid">{trueArtifactPool.map(a=>{const count=save.trueArtifacts[a.id]||0,first=save.trueFirst[a.id];return <article key={a.id} className={`${count?"found":"locked"}${a.ultimate?" ultimate":""}`}>
       <TrueArtifactArt artifact={a} locked={!count}/>
       {count&&a.ultimate&&<strong className="true-ultimate-label">ULTIMATE TRUE ARTIFACT</strong>}
@@ -690,13 +693,13 @@ const recipeUnlocked=(save:Save,unlock?:RecipeUnlock)=>!unlock||(!unlock.mine||s
 function Forge({save,setSave}:{save:Save;setSave:React.Dispatch<React.SetStateAction<Save>>}){
   const runMetallurgy=(id:string)=>setSave(s=>{const recipe=metallurgyRecipes.find(r=>r.id===id);if(!recipe||!recipeUnlocked(s,recipe.unlock)||!canAfford(s.rawResources,recipe.inputs))return s;return {...s,rawResources:spend(s.rawResources,recipe.inputs),processedMaterials:{...s.processedMaterials,[recipe.outputId]:(s.processedMaterials[recipe.outputId]||0)+recipe.outputQuantity}}});
   const runForge=(id:string)=>setSave(s=>{const recipe=forgeRecipes.find(r=>r.id===id);if(!recipe||s.ownedTools.includes(recipe.resultingItemId)||!recipeUnlocked(s,recipe.unlock)||!canAfford(s.processedMaterials,recipe.inputs))return s;return {...s,processedMaterials:spend(s.processedMaterials,recipe.inputs),ownedTools:[...s.ownedTools,recipe.resultingItemId],equippedTool:recipe.resultingItemId}});
-  const current=forgedItems.find(t=>t.id===save.equippedTool)||forgedItems[0];
+  const current=equippedMiningTool(save);
   return <section className="page forge-page"><div className="page-head"><div><p className="eyebrow">DIG → REFINE / ALLOY → FORGE → ITEM</p><h2>THE <i>FORGE</i></h2></div><div className="completion"><span>EQUIPPED TOOL</span><strong>{current.name}</strong></div></div>
     <p className="forge-intro">Cumulative ore discoveries remain in the Album. Spendable duplicate stock lives here. TRUE Artifacts remain safely outside the furnace.</p>
     <h3 className="section-label">RAW RESOURCE STOCK</h3><div className="material-ledger raw-ledger">{ores.map(o=><article key={o.id}><img src={oreAsset(o.id)} alt=""/><span>{o.name}<small>AVAILABLE</small></span><strong>{save.rawResources[o.id]||0}</strong></article>)}</div>
     <h3 className="section-label">METALLURGY · REFINE / ALLOY</h3><div className="recipe-grid">{metallurgyRecipes.map(r=>{const open=recipeUnlocked(save,r.unlock),ready=open&&canAfford(save.rawResources,r.inputs);return <article className={!open?"locked":""} key={r.id}><header><span>{r.operation}</span><strong>{r.name}</strong></header><div className="recipe-equation">{r.inputs.map(i=><b key={i.id}>{craftingName(i.id)} ×{i.quantity}</b>)}<i>→</i><em>{craftingName(r.outputId)} ×{r.outputQuantity}</em></div><button disabled={!ready} onClick={()=>runMetallurgy(r.id)}>{open?(ready?r.operation:"INSUFFICIENT ORE"):`LOCKED · ${r.unlock?.mine?.toUpperCase()} MINE`}</button></article>})}</div>
     <h3 className="section-label">PROCESSED MATERIALS</h3><div className="material-ledger processed-ledger">{processedMaterials.map(m=><article key={m.id}><span>{m.name}<small>{m.description}</small></span><strong>{save.processedMaterials[m.id]||0}</strong></article>)}</div>
-    <h3 className="section-label">FORGED MINING TOOLS</h3><div className="tool-progression">{forgedItems.map(tool=>{const owned=save.ownedTools.includes(tool.id),recipe=forgeRecipes.find(r=>r.resultingItemId===tool.id),open=!recipe||recipeUnlocked(save,recipe.unlock),ready=!!recipe&&open&&canAfford(save.processedMaterials,recipe.inputs);return <article className={`${owned?"owned":""} ${save.equippedTool===tool.id?"equipped":""}`} key={tool.id}><span>TIER {tool.tier} · {tool.mode.toUpperCase()}</span><h3>{tool.name}</h3><p>{tool.description}</p>{recipe&&<div className="tool-cost">{recipe.inputs.map(i=><b key={i.id}>{craftingName(i.id)} ×{i.quantity}</b>)}</div>}<button disabled={!owned&&!ready} onClick={()=>owned?setSave(s=>({...s,equippedTool:tool.id})):runForge(recipe!.id)}>{save.equippedTool===tool.id?"EQUIPPED":owned?"EQUIP":open?(ready?"FORGE TOOL":"MATERIALS REQUIRED"):"BLUEPRINT LOCKED"}</button></article>})}</div>
+    <h3 className="section-label">FORGED MINING TOOLS</h3><div className="tool-progression">{forgedItems.map(tool=>{const owned=save.ownedTools.includes(tool.id),recipe=forgeRecipes.find(r=>r.resultingItemId===tool.id),open=!recipe||recipeUnlocked(save,recipe.unlock),ready=!!recipe&&open&&canAfford(save.processedMaterials,recipe.inputs);return <article className={`${owned?"owned":""} ${save.equippedTool===tool.id?"equipped":""}`} key={tool.id}><span>TIER {tool.tier} · {tool.inputMode.toUpperCase()}</span><h3>{tool.name}</h3><div className="tool-stats"><b>TRUE {(equippedTrueArtifactChance(tool)*100).toFixed(2)}%</b><b>{tool.actionDurationMs}ms ACTION</b><b>{tool.damage.toFixed(2)}× IMPACT</b></div><p>{tool.description}</p>{recipe&&<div className="tool-cost">{recipe.inputs.map(i=><b key={i.id}>{craftingName(i.id)} ×{i.quantity}</b>)}</div>}<button disabled={!owned&&!ready} onClick={()=>owned?setSave(s=>({...s,equippedTool:tool.id})):runForge(recipe!.id)}>{save.equippedTool===tool.id?"EQUIPPED":owned?"EQUIP":open?(ready?"FORGE TOOL":"MATERIALS REQUIRED"):"BLUEPRINT LOCKED"}</button></article>})}</div>
   </section>
 }
 

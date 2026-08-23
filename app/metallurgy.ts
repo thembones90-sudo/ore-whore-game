@@ -9,7 +9,9 @@ export type MetallurgyRecipe = {
 };
 export type ForgedItem = {
   id: string; name: string; category: "MINING TOOL"; tier: number;
-  mode: "manual" | "continuous"; damage: number; intervalMs?: number; description: string;
+  mode: "manual" | "continuous"; inputMode:"click"|"hold"; holdToMine:boolean; continuousMining:boolean;
+  damage: number; actionDurationMs:number; intervalMs?: number; recipeId?:string; icon:string;
+  trueArtifactChance:number; description: string;
 };
 export type ForgeRecipe = {
   id: string; resultingItemId: string; inputs: Ingredient[];
@@ -36,13 +38,13 @@ export const metallurgyRecipes: MetallurgyRecipe[] = [
 ];
 
 export const forgedItems: ForgedItem[] = [
-  {id:"rusty-pickaxe",name:"Rusty Pickaxe",category:"MINING TOOL",tier:0,mode:"manual",damage:1,description:"Starting equipment. Mostly rust, technically a pickaxe."},
-  {id:"bronze-pickaxe",name:"Bronze Pickaxe",category:"MINING TOOL",tier:1,mode:"manual",damage:1.15,description:"A modestly faster manual tool and your introduction to alloying."},
-  {id:"iron-pickaxe",name:"Iron Pickaxe",category:"MINING TOOL",tier:2,mode:"manual",damage:1.35,description:"Reliable refined iron. The rock has begun to notice."},
-  {id:"mithril-pickaxe",name:"Mithril Pickaxe",category:"MINING TOOL",tier:3,mode:"manual",damage:1.6,description:"A lighter, faster traditional pickaxe."},
-  {id:"dark-iron-pickaxe",name:"Dark Iron Pickaxe",category:"MINING TOOL",tier:4,mode:"manual",damage:2,description:"The final major traditional mining tool."},
-  {id:"felsteel-jackhammer",name:"Felsteel Jackhammer",category:"MINING TOOL",tier:5,mode:"continuous",damage:1,intervalMs:430,description:"Hold input to repeat normal strikes. Every excavation remains an independent roll."},
-  {id:"khorium-drill",name:"Khorium Drill",category:"MINING TOOL",tier:6,mode:"continuous",damage:1.35,intervalMs:300,description:"The first serious continuous industrial drill."},
+  {id:"rusty-pickaxe",name:"Rusty Pickaxe",category:"MINING TOOL",tier:0,mode:"manual",inputMode:"click",holdToMine:false,continuousMining:false,damage:1,actionDurationMs:430,icon:"/assets/tools/tool-rusty-pickaxe.webp",trueArtifactChance:.0005,description:"Starting equipment. Mostly rust, technically a pickaxe."},
+  {id:"bronze-pickaxe",name:"Bronze Pickaxe",category:"MINING TOOL",tier:1,mode:"manual",inputMode:"click",holdToMine:false,continuousMining:false,damage:1.15,actionDurationMs:410,recipeId:"forge-bronze-pickaxe",icon:"/assets/tools/tool-bronze-pickaxe.webp",trueArtifactChance:.0006,description:"A modestly faster manual tool and your introduction to alloying."},
+  {id:"iron-pickaxe",name:"Iron Pickaxe",category:"MINING TOOL",tier:2,mode:"manual",inputMode:"click",holdToMine:false,continuousMining:false,damage:1.35,actionDurationMs:390,recipeId:"forge-iron-pickaxe",icon:"/assets/tools/tool-iron-pickaxe.webp",trueArtifactChance:.0008,description:"Reliable refined iron. The rock has begun to notice."},
+  {id:"mithril-pickaxe",name:"Mithril Pickaxe",category:"MINING TOOL",tier:3,mode:"manual",inputMode:"click",holdToMine:false,continuousMining:false,damage:1.6,actionDurationMs:365,recipeId:"forge-mithril-pickaxe",icon:"/assets/tools/tool-mithril-pickaxe.webp",trueArtifactChance:.001,description:"A lighter, faster traditional pickaxe."},
+  {id:"dark-iron-pickaxe",name:"Dark Iron Pickaxe",category:"MINING TOOL",tier:4,mode:"manual",inputMode:"click",holdToMine:false,continuousMining:false,damage:2,actionDurationMs:340,recipeId:"forge-dark-iron-pickaxe",icon:"/assets/tools/tool-dark-iron-pickaxe.webp",trueArtifactChance:.0015,description:"The final major traditional mining tool."},
+  {id:"felsteel-jackhammer",name:"Felsteel Jackhammer",category:"MINING TOOL",tier:5,mode:"continuous",inputMode:"hold",holdToMine:true,continuousMining:true,damage:1,actionDurationMs:430,intervalMs:430,recipeId:"forge-felsteel-jackhammer",icon:"/assets/tools/tool-felsteel-jackhammer.webp",trueArtifactChance:.002,description:"Hold input to repeat normal strikes. Every excavation remains an independent roll."},
+  {id:"khorium-drill",name:"Khorium Drill",category:"MINING TOOL",tier:6,mode:"continuous",inputMode:"hold",holdToMine:true,continuousMining:true,damage:1.35,actionDurationMs:300,intervalMs:300,recipeId:"forge-khorium-drill",icon:"/assets/tools/tool-khorium-drill.webp",trueArtifactChance:.003,description:"The first serious continuous industrial drill."},
 ];
 
 export const forgeRecipes: ForgeRecipe[] = [
@@ -54,7 +56,9 @@ export const forgeRecipes: ForgeRecipe[] = [
   {id:"forge-khorium-drill",resultingItemId:"khorium-drill",inputs:[{id:"khorium-alloy",quantity:6},{id:"felsteel",quantity:2}],category:"MINING TOOL",unlock:{mine:"northrend",tool:"felsteel-jackhammer"}},
 ];
 
-export const CANONICAL_EXCAVATION_PROBABILITIES = Object.freeze({emptyDig:0.20,trueArtifact:0.0005,miss:0.05,critical:0.05});
+export const MAX_TRUE_ARTIFACT_CHANCE = 0.01;
+export const CANONICAL_EXCAVATION_PROBABILITIES = Object.freeze({emptyDig:0.20,miss:0.05,critical:0.05});
+export const equippedTrueArtifactChance=(tool:ForgedItem)=>Math.min(MAX_TRUE_ARTIFACT_CHANCE,Math.max(0,tool.trueArtifactChance));
 
 export const canAfford=(inventory:Record<string,number>,inputs:Ingredient[])=>inputs.every(i=>(inventory[i.id]||0)>=i.quantity);
 export const spend=(inventory:Record<string,number>,inputs:Ingredient[])=>inputs.reduce((next,i)=>({...next,[i.id]:(next[i.id]||0)-i.quantity}),{...inventory});

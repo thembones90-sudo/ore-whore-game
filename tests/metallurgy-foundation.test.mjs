@@ -12,11 +12,14 @@ test("metallurgy foundation contains the canonical initial pipeline without coal
   assert.doesNotMatch(data,/steel-pickaxe/);
 });
 
-test("tools reuse immutable canonical excavation probabilities",()=>{
-  assert.match(data,/emptyDig:0\.20,trueArtifact:0\.0005,miss:0\.05,critical:0\.05/);
-  assert.match(game,/CANONICAL_EXCAVATION_PROBABILITIES\.trueArtifact/);
+test("equipped tools own a data-driven TRUE Artifact curve capped at one percent",()=>{
+  assert.match(data,/MAX_TRUE_ARTIFACT_CHANCE = 0\.01/);
+  for(const chance of [".0005",".0006",".0008",".001",".0015",".002",".003"])assert.ok(data.includes(`trueArtifactChance:${chance}`));
+  assert.match(data,/equippedTrueArtifactChance=.*Math\.min\(MAX_TRUE_ARTIFACT_CHANCE/);
+  assert.match(game,/equippedTrueArtifactChance\(equippedMiningTool\(save\)\)/);
   assert.match(game,/CANONICAL_EXCAVATION_PROBABILITIES\.emptyDig/);
-  assert.doesNotMatch(data,/artifact.*(?:bonus|boost|modifier)/i);
+  assert.doesNotMatch(game,/const TRUE_CHANCE/);
+  assert.doesNotMatch(game,/ownedTools.*trueArtifactChance/);
 });
 
 test("save migration preserves cumulative ores while adding spendable inventories and tool ownership",()=>{
