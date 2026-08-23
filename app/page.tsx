@@ -660,14 +660,31 @@ function TrueReveal({data,reducedMotion,onContinue}:{data:{artifact:TrueArtifact
   </div>;
 }
 
+function TrueArtifactInspection({artifact,count,first,onClose}:{artifact:TrueArtifact;count:number;first?:number;onClose:()=>void}){
+  useEffect(()=>{const close=(event:KeyboardEvent)=>{if(event.key==="Escape")onClose()};addEventListener("keydown",close);return()=>removeEventListener("keydown",close)},[onClose]);
+  return <div className={`true-inspection theme-${artifact.theme||"shadow"}`} role="dialog" aria-modal="true" aria-label={`${artifact.name} archive entry`}>
+    <section className="true-inspection-card">
+      <button className="true-inspection-close" onClick={onClose} aria-label="Close artefact inspection">×</button>
+      <p className="true-inspection-kicker">TRUE ARTEFACT · VERIFIED ARCHIVE ENTRY</p>
+      <h2>{artifact.name}</h2>
+      <TrueArtifactArt artifact={artifact}/>
+      {artifact.instruction&&<p className="true-inspection-instruction">{artifact.instruction}</p>}
+      <p className="true-inspection-lore">{artifact.lore}</p>
+      <div className="true-inspection-peon"><small>PEON</small><p>&ldquo;{artifact.peonBark}&rdquo;</p></div>
+      <footer><span>ARCHIVED ×{count}</span>{first!==undefined&&<small>FIRST DISCOVERED AFTER {first.toLocaleString()} DIGS</small>}</footer>
+    </section>
+  </div>;
+}
+
 function TrueArchive({save}:{save:Save}){
+  const [selected,setSelected]=useState<TrueArtifact|null>(null);
   const owned=trueArtifactPool.filter(a=>save.trueArtifacts[a.id]);
   const totalFound=Object.values(save.trueArtifacts).reduce((s,n)=>s+n,0);
   const tool=equippedMiningTool(save),trueChance=equippedTrueArtifactChance(tool);
-  return <section className="page true-archive-page">
+  return <><section className="page true-archive-page">
     <div className="page-head"><div><p className="eyebrow">NOT GEOLOGY. SOMETHING ELSE.</p><h2>TRUE <i>ARTEFACTS</i></h2></div><div className="completion"><span>ARTEFACTS FOUND</span><strong>{owned.length}<small> / {trueArtifactPool.length}</small></strong></div></div>
     <p className="true-archive-intro">Common through Legendary belongs to the mountain. These do not. Each is independently possible on any completed excavation. Equipped tool: <strong>{tool.name}</strong>. Current chance: <strong>{(trueChance*100).toFixed(2)}%</strong> · approximately 1 in {Math.round(1/trueChance).toLocaleString()}. No pity system. No stacking.{totalFound?` Total anomalies logged: ${totalFound}.`:""}</p>
-    <div className="true-grid">{trueArtifactPool.map(a=>{const count=save.trueArtifacts[a.id]||0,first=save.trueFirst[a.id];return <article key={a.id} className={`${count?"found":"locked"}${a.ultimate?" ultimate":""}`}>
+    <div className="true-grid">{trueArtifactPool.map(a=>{const count=save.trueArtifacts[a.id]||0,first=save.trueFirst[a.id];return <article key={a.id} className={`${count?"found inspectable":"locked"}${a.ultimate?" ultimate":""}`}>
       <TrueArtifactArt artifact={a} locked={!count}/>
       {count&&a.ultimate&&<strong className="true-ultimate-label">ULTIMATE TRUE ARTIFACT</strong>}
       <h3>{count?a.name:"???"}</h3>
@@ -675,8 +692,9 @@ function TrueArchive({save}:{save:Save}){
       {count&&a.ultimate&&<div className="true-issued"><span>STATUS: ISSUED</span><strong>HOLDER: YOU</strong></div>}
       {count&&a.instruction&&<p className="true-archive-instruction">{a.instruction}</p>}
       <footer>{count?<><span>FOUND ×{count}</span>{first!==undefined&&<small>FOUND AFTER {first.toLocaleString()} DIGS</small>}</>:<span>{a.ultimate?"STATUS: NOT ISSUED":"NOT DISCOVERED"}</span>}</footer>
+      {count>0&&<button className="true-card-inspect" onClick={()=>setSelected(a)} aria-label={`View ${a.name}`}/>}
     </article>})}</div>
-  </section>;
+  </section>{selected&&<TrueArtifactInspection artifact={selected} count={save.trueArtifacts[selected.id]||0} first={save.trueFirst[selected.id]} onClose={()=>setSelected(null)}/>}</>;
 }
 
 function Records({ save, onReset, session }: { save: Save; onReset: () => void; session: {digs:number;misses:number;veins:number;newSpecimens:number;drought:number;longestDrought:number} }) {
