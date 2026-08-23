@@ -11,3 +11,11 @@ test("TRUE Artefacts require a concealed twenty-times-health excavation before r
   assert.match(page, /CLASSIFICATION WITHHELD/);
   assert.match(page, /20×<small>RESISTANCE/);
 });
+
+test("active TRUE Artefact encounters persist and restore without granting ownership early", () => {
+  assert.match(page, /activeTrueEncounter:ActiveTrueEncounter\|null/);
+  assert.match(page, /setSave\(s=>\(\{\.\.\.s,activeTrueEncounter\}\)\)/);
+  assert.match(page, /activeTrueEncounter:s\.activeTrueEncounter\?\{\.\.\.s\.activeTrueEncounter,hp:hit\}:null/);
+  assert.match(page, /if\(restored\.activeTrueEncounter\)/);
+  assert.match(page, /activeTrueEncounter:null,lastDigAt/);
+});
