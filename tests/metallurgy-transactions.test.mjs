@@ -85,3 +85,10 @@ test("migration is schema-versioned and idempotent by construction",()=>{
   assert.match(game,/old\.oreResources[\s\S]*?old\.rawResources/);assert.match(game,/old\.mineralResources[\s\S]*?mineralCounts/);assert.match(game,/old\.processedResources[\s\S]*?old\.processedMaterials/);
   assert.match(game,/toolTier=Math\.max/);assert.match(game,/schema:15/);
 });
+
+test("Titanium discoveries use the canonical IDE TITTY callout without renaming the ore ID",()=>{
+  assert.match(game,/ore\.id==="titanium"\?"IDE TITTY":ore\.name/);
+  assert.match(game,/id: "titanium", name: "Titanium Ore"/);
+  assert.match(game,/discoveryOreName\(found\.ore\)/);
+  assert.match(game,/discoveryOreName\(duplicateNotice\.ore\)/);
+});
