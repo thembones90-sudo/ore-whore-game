@@ -1,0 +1,28 @@
+/* v0.6.0 — true 1:1 cursor movement with the pick point as the hotspot. */
+@media(pointer:fine){
+  .rock .pickaxe{
+    translate:-1% -17%!important;
+    transform:rotate(-34deg) scale(1.03)!important;
+    transform-origin:67px 126px!important;
+    transition:none!important;
+  }
+  .rock.pick-following:not(.hit) .pickaxe{transform:rotate(-34deg) scale(1.03)!important}
+  .rock.hit .pickaxe{left:var(--hit-x)!important;top:var(--hit-y)!important}
+}
+.rock.hit .pickaxe{animation:peonStrikeDirect .43s cubic-bezier(.2,.72,.23,1)!important}
+@keyframes peonStrikeDirect{
+  0%{transform:rotate(-34deg) scale(1.03);translate:calc(-1% + 54px) calc(-17% - 58px)}
+  18%{transform:rotate(18deg) scale(1.05);translate:calc(-1% + 66px) calc(-17% - 69px)}
+  48%{transform:rotate(-41deg) scale(1.09);translate:-1% -17%}
+  57%{transform:rotate(-37deg) scale(.98);translate:calc(-1% + 4px) calc(-17% + 4px)}
+  76%{transform:rotate(-29deg) scale(1.02);translate:calc(-1% + 9px) calc(-17% - 7px)}
+  100%{transform:rotate(-34deg) scale(1.03);translate:-1% -17%}
+}
+.rock.hit-miss .pickaxe{animation:peonGlanceDirect .43s ease-out!important}
+@keyframes peonGlanceDirect{
+  0%{transform:rotate(-34deg) scale(1.03);translate:calc(-1% + 48px) calc(-17% - 52px)}
+  42%{transform:rotate(-28deg) scale(1.05);translate:calc(-1% + 8px) calc(-17% + 3px)}
+  62%{transform:rotate(-8deg) scale(.98);translate:calc(-1% + 31px) calc(-17% + 10px)}
+  100%{transform:rotate(-34deg) scale(1.03);translate:-1% -17%}
+}
+.reduced-shake .rock.hit .pickaxe{animation:peonSwingSoftDirect .18s ease-out!important}@keyframes peonSwingSoftDirect{50%{transform:rotate(-31deg) scale(1.03)}}

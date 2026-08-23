@@ -259,9 +259,6 @@ export default function Home() {
   const perfectIntervalRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
   const hitFeedbackTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const collapseTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const pickFollowFrame=useRef<number|null>(null);
-  const pickPosition=useRef({x:50,y:48});
-  const pickTarget=useRef({x:50,y:48});
   const fractureId = useRef(0);
   const duplicateNoticeId = useRef(0);
   const emptyNoticeId = useRef(0);
@@ -461,9 +458,9 @@ export default function Home() {
     }
   };
 
-  const strikeAtPointer=(event:React.MouseEvent<HTMLButtonElement>)=>{const rect=event.currentTarget.getBoundingClientRect();strike({x:Math.max(4,Math.min(96,(event.clientX-rect.left)/rect.width*100)),y:Math.max(5,Math.min(95,(event.clientY-rect.top)/rect.height*100))})};
-  const followPointer=(event:React.PointerEvent<HTMLButtonElement>)=>{if(event.pointerType!=="mouse")return;const rock=event.currentTarget,rect=rock.getBoundingClientRect();pickTarget.current={x:Math.max(4,Math.min(96,(event.clientX-rect.left)/rect.width*100)),y:Math.max(8,Math.min(94,(event.clientY-rect.top)/rect.height*100))};rock.classList.add("pick-following");if(pickFollowFrame.current!==null)return;const easePick=()=>{const current=pickPosition.current,target=pickTarget.current,dx=target.x-current.x,dy=target.y-current.y;current.x+=dx*.24;current.y+=dy*.24;rock.style.setProperty("--pick-x",`${current.x}%`);rock.style.setProperty("--pick-y",`${current.y}%`);rock.style.setProperty("--pick-lean",`${Math.max(-8,Math.min(8,dx*.35))}deg`);if(rock.classList.contains("pick-following")&&(Math.abs(dx)>.025||Math.abs(dy)>.025))pickFollowFrame.current=requestAnimationFrame(easePick);else{rock.style.setProperty("--pick-lean","0deg");pickFollowFrame.current=null}};pickFollowFrame.current=requestAnimationFrame(easePick)};
-  const stopFollowing=(event:React.PointerEvent<HTMLButtonElement>)=>{event.currentTarget.classList.remove("pick-following");event.currentTarget.style.removeProperty("--pick-x");event.currentTarget.style.removeProperty("--pick-y");event.currentTarget.style.removeProperty("--pick-lean");if(pickFollowFrame.current!==null)cancelAnimationFrame(pickFollowFrame.current);pickFollowFrame.current=null};
+  const strikeAtPointer=(event:React.MouseEvent<HTMLButtonElement>)=>{const rect=event.currentTarget.getBoundingClientRect();strike({x:Math.max(1,Math.min(99,(event.clientX-rect.left)/rect.width*100)),y:Math.max(2,Math.min(98,(event.clientY-rect.top)/rect.height*100))})};
+  const followPointer=(event:React.PointerEvent<HTMLButtonElement>)=>{if(event.pointerType!=="mouse")return;const rock=event.currentTarget,rect=rock.getBoundingClientRect(),x=Math.max(1,Math.min(99,(event.clientX-rect.left)/rect.width*100)),y=Math.max(2,Math.min(98,(event.clientY-rect.top)/rect.height*100));rock.style.setProperty("--pick-x",`${x}%`);rock.style.setProperty("--pick-y",`${y}%`);rock.classList.add("pick-following")};
+  const stopFollowing=(event:React.PointerEvent<HTMLButtonElement>)=>{event.currentTarget.classList.remove("pick-following");event.currentTarget.style.removeProperty("--pick-x");event.currentTarget.style.removeProperty("--pick-y")};
 
   const playImpact=(kind:"rock"|"clank"|"crack"|"miss"|"perfect"|"crit")=>{if(save.settings.master<=0||save.settings.sfx<=0)return;try{const C=window.AudioContext;const c=new C(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);const base=kind==="clank"?720:kind==="crack"?145:kind==="perfect"?980:kind==="crit"?520:kind==="miss"?60:82+Math.random()*36;o.type=kind==="clank"?"triangle":kind==="perfect"||kind==="miss"?"sine":"square";o.frequency.setValueAtTime(base,c.currentTime);o.frequency.exponentialRampToValueAtTime(kind==="clank"?340:kind==="perfect"?1400:kind==="crit"?200:kind==="miss"?40:45,c.currentTime+.09);g.gain.setValueAtTime((kind==="clank"?.18:kind==="perfect"?.22:kind==="crit"?.16:kind==="miss"?.06:.08)*save.settings.master*save.settings.sfx,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.12);o.start();o.stop(c.currentTime+.13);}catch{/* AudioContext unavailable or blocked; fail silently */}};
 
