@@ -22,6 +22,13 @@ test("equipped tools own a data-driven TRUE Artifact curve capped at one percent
   assert.doesNotMatch(game,/ownedTools.*trueArtifactChance/);
 });
 
+test("Peon Technology Tree uses canonical display names without changing stable early IDs",()=>{
+  for(const name of ["ROCK BONKER","BRONZE BONKER","BIG PICK","SHINY BONKER","ANGRY PICK","LOUD BONKER","SPINNY DIGGER","BIGGER SPINNY DIGGER","ROCK EATER","MOUNTAIN HURTER","MOUNTAIN FUCKER"])assert.ok(data.includes(`name:"${name}"`));
+  for(const technical of ["Rusty Pickaxe","Mithrilsteel Pickaxe","Darksteel Pickaxe","Felsteel Jackhammer","Khorium Rotary Drill","Ultimate Mining Machine"])assert.ok(data.includes(`technicalName:"${technical}"`));
+  assert.match(data,/id:"ultimate-machine"[\s\S]*?planned:true[\s\S]*?trueArtifactChance:\.01/);
+  assert.doesNotMatch(data,/resultingItemId:"(?:advanced-drill|advanced-excavator|endgame-machine|ultimate-machine)"/);
+});
+
 test("save migration preserves cumulative ores while adding spendable inventories and tool ownership",()=>{
   assert.match(game,/rawResources=old\.rawResources/);
   assert.match(game,/processedMaterials:old\.processedMaterials\|\|\{\}/);
