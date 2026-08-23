@@ -37,3 +37,14 @@
   100%{opacity:.3}
 }
 .reduced-motion .perfect-ring.ready{animation:none;opacity:.35}
+
+/* Persistent five-stage mine depletion, driven by each biome's extraction quota. */
+.mine-depletion{position:absolute;inset:0;z-index:5;overflow:hidden;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .7s ease,filter .7s ease;background:radial-gradient(ellipse at 50% 50%,#020302ee 0 12%,#060807b8 28%,transparent 55%)}
+.mine-depletion:before{content:"";position:absolute;inset:8% 10% 9%;border-radius:45% 52% 43% 48%;opacity:0;background:repeating-conic-gradient(from 8deg at 50% 48%,transparent 0 11deg,#020302 12deg 12.8deg,transparent 13.5deg 31deg);filter:drop-shadow(0 2px 1px #000);transform:scale(.58);transition:opacity .7s ease,transform .7s ease}
+.mine-depletion:after{content:"";position:absolute;left:3%;right:3%;bottom:-8%;height:34%;opacity:0;background:conic-gradient(from 32deg at 8% 80%,#171b18 0 17deg,transparent 18deg 360deg),conic-gradient(from 14deg at 22% 76%,#272c28 0 24deg,transparent 25deg 360deg),conic-gradient(from 55deg at 38% 87%,#101310 0 20deg,transparent 21deg 360deg),conic-gradient(from 25deg at 61% 79%,#242925 0 26deg,transparent 27deg 360deg),conic-gradient(from 42deg at 78% 86%,#121512 0 19deg,transparent 20deg 360deg),conic-gradient(from 8deg at 93% 73%,#292e2a 0 22deg,transparent 23deg 360deg);filter:drop-shadow(0 -8px 10px #000);transform:translateY(38%);transition:opacity .7s ease,transform .7s ease}
+.depletion-1 .mine-depletion{opacity:.18}.depletion-1 .mine-depletion:before{opacity:.25;transform:scale(.72)}
+.depletion-2 .mine-depletion{opacity:.34}.depletion-2 .mine-depletion:before{opacity:.48;transform:scale(.86)}.depletion-2 .mine-depletion:after{opacity:.45;transform:translateY(24%)}
+.depletion-3 .mine-depletion{opacity:.58;filter:saturate(.8)}.depletion-3 .mine-depletion:before{opacity:.72;transform:scale(1)}.depletion-3 .mine-depletion:after{opacity:.7;transform:translateY(11%)}
+.depletion-4 .mine-depletion{opacity:.82;filter:saturate(.55) contrast(1.12);background:radial-gradient(ellipse at 50% 48%,#010201f5 0 28%,#050706e8 46%,transparent 72%)}.depletion-4 .mine-depletion:before{opacity:.88;transform:scale(1.12)}.depletion-4 .mine-depletion:after{opacity:.92;transform:translateY(0)}
+.depletion-4{box-shadow:inset 0 0 110px #000,inset 0 -80px 100px #000,0 38px 55px #000d,0 0 38px color-mix(in srgb,var(--biome-accent) 10%,transparent)!important}
+.stage-ore .mine-depletion,.stage-artifact .mine-depletion{opacity:.22}.reduced-motion .mine-depletion,.reduced-motion .mine-depletion:before,.reduced-motion .mine-depletion:after{transition:none}
