@@ -249,6 +249,7 @@ export default function Home() {
   const perfectPhase = useState<{current:number}>(() => ({current: Date.now()}))[0];
   const perfectIntervalRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
   const hitFeedbackTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const spaceHeld = useRef(false);
   const sessionDigs = useRef(0);
   const [sessionDigsCount,setSessionDigsCount]=useState(0);
   const [sessionMisses,setSessionMisses]=useState(0);
@@ -424,10 +425,18 @@ export default function Home() {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.code === "Space" && tab === "mine" && !found && !emptyFind && !trueFind) { event.preventDefault(); strike(); }
+      if(event.code!=="Space")return;
+      if(tab==="mine")event.preventDefault();
+      if(event.repeat||spaceHeld.current)return;
+      spaceHeld.current=true;
+      if(tab === "mine" && !found && !emptyFind && !trueFind)strike();
     };
+    const onKeyUp=(event:KeyboardEvent)=>{if(event.code==="Space")spaceHeld.current=false};
+    const releaseSpace=()=>{spaceHeld.current=false};
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("keyup",onKeyUp);
+    window.addEventListener("blur",releaseSpace);
+    return () => {window.removeEventListener("keydown", onKey);window.removeEventListener("keyup",onKeyUp);window.removeEventListener("blur",releaseSpace)};
   });
 
   const continueMine = () => { const hp=10+Math.floor(rng.current()*6); setFound(null); setEmptyFind(false); setPendingOre(null); setStage("tunnel"); setMaxHp(hp); setRockHp(hp); track("mine_started",{attempt:save.digs+1,biome:save.biome}); };
