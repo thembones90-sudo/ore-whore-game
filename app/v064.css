@@ -1,0 +1,9 @@
+/* v0.6.4 — artwork and labels share one three-column reveal geometry. */
+.reveal-card .combo-art,.reveal-card .names{display:grid!important;grid-template-columns:minmax(0,1fr) 80px minmax(0,1fr)!important;width:100%;align-items:center}
+.reveal-card .combo-art{gap:0!important}
+.reveal-card .combo-art .ore-sprite-reveal{grid-column:1;justify-self:center}
+.reveal-card .combo-art>b{grid-column:2;justify-self:center;margin:0}
+.reveal-card .combo-art .mineral-sprite-reveal{grid-column:3;justify-self:center}
+.reveal-card .names>div{min-width:0;text-align:center}.reveal-card .names>div:first-child{grid-column:1}.reveal-card .names>b{grid-column:2;justify-self:center;margin:0!important}.reveal-card .names>div:last-child{grid-column:3}
+.reveal-card .names strong{overflow-wrap:anywhere}
+@media(max-width:600px){.reveal-card .combo-art,.reveal-card .names{grid-template-columns:minmax(0,1fr) 42px minmax(0,1fr)!important}}
