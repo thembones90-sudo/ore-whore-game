@@ -9,6 +9,5 @@ test("TRUE Artefacts require a concealed twenty-times-health excavation before r
   assert.match(page, /setStage\("artifact"\)/);
   assert.match(page, /if\(stage==="artifact"\)\{completeTrueEncounter\(\);return;\}/);
   assert.match(page, /CLASSIFICATION WITHHELD/);
-  assert.match(page, /20× HEALTH/);
+  assert.match(page, /20×<small>RESISTANCE/);
 });
-
