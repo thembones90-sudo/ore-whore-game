@@ -1,0 +1,8 @@
+/* v0.5.8 — the Peon pick becomes the mouse pointer inside the mining face. */
+@media(pointer:fine){
+  .rock{cursor:none!important}
+  .rock .pickaxe{left:var(--pick-x,var(--hit-x))!important;top:var(--pick-y,var(--hit-y))!important;transition:left 45ms linear,top 45ms linear,filter .12s ease;will-change:left,top,transform}
+  .rock.pick-following .pickaxe{filter:drop-shadow(0 10px 5px #000e) drop-shadow(0 0 3px color-mix(in srgb,var(--biome-accent) 38%,transparent))!important}
+  .rock.hit .pickaxe{left:var(--hit-x)!important;top:var(--hit-y)!important;transition:none}
+}
+.reduced-motion .rock .pickaxe{transition:none!important}
