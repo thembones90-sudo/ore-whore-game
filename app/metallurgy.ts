@@ -10,7 +10,7 @@ export type MetallurgyRecipe = {
 export type ForgedItem = {
   id: string; name: string; technicalName:string; category: "MINING TOOL"; tier: number; planned?:boolean;
   mode: "manual" | "continuous"; inputMode:"click"|"hold"; holdToMine:boolean; continuousMining:boolean;
-  damage: number; actionDurationMs:number; intervalMs?: number; recipeId?:string; icon:string;
+  damage: number; actionDurationMs:number; trueArtifactChance:number; intervalMs?: number; recipeId?:string; icon:string;
   description: string;
 };
 export type ForgeRecipe = {
@@ -41,7 +41,8 @@ export const metallurgyRecipes: MetallurgyRecipe[] = [
   {id:"assembly-titanium",name:"Build Titanium Assembly",operation:"ALLOY",inputs:[{id:"titanium",quantity:1},{id:"silver",quantity:1},{id:"cobalt",quantity:1}],outputId:"titanium-assembly",outputQuantity:1,unlock:{mine:"northrend"}},
 ];
 
-export const forgedItems: ForgedItem[] = [
+export const TOOL_TRUE_ARTIFACT_CHANCES = [0.0005,0.0006,0.0008,0.001,0.0015,0.002,0.003,0.004,0.005,0.0075,0.01] as const;
+export const forgedItems: ForgedItem[] = ([
   {id:"rusty-pickaxe",name:"ROCK BONKER",technicalName:"Peon Pickaxe",category:"MINING TOOL",tier:0,mode:"manual",inputMode:"click",holdToMine:false,continuousMining:false,damage:1,actionDurationMs:430,icon:"/assets/tools/tool-rock-bonker.webp",description:"Wood, leather, ugly iron, and violence. The absolute bottom of the ladder."},
   {id:"bronze-pickaxe",name:"BRONZE BONKER",technicalName:"Bronze Pickaxe",category:"MINING TOOL",tier:1,mode:"manual",inputMode:"click",holdToMine:false,continuousMining:false,damage:1.15,actionDurationMs:410,recipeId:"forge-bronze-pickaxe",icon:"/assets/tools/tool-bronze-pickaxe.webp",description:"A modestly faster manual tool and your introduction to alloying."},
   {id:"iron-pickaxe",name:"BIG PICK",technicalName:"Iron Pickaxe",category:"MINING TOOL",tier:2,mode:"manual",inputMode:"click",holdToMine:false,continuousMining:false,damage:1.35,actionDurationMs:390,recipeId:"forge-iron-pickaxe",icon:"/assets/tools/tool-iron-pickaxe.webp",description:"Reliable refined iron. The rock has begun to notice."},
@@ -53,7 +54,7 @@ export const forgedItems: ForgedItem[] = [
   {id:"advanced-excavator",name:"ROCK EATER",technicalName:"Advanced Excavator",category:"MINING TOOL",tier:8,mode:"continuous",inputMode:"hold",holdToMine:true,continuousMining:true,damage:1.75,actionDurationMs:220,intervalMs:220,recipeId:"forge-advanced-excavator",icon:"/assets/tools/tool-advanced-excavator.webp",description:"An industrial cutting head built to consume the wall continuously."},
   {id:"endgame-machine",name:"MOUNTAIN HURTER",technicalName:"Endgame Mining Machine",category:"MINING TOOL",tier:9,mode:"continuous",inputMode:"hold",holdToMine:true,continuousMining:true,damage:2,actionDurationMs:180,intervalMs:180,recipeId:"forge-endgame-machine",icon:"/assets/tools/tool-endgame-machine.webp",description:"Every proven metal in the workshop, weaponized against geography."},
   {id:"ultimate-machine",name:"MOUNTAIN FUCKER",technicalName:"Ultimate Mining Machine",category:"MINING TOOL",tier:10,mode:"continuous",inputMode:"hold",holdToMine:true,continuousMining:true,damage:2.5,actionDurationMs:150,intervalMs:150,recipeId:"forge-ultimate-machine",icon:"/assets/tools/tool-ultimate-machine.webp",description:"Ultimate technology. The Peon has exhausted his engineering vocabulary."},
-];
+] as Omit<ForgedItem,"trueArtifactChance">[]).map(tool=>({...tool,trueArtifactChance:TOOL_TRUE_ARTIFACT_CHANCES[tool.tier]}));
 
 export const forgeRecipes: ForgeRecipe[] = [
   {id:"forge-bronze-pickaxe",resultingItemId:"bronze-pickaxe",processedInputs:[{id:"bronze",quantity:3}],mineralInputs:[{id:"malachite",quantity:2},{id:"tigerseye",quantity:1}],category:"MINING TOOL",unlock:{tool:"rusty-pickaxe"}},

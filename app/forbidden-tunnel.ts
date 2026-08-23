@@ -33,7 +33,7 @@ export const selectSecondPath=(state:ForbiddenTunnelState,direction:SecondDirect
   const resolution=state.secondAssignments[direction];
   return {tunnel:{...state,chamber:"resolved",secondSelection:direction,resolution},modifier:modifierFor(resolution)};
 };
-export const artifactChanceForDig=(modifier:ArtifactModifier|null)=>modifier&&!modifier.consumed?modifier.chance:ORDINARY_TRUE_ARTIFACT_CHANCE;
+export const artifactChanceForDig=(modifier:ArtifactModifier|null,equippedToolChance=ORDINARY_TRUE_ARTIFACT_CHANCE)=>modifier&&!modifier.consumed?modifier.chance:Math.min(.01,Math.max(ORDINARY_TRUE_ARTIFACT_CHANCE,equippedToolChance));
 export const markModifierRolled=(modifier:ArtifactModifier|null)=>modifier&&!modifier.consumed?{...modifier,consumed:true}:modifier;
 export const canTriggerForbiddenTunnel=(state:{forbiddenTunnel:ForbiddenTunnelState|null;pendingArtifactModifier:ArtifactModifier|null;activeTrueEncounter:unknown;veinDigsRemaining:number},cleanTransition:boolean)=>cleanTransition&&!state.forbiddenTunnel&&!state.pendingArtifactModifier&&!state.activeTrueEncounter&&state.veinDigsRemaining<=0;
 export const sanitizeForbiddenTunnel=(value:unknown):ForbiddenTunnelState|null=>{

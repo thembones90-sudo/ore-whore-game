@@ -13,12 +13,11 @@ test("metallurgy foundation contains the canonical initial pipeline without coal
   assert.doesNotMatch(data,/steel-pickaxe/);
 });
 
-test("every technology shares one ordinary TRUE Artifact baseline",()=>{
+test("equipped technology supplies the ordinary TRUE Artifact chance",()=>{
   assert.match(tunnel,/ORDINARY_TRUE_ARTIFACT_CHANCE=0\.0005/);
-  assert.doesNotMatch(data,/trueArtifactChance|MAX_TRUE_ARTIFACT_CHANCE|equippedTrueArtifactChance/);
-  assert.match(game,/artifactChanceForDig\(modifier\)/);
+  assert.match(data,/TOOL_TRUE_ARTIFACT_CHANCES = \[0\.0005,0\.0006,0\.0008,0\.001,0\.0015,0\.002,0\.003,0\.004,0\.005,0\.0075,0\.01\]/);
+  assert.match(game,/artifactChanceForDig\(modifier,equippedMiningTool\(save\)\.trueArtifactChance\)/);
   assert.match(game,/CANONICAL_EXCAVATION_PROBABILITIES\.emptyDig/);
-  assert.doesNotMatch(game,/equippedTrueArtifactChance|TRUE chance .*tool/);
 });
 
 test("Peon Technology Tree uses canonical display names without changing stable early IDs",()=>{
@@ -27,7 +26,7 @@ test("Peon Technology Tree uses canonical display names without changing stable 
   assert.match(data,/id:"rusty-pickaxe"[\s\S]*?icon:"\/assets\/tools\/tool-rock-bonker\.webp"/);
   assert.match(game,/canonical-rock-bonker/);
   assert.match(data,/id:"ultimate-machine"[\s\S]*?recipeId:"forge-ultimate-machine"/);
-  assert.doesNotMatch(data,/id:"ultimate-machine"[^\n]*trueArtifactChance/);
+  assert.match(data,/trueArtifactChance:TOOL_TRUE_ARTIFACT_CHANCES\[tool\.tier\]/);
   assert.doesNotMatch(data,/planned:true/);
   for(const id of ["forge-advanced-drill","forge-advanced-excavator","forge-endgame-machine","forge-ultimate-machine"])assert.ok(data.includes(`id:"${id}"`));
 });
