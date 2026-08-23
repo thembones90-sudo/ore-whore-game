@@ -8,7 +8,7 @@ export type GameplayEvent =
   | "VEIN_EXPOSED" | "VEIN_EXPIRED"
   | "TOUGH_ORE_EXPOSED"
   | "LAST_SPECIMEN_25" | "LAST_SPECIMEN_60" | "LAST_SPECIMEN_100" | "LAST_SPECIMEN_175"
-  | "TRUE_ARTIFACT_FOUND" | "MINE_COMPLETED";
+  | "TRUE_ARTIFACT_ENCOUNTER_STARTED" | "TRUE_ARTIFACT_FOUND" | "MINE_COMPLETED";
 
 export function emitGameplayEvent(event: GameplayEvent, context: Record<string, unknown> = {}) {
   if (typeof window === "undefined") return;
