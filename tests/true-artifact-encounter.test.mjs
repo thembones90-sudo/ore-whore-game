@@ -19,3 +19,7 @@ test("active TRUE Artefact encounters persist and restore without granting owner
   assert.match(page, /if\(restored\.activeTrueEncounter\)/);
   assert.match(page, /activeTrueEncounter:null,lastDigAt/);
 });
+
+test("R9 receives the canonical Peon tribute", () => {
+  assert.match(page, /peonBark:"Boss\.\.\. this not man\. This Ronaldo\. Peon take hat off\."/);
+});
