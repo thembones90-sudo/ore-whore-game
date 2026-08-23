@@ -536,7 +536,7 @@ export default function Home() {
         {stage === "ore" && pendingOre && <span className={`exposed-ore rarity-${pendingOre.rarity.toLowerCase()}`} style={{"--ore":pendingOre.color} as React.CSSProperties}><img className="ore-sprite ore-sprite-exposed" src={oreAsset(pendingOre.id)} alt=""/><strong>{pendingOre.name}</strong><small>{pendingOre.rarity.toUpperCase()}</small></span>}
         {stage === "artifact" && <span className="artifact-mass" aria-hidden="true"><i>?</i><strong>UNIDENTIFIED MASS</strong><small>CLASSIFICATION WITHHELD</small></span>}
         {impact && <span className="debris">{Array.from({length:8},(_,i)=><i key={i}/>)}</span>}
-        <span className="pickaxe" aria-hidden="true"><i className="pick-head"/><i className="pick-handle"/><i className="pick-grip"/></span>
+        <span className={`pickaxe ${save.equippedTool==="rusty-pickaxe"?"canonical-rock-bonker":""}`} aria-hidden="true">{save.equippedTool==="rusty-pickaxe"?<img src="/assets/tools/tool-rock-bonker.webp" alt=""/>:<><i className="pick-head"/><i className="pick-handle"/><i className="pick-grip"/></>}</span>
         {impact && <span className="impact-flash" aria-hidden="true"/>}
         {collapseBurst&&<span key={collapseBurst.id} className="collapse-rift" style={{"--collapse-x":`${collapseBurst.x}%`,"--collapse-y":`${collapseBurst.y}%`} as React.CSSProperties} aria-hidden="true"><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/></span>}
         {lastHitKind&&lastHitKind!=="miss"&&<span className="hit-callout" aria-hidden="true">{lastHitKind==="perfectCrit"?"PERFECT CRIT":lastHitKind==="perfect"?"PERFECT":lastHitKind==="crit"?"CRITICAL":"SOLID HIT"}</span>}
@@ -735,7 +735,7 @@ function Forge({save,setSave}:{save:Save;setSave:React.Dispatch<React.SetStateAc
   </section>
 }
 
-function ToolArt({tool}:{tool:(typeof forgedItems)[number]}){return <span className={`tool-art tool-art-${tool.tier} ${tool.mode}`} aria-label={`${tool.name} placeholder artwork`} role="img"><i/><b/><em/></span>}
+function ToolArt({tool}:{tool:(typeof forgedItems)[number]}){return <span className={`tool-art tool-art-${tool.tier} ${tool.mode} ${tool.id==="rusty-pickaxe"?"canonical-tool-art":""}`} aria-label={`${tool.name} artwork`} role="img">{tool.id==="rusty-pickaxe"?<img src={tool.icon} alt=""/>:<><i/><b/><em/></>}</span>}
 
 function More({save,setSave,onHelp}:{save:Save;setSave:React.Dispatch<React.SetStateAction<Save>>;onHelp:()=>void}){
  const download=(name:string,data:unknown)=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));a.download=name;a.click();URL.revokeObjectURL(a.href)};
