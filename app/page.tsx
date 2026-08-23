@@ -233,6 +233,8 @@ export default function Home() {
   const [pendingOre, setPendingOre] = useState<Item | null>(null);
   const [impact, setImpact] = useState<number | null>(null);
   const [hitPoint, setHitPoint] = useState({x:50,y:48});
+  const [fractures,setFractures]=useState<{id:number;x:number;y:number;power:number}[]>([]);
+  const [collapseBurst,setCollapseBurst]=useState<{id:number;x:number;y:number}|null>(null);
   const [found, setFound] = useState<{ ore: Item; mineral: Item; isNew: boolean; count: number } | null>(null);
   const [emptyNotice,setEmptyNotice]=useState<{id:number;result:string;insult:string}|null>(null);
   const [trueFind,setTrueFind]=useState<{artifact:TrueArtifact;digNumber:number}|null>(null);
@@ -256,6 +258,8 @@ export default function Home() {
   const perfectPhase = useState<{current:number}>(() => ({current: Date.now()}))[0];
   const perfectIntervalRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
   const hitFeedbackTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const collapseTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const fractureId = useRef(0);
   const duplicateNoticeId = useRef(0);
   const emptyNoticeId = useRef(0);
   const emptyDigStreak = useRef(0);
@@ -317,11 +321,12 @@ export default function Home() {
     return ids.filter(id => !next.achievements.includes(id));
   };
 
-  const continueMine = () => { const hp=10+Math.floor(rng.current()*6); setFound(null); setPendingOre(null); setStage("tunnel"); setMaxHp(hp); setRockHp(hp); track("mine_started",{attempt:save.digs+1,biome:save.biome}); };
+  const continueMine = () => { const hp=10+Math.floor(rng.current()*6); setFound(null); setPendingOre(null); setFractures([]); setStage("tunnel"); setMaxHp(hp); setRockHp(hp); track("mine_started",{attempt:save.digs+1,biome:save.biome}); };
 
   const strike = (point?:{x:number;y:number}) => {
     if (found||trueFind) return;
-    setHitPoint(point||{x:50,y:48});
+    const strikePoint=point||{x:50,y:48};
+    setHitPoint(strikePoint);
 
     // PERFECT CHECK — timing-skill, not RNG. Fixed metronome phase so the
     // window is a learnable rhythm. Never consumes a seeded RNG draw.
@@ -368,6 +373,8 @@ export default function Home() {
     }
 
     const hit = rockHp - damage;
+    setFractures(current=>[...current.slice(-11),{id:++fractureId.current,x:strikePoint.x,y:strikePoint.y,power:damage}]);
+    if(hit<=0){setCollapseBurst({id:fractureId.current,x:strikePoint.x,y:strikePoint.y});if(collapseTimer.current)clearTimeout(collapseTimer.current);collapseTimer.current=setTimeout(()=>setCollapseBurst(null),460)}
     // eslint-disable-next-line react-hooks/purity -- strike() only runs from click/keydown handlers, never during render.
     setImpact(Date.now());
     setTimeout(() => setImpact(null), 180);
@@ -387,6 +394,7 @@ export default function Home() {
       const ore = pick(ores,rng.current,weights);
       emptyDigStreak.current=0;
       playImpact(impactKind??"clank");
+      setFractures([]);
       setPendingOre(ore);
       setStage("ore");
       const oreHp = toughnessStrikes(ore.toughness ?? 1);
@@ -462,7 +470,7 @@ export default function Home() {
   });
 
   const unique = Object.keys(save.combos).length;
-  const reset = () => { if (confirm("Erase every discovery and return to the cold, uncaring rock?")) { setSave(blank); setFound(null); setPendingOre(null); setEmptyNotice(null); setStage("tunnel"); setMaxHp(12); setRockHp(12); sessionDigs.current=0; setSessionDigsCount(0); setSessionMisses(0); setSessionVeins(0); setSessionNew(0); setSessionDrought(0); setSessionLongestDrought(0); consecutiveMisses.current=0; emptyDigStreak.current=0; } };
+  const reset = () => { if (confirm("Erase every discovery and return to the cold, uncaring rock?")) { setSave(blank); setFound(null); setPendingOre(null); setEmptyNotice(null); setFractures([]); setCollapseBurst(null); setStage("tunnel"); setMaxHp(12); setRockHp(12); sessionDigs.current=0; setSessionDigsCount(0); setSessionMisses(0); setSessionVeins(0); setSessionNew(0); setSessionDrought(0); setSessionLongestDrought(0); consecutiveMisses.current=0; emptyDigStreak.current=0; } };
 
   return <main className={`${save.settings.reducedMotion?"reduced-motion":""} ${save.settings.reducedShake?"reduced-shake":""} ${save.settings.highContrast?"high-contrast":""} cosmetic-${save.equipped}`}>
     <header className="topbar">
@@ -487,6 +495,8 @@ export default function Home() {
       <div className="biomes volume-biomes" aria-label="Mine location">{biomeOrder.map((b,i)=>{const open=save.unlockedBiomes.includes(b),done=biomeQuotaProgress(save,b),previous=i?biomeOrder[i-1]:b,v=biomeVisuals[b];return <button key={b} disabled={!open} style={{"--card-accent":v.accent,"--card-secondary":v.secondary,"--card-bg":v.card} as React.CSSProperties} className={`mine-card biome-card-${b} ${save.biome===b?"chosen":""} ${open?"":"locked"}`} onClick={()=>{setSave(s=>({...s,biome:b}));track("biome_selected",{biome:b})}}><span>{open?biomeNames[b]:`🔒 ${biomeNames[b]}`}</span><small>{open?`${done}/${biomeQuotaTotal(b)} EXTRACTED · ${distributionLabel(b)}`:`COMPLETE ALL ${biomeNames[previous]} EXTRACTION QUOTAS · ${biomeQuotaProgress(save,previous)}/${biomeQuotaTotal(previous)}`}</small></button>})}</div>
       <button className={`rock ${impact ? "hit" : ""} ${stage === "ore" ? "ore-rock" : ""} damage-${Math.floor((1-rockHp/maxHp)*4)} ${rockHp===1?"final-hit":""} ${lastHitKind&&lastHitKind!=="normal"?`hit-${lastHitKind==="perfectCrit"?"perfect-crit":lastHitKind}`:""}`} style={{"--hit-x":`${hitPoint.x}%`,"--hit-y":`${hitPoint.y}%`} as React.CSSProperties} onClick={strikeAtPointer} aria-label={stage === "ore" ? "Crack the exposed ore deposit" : "Strike the rock wall"}>
         <span className="mine-atmosphere" aria-hidden="true"/>
+        <span className="damage-reveal" style={{"--subsurface":stage==="ore"&&pendingOre?pendingOre.color:biomeVisuals[save.biome].accent} as React.CSSProperties} aria-hidden="true"/>
+        <span className="fracture-field" aria-hidden="true">{fractures.map(f=><i key={f.id} className={`persistent-fracture fracture-power-${f.power}`} style={{"--fracture-x":`${f.x}%`,"--fracture-y":`${f.y}%`,"--fracture-turn":`${(f.id*47)%360}deg`} as React.CSSProperties}/>)}</span>
         <span className="impact-scar" aria-hidden="true"/>
         <span className="crack c1"/><span className="crack c2"/><span className="crack c3"/>
         <span className={`perfect-ring ${perfectReady?"ready":""}`} aria-hidden="true"/>
@@ -494,6 +504,7 @@ export default function Home() {
         {impact && <span className="debris">{Array.from({length:8},(_,i)=><i key={i}/>)}</span>}
         <span className="pickaxe" aria-hidden="true"><i className="pick-head"/><i className="pick-handle"/><i className="pick-grip"/></span>
         {impact && <span className="impact-flash" aria-hidden="true"/>}
+        {collapseBurst&&<span key={collapseBurst.id} className="collapse-rift" style={{"--collapse-x":`${collapseBurst.x}%`,"--collapse-y":`${collapseBurst.y}%`} as React.CSSProperties} aria-hidden="true"><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/></span>}
         {lastHitKind&&lastHitKind!=="normal"&&lastHitKind!=="miss"&&<span className="hit-callout" aria-hidden="true">{lastHitKind==="perfectCrit"?"PERFECT CRIT":lastHitKind==="perfect"?"PERFECT":"CRITICAL"}</span>}
         {missFlash && <span className="miss-bark" role="status">{missFlash}</span>}
       </button>
