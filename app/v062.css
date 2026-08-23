@@ -1,0 +1,27 @@
+/* v0.6.2 — TRUE ARTEFACTS: readable classified collection gallery. */
+.true-nav-btn{min-width:142px;color:#c68ee8!important}.true-nav-btn.active{color:#f0d9ff!important;border-color:#bd68ee!important;background:linear-gradient(180deg,transparent,#b85ce714)!important}
+.true-archive-page{max-width:1360px;padding-top:48px;background:radial-gradient(circle at 52% 18%,#26152c25,transparent 43%)}
+.true-archive-page .page-head{padding:0 6px 30px;border-bottom:1px solid #674178;align-items:center}
+.true-archive-page .page-head h2{font-size:clamp(50px,6vw,82px);letter-spacing:-5px}.true-archive-page .page-head h2 i{color:#c969f1;text-shadow:0 0 28px #ac47df30}
+.true-archive-page .eyebrow{font-size:11px;letter-spacing:4px;color:#b5a0bd}
+.true-archive-page .completion{min-width:180px;padding:17px 22px;text-align:left;border:1px solid #4c3257;border-left:4px solid #bd68ee;background:#141017}
+.true-archive-page .completion span{font-size:10px;color:#bba7c1}.true-archive-page .completion strong{font-size:40px;color:#c969f1}.true-archive-page .completion small{font-size:16px}
+.true-archive-intro{max-width:none!important;margin:24px 0 36px!important;padding:22px 26px;border:1px solid #3b2c41;border-left:4px solid #7f4c96;background:linear-gradient(90deg,#1b141f,#111312);font:17px/1.65 Georgia,serif!important;color:#c0afc5!important}
+.true-archive-intro::first-line{color:#e0d4e3}
+.true-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:18px!important}
+.true-grid article{position:relative;gap:13px!important;min-height:430px;padding:26px 24px 22px!important;border:1px solid #483650!important;background:linear-gradient(155deg,#1c151f,#100d12 68%)!important;box-shadow:inset 0 1px #ffffff08,0 18px 38px #0005;transition:border-color .2s,transform .2s,box-shadow .2s}
+.true-grid article::before{content:"CLASSIFIED";position:absolute;left:14px;top:13px;font:700 8px Arial;letter-spacing:2px;color:#755c7d}
+.true-grid article:hover{transform:translateY(-3px);border-color:#735184!important;box-shadow:inset 0 1px #ffffff0b,0 24px 46px #0008,0 0 26px #9d55be10}
+.true-grid article.locked{opacity:.82!important}.true-grid article.locked .true-art-slot{opacity:.78;filter:grayscale(1) contrast(1.18)!important}
+.true-grid .true-art-slot{width:210px;height:190px;margin-top:12px;border:1px solid #584361;border-radius:5px;background:radial-gradient(circle at 50% 42%,#302736,#08070a 72%);box-shadow:inset 0 0 42px #000,0 0 24px #a35ac317}
+.true-grid h3{font-size:18px!important;line-height:1.2;letter-spacing:1.4px!important;margin:2px 0 0!important;color:#eee6f0}
+.true-grid article.locked h3{font-size:22px!important;letter-spacing:5px!important;color:#a58cae}
+.true-grid p{min-height:58px!important;margin:0;font:italic 15px/1.48 Georgia,serif!important;color:#a997af!important}
+.true-grid footer{width:100%;margin-top:auto;padding-top:14px;border-top:1px solid #3a2b40;font-size:10px!important;letter-spacing:1.7px!important;color:#c969f1!important}
+.true-grid footer small{margin-top:3px;font-size:9px!important;color:#927e98!important}
+.true-grid article.found{border-color:#815096!important;background:radial-gradient(circle at 50% 18%,#3a204522,#120e15 70%)!important;box-shadow:inset 0 2px #c969f133,0 20px 44px #0007,0 0 30px #a64bd414}
+.true-grid article.found::before{content:"ARCHIVE ENTRY · VERIFIED";color:#c969f1}
+.true-grid article.ultimate.found{grid-column:span 2!important}.true-grid article.ultimate.found .true-art-slot{width:min(430px,100%);height:250px}
+@media(max-width:1020px){.true-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.true-archive-page{padding-left:22px;padding-right:22px}}
+@media(max-width:700px){.true-nav-btn{min-width:0}.true-archive-page .page-head{align-items:flex-start}.true-archive-page .completion{min-width:125px;padding:12px}.true-archive-page .page-head h2{font-size:43px;letter-spacing:-3px}.true-archive-intro{font-size:15px!important;padding:18px}.true-grid{grid-template-columns:1fr!important}.true-grid article{min-height:390px}.true-grid article.ultimate.found{grid-column:span 1!important}}
+@media(max-width:470px){.true-nav-btn{font-size:0!important;width:44px}.true-nav-btn::after{content:"TRUE";font-size:8px}.true-archive-page .page-head{display:block}.true-archive-page .completion{margin-top:18px}.true-grid .true-art-slot{width:180px;height:165px}}

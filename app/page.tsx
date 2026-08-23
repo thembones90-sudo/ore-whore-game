@@ -490,7 +490,7 @@ export default function Home() {
         <button className={tab === "wanted" ? "active" : ""} onClick={() => {setTab("wanted");track("missing_view_opened",{completion:unique/225});}}>WANTED</button>
         <button className={tab === "records" ? "active" : ""} onClick={() => setTab("records")}>RECORDS</button>
         <button className={tab === "more" ? "active" : ""} onClick={() => setTab("more")}>MORE</button>
-        <button className={`true-nav-btn ${tab === "true" ? "active" : ""}`} onClick={() => setTab("true")}>TRUE</button>
+        <button className={`true-nav-btn ${tab === "true" ? "active" : ""}`} onClick={() => setTab("true")}>TRUE ARTEFACTS</button>
       </nav>
       <div className="depth"><span>SPECIMEN DUST</span><strong>✦ {save.dust}</strong></div>
     </header>
@@ -644,7 +644,7 @@ function TrueArchive({save}:{save:Save}){
   const owned=trueArtifactPool.filter(a=>save.trueArtifacts[a.id]);
   const totalFound=Object.values(save.trueArtifacts).reduce((s,n)=>s+n,0);
   return <section className="page true-archive-page">
-    <div className="page-head"><div><p className="eyebrow">NOT GEOLOGY. SOMETHING ELSE.</p><h2>TRUE <i>ARCHIVE</i></h2></div><div className="completion"><span>ARTIFACTS FOUND</span><strong>{owned.length}<small> / {trueArtifactPool.length}</small></strong></div></div>
+    <div className="page-head"><div><p className="eyebrow">NOT GEOLOGY. SOMETHING ELSE.</p><h2>TRUE <i>ARTEFACTS</i></h2></div><div className="completion"><span>ARTEFACTS FOUND</span><strong>{owned.length}<small> / {trueArtifactPool.length}</small></strong></div></div>
     <p className="true-archive-intro">Common through Legendary belongs to the mountain. These do not. Each is independently possible on any dig, at any depth, regardless of mine, biome, streak, or luck. Odds: 1 in 2,000. No protection. No pattern.{totalFound?` Total anomalies logged: ${totalFound}.`:""}</p>
     <div className="true-grid">{trueArtifactPool.map(a=>{const count=save.trueArtifacts[a.id]||0,first=save.trueFirst[a.id];return <article key={a.id} className={`${count?"found":"locked"}${a.ultimate?" ultimate":""}`}>
       <TrueArtifactArt artifact={a} locked={!count}/>
