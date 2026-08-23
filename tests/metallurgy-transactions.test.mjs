@@ -77,6 +77,7 @@ test("UI separates lifetime history from stock, confirms transactions, and prese
   assert.match(game,/combos: \{ \.\.\.s\.combos/);assert.match(game,/ores: \{ \.\.\.s\.ores/);assert.match(game,/minerals: \{ \.\.\.s\.minerals/);
   assert.match(game,/className="craft-confirm-overlay"/);assert.match(game,/CONFIRM & CONSUME/);assert.match(game,/BUILD ALL ×/);assert.match(game,/transactionBusy/);
   assert.match(game,/BUILD ALL PREREQUISITES \+ FORGE/);assert.match(game,/SELECTED TECHNOLOGY PATH/);
+  assert.match(game,/EFFECTIVE TRUE ARTEFACT CHANCE/);assert.match(game,/artifactChanceForDig\(save\.pendingArtifactModifier\)/);
   assert.match(game,/Cosmetic model unchanged/);assert.doesNotMatch(game,/toolSkinId:tool\.id/);
 });
 
