@@ -247,6 +247,7 @@ export default function Home() {
   // as `rng` above.
   const perfectPhase = useState<{current:number}>(() => ({current: Date.now()}))[0];
   const perfectIntervalRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+  const hitFeedbackTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const sessionDigs = useRef(0);
   const [sessionDigsCount,setSessionDigsCount]=useState(0);
   const [sessionMisses,setSessionMisses]=useState(0);
@@ -326,7 +327,8 @@ export default function Home() {
       const line = MISS_LINES[Math.floor(Math.random() * MISS_LINES.length)];
       setMissFlash(line);
       setLastHitKind("miss");
-      setTimeout(() => { setMissFlash(null); setLastHitKind(null); }, 700);
+      if(hitFeedbackTimer.current)clearTimeout(hitFeedbackTimer.current);
+      hitFeedbackTimer.current=setTimeout(() => { setMissFlash(null); setLastHitKind(null); }, 1700);
       playImpact("miss");
       emitGameplayEvent("MISS", { stage, consecutive: consecutiveMisses.current });
       if (consecutiveMisses.current === 2) emitGameplayEvent("DOUBLE_MISS", { stage });
@@ -345,7 +347,8 @@ export default function Home() {
       else if (hitKind === "perfect") emitGameplayEvent("PERFECT_STRIKE", { stage });
       else emitGameplayEvent("CRITICAL_STRIKE", { stage });
       setLastHitKind(hitKind);
-      setTimeout(() => setLastHitKind(null), 320);
+      if(hitFeedbackTimer.current)clearTimeout(hitFeedbackTimer.current);
+      hitFeedbackTimer.current=setTimeout(() => setLastHitKind(null), 1500);
     }
 
     const hit = rockHp - damage;
