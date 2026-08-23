@@ -17,7 +17,7 @@ test("active TRUE Artefact encounters persist and restore without granting owner
   assert.match(page, /setSave\(s=>\(\{\.\.\.s,activeTrueEncounter\}\)\)/);
   assert.match(page, /activeTrueEncounter:s\.activeTrueEncounter\?\{\.\.\.s\.activeTrueEncounter,hp:hit\}:null/);
   assert.match(page, /if\(restored\.activeTrueEncounter\)/);
-  assert.match(page, /activeTrueEncounter:null,lastDigAt/);
+  assert.match(page, /activeTrueEncounter:null,pendingArtifactModifier:null,lastDigAt/);
 });
 
 test("R9 receives the canonical Peon tribute", () => {

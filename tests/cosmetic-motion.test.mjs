@@ -26,7 +26,7 @@ test("cosmetic effects are inert and do not create strikes",()=>{
 test("technology and model are shown as separate loadout concepts",()=>{
   assert.match(page,/TECHNOLOGY · GAMEPLAY/);
   assert.match(page,/MODEL · APPEARANCE/);
-  assert.match(page,/equippedTrueArtifactChance\(current\)/);
+  assert.doesNotMatch(page,/equippedTrueArtifactChance/);
   assert.doesNotMatch(skins,/trueArtifactChance|damage|actionDurationMs/);
 });
 

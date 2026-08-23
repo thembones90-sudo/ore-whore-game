@@ -1,4 +1,5 @@
 export const FORBIDDEN_TUNNEL_TRIGGER_CHANCE=0.01;
+export const ORDINARY_TRUE_ARTIFACT_CHANCE=0.0005;
 export const FIRST_DIRECTIONS=["left","middle","right"] as const;
 export const SECOND_DIRECTIONS=["left","right"] as const;
 export type FirstDirection=typeof FIRST_DIRECTIONS[number];
@@ -19,7 +20,7 @@ export const createForbiddenTunnel=(rng:()=>number,id:string):ForbiddenTunnelSta
   const outcomes=shuffled<FirstOutcome>(["x1","x2","x5"],rng);
   return {id,chamber:"first",firstAssignments:{left:outcomes[0],middle:outcomes[1],right:outcomes[2]}};
 };
-export const modifierFor=(resolution:ForbiddenTunnelState["resolution"]):ArtifactModifier|null=>resolution==="x1"?{chance:.0005,source:"forbidden-x1",consumed:false}:resolution==="x2"?{chance:.001,source:"forbidden-x2",consumed:false}:resolution==="sealed"?{chance:.0025,source:"forbidden-x5-sealed",consumed:false}:resolution==="deep"?{chance:.15,source:"forbidden-deep-way",consumed:false}:null;
+export const modifierFor=(resolution:ForbiddenTunnelState["resolution"]):ArtifactModifier|null=>resolution==="x1"?{chance:ORDINARY_TRUE_ARTIFACT_CHANCE,source:"forbidden-x1",consumed:false}:resolution==="x2"?{chance:.001,source:"forbidden-x2",consumed:false}:resolution==="sealed"?{chance:.0025,source:"forbidden-x5-sealed",consumed:false}:resolution==="deep"?{chance:.15,source:"forbidden-deep-way",consumed:false}:null;
 export const selectFirstPath=(state:ForbiddenTunnelState,direction:FirstDirection,rng:()=>number):{tunnel:ForbiddenTunnelState;modifier:ArtifactModifier|null}=>{
   if(state.chamber!=="first"||state.firstSelection)return {tunnel:state,modifier:null};
   const outcome=state.firstAssignments[direction];
@@ -32,7 +33,7 @@ export const selectSecondPath=(state:ForbiddenTunnelState,direction:SecondDirect
   const resolution=state.secondAssignments[direction];
   return {tunnel:{...state,chamber:"resolved",secondSelection:direction,resolution},modifier:modifierFor(resolution)};
 };
-export const artifactChanceForDig=(normalChance:number,modifier:ArtifactModifier|null)=>modifier&&!modifier.consumed?modifier.chance:normalChance;
+export const artifactChanceForDig=(modifier:ArtifactModifier|null)=>modifier&&!modifier.consumed?modifier.chance:ORDINARY_TRUE_ARTIFACT_CHANCE;
 export const markModifierRolled=(modifier:ArtifactModifier|null)=>modifier&&!modifier.consumed?{...modifier,consumed:true}:modifier;
 export const canTriggerForbiddenTunnel=(state:{forbiddenTunnel:ForbiddenTunnelState|null;pendingArtifactModifier:ArtifactModifier|null;activeTrueEncounter:unknown;veinDigsRemaining:number},cleanTransition:boolean)=>cleanTransition&&!state.forbiddenTunnel&&!state.pendingArtifactModifier&&!state.activeTrueEncounter&&state.veinDigsRemaining<=0;
 export const sanitizeForbiddenTunnel=(value:unknown):ForbiddenTunnelState|null=>{
@@ -45,6 +46,6 @@ export const sanitizeForbiddenTunnel=(value:unknown):ForbiddenTunnelState|null=>
   if(state.chamber==="resolved"&&state.resolution&&modifierFor(state.resolution))return state;
   return null;
 };
-export const sanitizeArtifactModifier=(value:unknown):ArtifactModifier|null=>{if(!value||typeof value!=="object")return null;const m=value as ArtifactModifier;return [0.0005,0.001,0.0025,0.15].includes(m.chance)&&["forbidden-x1","forbidden-x2","forbidden-x5-sealed","forbidden-deep-way"].includes(m.source)&&typeof m.consumed==="boolean"?m:null};
+export const sanitizeArtifactModifier=(value:unknown):ArtifactModifier|null=>{if(!value||typeof value!=="object")return null;const m=value as ArtifactModifier;return [ORDINARY_TRUE_ARTIFACT_CHANCE,0.001,0.0025,0.15].includes(m.chance)&&["forbidden-x1","forbidden-x2","forbidden-x5-sealed","forbidden-deep-way"].includes(m.source)&&typeof m.consumed==="boolean"?m:null};
 
-export function simulateForbiddenTunnels(iterations:number,seed=20260823){let s=seed|0;const rng=()=>{s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};const first={x1:0,x2:0,x5:0},second={sealed:0,deep:0};let chance=0;for(let i=0;i<iterations;i++){let state=createForbiddenTunnel(rng,String(i)),result=selectFirstPath(state,FIRST_DIRECTIONS[Math.floor(rng()*3)],rng);const firstOutcome=state.firstAssignments[result.tunnel.firstSelection!];first[firstOutcome]++;if(firstOutcome==="x5"){result=selectSecondPath(result.tunnel,SECOND_DIRECTIONS[Math.floor(rng()*2)]);second[result.tunnel.resolution as SecondOutcome]++}chance+=result.modifier!.chance}const average=chance/iterations;return {iterations,first,second,averageTunnelChance:average,overallBaselineRate:.99*.0005+.01*average};}
+export function simulateForbiddenTunnels(iterations:number,seed=20260823){let s=seed|0;const rng=()=>{s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};const first={x1:0,x2:0,x5:0},second={sealed:0,deep:0};let chance=0;for(let i=0;i<iterations;i++){let state=createForbiddenTunnel(rng,String(i)),result=selectFirstPath(state,FIRST_DIRECTIONS[Math.floor(rng()*3)],rng);const firstOutcome=state.firstAssignments[result.tunnel.firstSelection!];first[firstOutcome]++;if(firstOutcome==="x5"){result=selectSecondPath(result.tunnel,SECOND_DIRECTIONS[Math.floor(rng()*2)]);second[result.tunnel.resolution as SecondOutcome]++}chance+=result.modifier!.chance}const average=chance/iterations;return {iterations,first,second,averageTunnelChance:average,overallBaselineRate:.99*ORDINARY_TRUE_ARTIFACT_CHANCE+.01*average};}
