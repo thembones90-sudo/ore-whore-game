@@ -3,12 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import { track } from "./analytics";
 import { emitGameplayEvent } from "./gameplay-events";
+import { CANONICAL_EXCAVATION_PROBABILITIES, canAfford, forgeRecipes, forgedItems, metallurgyRecipes, processedMaterials, spend, type RecipeUnlock } from "./metallurgy";
 
 type Rarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Mythic";
 type Item = { id: string; name: string; rarity: Rarity; weight: number; color: string; note: string; toughness?: number };
 type Biome = "old" | "deep" | "outland" | "northrend";
 type Settings = { master:number;sfx:number;reducedShake:boolean;reducedMotion:boolean;vibration:boolean;highContrast:boolean;helpSeen:boolean };
-type Save = { digs: number; emptyDigs:number; strikes: number; distance: number; combos: Record<string, number>; ores: Record<string, number>; minerals: Record<string, number>; first: Record<string, number>; achievements: string[]; streak: number; longestStreak:number;newStreak:number;longestNewStreak:number; dust: number; dustEarned:number;dustSpent:number; biome: Biome; unlockedBiomes:Biome[]; completedBiomes:Biome[]; milestones: Record<string, number>; lastDigAt: number; schema: number; settings:Settings;unlocks:string[];equipped:string;huntTarget:string|null;huntCounts:Record<string,number>;huntStartedAtDig:number;longestHunt:number;trueArtifacts:Record<string,number>;trueFirst:Record<string,number>;misses:number;veinOre:string|null;veinDigsRemaining:number;milestoneDigs:Record<string,number> };
+type Save = { digs: number; emptyDigs:number; strikes: number; distance: number; combos: Record<string, number>; ores: Record<string, number>; rawResources:Record<string,number>;processedMaterials:Record<string,number>;ownedTools:string[];equippedTool:string; minerals: Record<string, number>; first: Record<string, number>; achievements: string[]; streak: number; longestStreak:number;newStreak:number;longestNewStreak:number; dust: number; dustEarned:number;dustSpent:number; biome: Biome; unlockedBiomes:Biome[]; completedBiomes:Biome[]; milestones: Record<string, number>; lastDigAt: number; schema: number; settings:Settings;unlocks:string[];equipped:string;huntTarget:string|null;huntCounts:Record<string,number>;huntStartedAtDig:number;longestHunt:number;trueArtifacts:Record<string,number>;trueFirst:Record<string,number>;misses:number;veinOre:string|null;veinDigsRemaining:number;milestoneDigs:Record<string,number> };
 
 const ores: Item[] = [
   { id: "copper", name: "Copper Ore", rarity: "Common", weight: 48, color: "#d88156", note: "Honest rock for dishonest amounts of time.", toughness: 1.00 },
@@ -66,7 +67,7 @@ const achievements = [
 ];
 
 const defaultSettings:Settings={master:.7,sfx:.8,reducedShake:false,reducedMotion:false,vibration:true,highContrast:false,helpSeen:false};
-const blank: Save = { digs: 0, emptyDigs:0, strikes: 0, distance: 0, combos: {}, ores: {}, minerals: {}, first: {}, achievements: [], streak: 0,longestStreak:0,newStreak:0,longestNewStreak:0, dust: 0,dustEarned:0,dustSpent:0, biome: "old", unlockedBiomes:["old"], completedBiomes:[], milestones: {}, lastDigAt: 0, schema: 10,settings:defaultSettings,unlocks:[],equipped:"standard",huntTarget:null,huntCounts:{},huntStartedAtDig:0,longestHunt:0,trueArtifacts:{},trueFirst:{},misses:0,veinOre:null,veinDigsRemaining:0,milestoneDigs:{} };
+const blank: Save = { digs: 0, emptyDigs:0, strikes: 0, distance: 0, combos: {}, ores: {}, rawResources:{},processedMaterials:{},ownedTools:["rusty-pickaxe"],equippedTool:"rusty-pickaxe", minerals: {}, first: {}, achievements: [], streak: 0,longestStreak:0,newStreak:0,longestNewStreak:0, dust: 0,dustEarned:0,dustSpent:0, biome: "old", unlockedBiomes:["old"], completedBiomes:[], milestones: {}, lastDigAt: 0, schema: 11,settings:defaultSettings,unlocks:[],equipped:"standard",huntTarget:null,huntCounts:{},huntStartedAtDig:0,longestHunt:0,trueArtifacts:{},trueFirst:{},misses:0,veinOre:null,veinDigsRemaining:0,milestoneDigs:{} };
 const cosmetics=[{id:"rust",name:"Rustbite Pick",cost:15,kind:"PICKAXE"},{id:"neon",name:"Toxic Impact",cost:30,kind:"IMPACT"},{id:"gilded",name:"Gilded Album",cost:45,kind:"ALBUM"},{id:"deepframe",name:"Deep-Mine Frame",cost:60,kind:"ALBUM"},{id:"menace",name:"Geological Menace",cost:75,kind:"TITLE"},{id:"void",name:"Void Pick",cost:100,kind:"PICKAXE"},{id:"fel",name:"Fel Dust",cost:35,kind:"IMPACT"},{id:"frost",name:"Frostbite Pick",cost:55,kind:"PICKAXE"},{id:"saroniteframe",name:"Saronite Whisper",cost:70,kind:"ALBUM"},{id:"prospector",name:"Master Prospector",cost:80,kind:"TITLE"},{id:"khoriumframe",name:"Khorium Prestige",cost:110,kind:"REVEAL"},{id:"titan",name:"Titanium Crown",cost:140,kind:"PICKAXE"},{id:"brdtitle",name:"Not Going Back",cost:95,kind:"TITLE"},{id:"arcaneimpact",name:"Arcane Fracture",cost:125,kind:"IMPACT"},{id:"volumeone",name:"Volume I Victor",cost:180,kind:"ALBUM"},{id:"orewhoretitle",name:"THE ORE WHORE",cost:999,kind:"TITLE"},{id:"orewhorepick",name:"The Final Pick",cost:999,kind:"PICKAXE"},{id:"orewhorealbum",name:"225 Stamp",cost:999,kind:"ALBUM"},{id:"centerpiece",name:"Mountain's Regret",cost:999,kind:"TROPHY"}];
 const biomeWeights: Record<Biome, number[]> = {
  old:[28,20,12,18,10,8,2,1,1,0,0,0,0,0,0],
@@ -183,10 +184,10 @@ const trueArtifactPool: TrueArtifact[] = [
   {id:"invincible",name:"INVINCIBLE'S REINS",announcement:"MOUNT EQUIPMENT DETECTED. MOUNT ABSENT.",lore:"The reins are immaculate. Their owner remains committed to being elsewhere.",lockedClue:"A loyal servant, both in life and death.",peonBark:"...where horse?",image:"/assets/true/invincible.webp",selectionWeight:1,theme:"frost"},
   {id:"asoc",name:"ASOC TICKET",announcement:"ANOMALOUS OBJECT DETECTED",lore:"The ultimate TRUE discovery. Entry to one game of ASOC.",lockedClue:"Someone is waiting for an invitation to be presented.",peonBark:"Me win?",image:"/assets/true/true-asoc-ticket.webp",selectionWeight:null,theme:"infernal",ultimate:true,instruction:"SHOW THIS TO SUMMON THE GAME MASTER",systemResponse:"NO. YOU HAVE BEEN INVITED."},
 ];
-const TRUE_CHANCE = 0.0005;
+const TRUE_CHANCE = CANONICAL_EXCAVATION_PROBABILITIES.trueArtifact;
 // Miss / Perfect / Critical pipeline constants — tunable after playtesting.
-const MISS_CHANCE = 0.05;
-const CRIT_CHANCE = 0.05;
+const MISS_CHANCE = CANONICAL_EXCAVATION_PROBABILITIES.miss;
+const CRIT_CHANCE = CANONICAL_EXCAVATION_PROBABILITIES.critical;
 const PERFECT_CYCLE_MS = 900; // fixed metronome period, learnable rhythm
 const PERFECT_WINDOW_MS = 120; // total accepted window width, ±60ms around peak
 // Miss flavor text is cosmetic selection only — Math.random(), never the
@@ -221,12 +222,12 @@ const odds = (ore:Item,mineral:Item,biome:Biome) => {const ow=biomeWeights[biome
 // collections." Narrowing this to `unknown` would require type guards on
 // every legacy field access below, which risks altering migration behavior.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const migrate=(old:any):Save=>{const map:Record<string,string>={quartz:"malachite",jade:"jade",citrine:"citrine",opal:"largeopal",star:"arcane"};const combos:Record<string,number>={},first:Record<string,number>={};for(const [k,v] of Object.entries(old.combos||{})){const p=k.lastIndexOf("-");const o=k.slice(0,p),m=k.slice(p+1);combos[`${o}-${map[m]||m}`]=Number(v)}for(const [k,v] of Object.entries(old.first||{})){const p=k.lastIndexOf("-");const o=k.slice(0,p),m=k.slice(p+1);first[`${o}-${map[m]||m}`]=Number(v)}const mineralCounts:Record<string,number>={};for(const [k,v] of Object.entries(old.minerals||{}))mineralCounts[map[k]||k]=(mineralCounts[map[k]||k]||0)+Number(v);const historicalOreCounts:Record<string,number>={};for(const [key,count] of Object.entries(combos)){const p=key.lastIndexOf("-");const id=key.slice(0,p);historicalOreCounts[id]=(historicalOreCounts[id]||0)+Number(count)}const oreCounts:Record<string,number>={};for(const ore of ores)oreCounts[ore.id]=Math.max(Number(old.ores?.[ore.id]||0),historicalOreCounts[ore.id]||0);const provisional={...blank,...old,combos,ores:oreCounts,first,minerals:mineralCounts,settings:{...defaultSettings,...old.settings},schema:10} as Save;const completedBiomes=biomeOrder.filter(b=>biomeQuotaComplete(provisional,b));const unlockedBiomes:Biome[]=["old"];for(let i=0;i<biomeOrder.length-1;i++){if(!completedBiomes.includes(biomeOrder[i]))break;unlockedBiomes.push(biomeOrder[i+1])}const requested:Biome=biomeOrder.includes(old.biome)?old.biome:"old",biome=unlockedBiomes.includes(requested)?requested:unlockedBiomes[unlockedBiomes.length-1];return {...provisional,biome,unlockedBiomes,completedBiomes}}
+const migrate=(old:any):Save=>{const map:Record<string,string>={quartz:"malachite",jade:"jade",citrine:"citrine",opal:"largeopal",star:"arcane"};const combos:Record<string,number>={},first:Record<string,number>={};for(const [k,v] of Object.entries(old.combos||{})){const p=k.lastIndexOf("-");const o=k.slice(0,p),m=k.slice(p+1);combos[`${o}-${map[m]||m}`]=Number(v)}for(const [k,v] of Object.entries(old.first||{})){const p=k.lastIndexOf("-");const o=k.slice(0,p),m=k.slice(p+1);first[`${o}-${map[m]||m}`]=Number(v)}const mineralCounts:Record<string,number>={};for(const [k,v] of Object.entries(old.minerals||{}))mineralCounts[map[k]||k]=(mineralCounts[map[k]||k]||0)+Number(v);const historicalOreCounts:Record<string,number>={};for(const [key,count] of Object.entries(combos)){const p=key.lastIndexOf("-");const id=key.slice(0,p);historicalOreCounts[id]=(historicalOreCounts[id]||0)+Number(count)}const oreCounts:Record<string,number>={};for(const ore of ores)oreCounts[ore.id]=Math.max(Number(old.ores?.[ore.id]||0),historicalOreCounts[ore.id]||0);const rawResources=old.rawResources&&typeof old.rawResources==="object"?old.rawResources:{...oreCounts};const ownedTools=Array.isArray(old.ownedTools)&&old.ownedTools.length?old.ownedTools:["rusty-pickaxe"];const equippedTool=ownedTools.includes(old.equippedTool)?old.equippedTool:"rusty-pickaxe";const provisional={...blank,...old,combos,ores:oreCounts,rawResources,processedMaterials:old.processedMaterials||{},ownedTools,equippedTool,first,minerals:mineralCounts,settings:{...defaultSettings,...old.settings},schema:11} as Save;const completedBiomes=biomeOrder.filter(b=>biomeQuotaComplete(provisional,b));const unlockedBiomes:Biome[]=["old"];for(let i=0;i<biomeOrder.length-1;i++){if(!completedBiomes.includes(biomeOrder[i]))break;unlockedBiomes.push(biomeOrder[i+1])}const requested:Biome=biomeOrder.includes(old.biome)?old.biome:"old",biome=unlockedBiomes.includes(requested)?requested:unlockedBiomes[unlockedBiomes.length-1];return {...provisional,biome,unlockedBiomes,completedBiomes}}
 
 export default function Home() {
   const [save, setSave] = useState<Save>(blank);
   const [loaded, setLoaded] = useState(false);
-  const [tab, setTab] = useState<"mine" | "album" | "wanted" | "records" | "more" | "true">("mine");
+  const [tab, setTab] = useState<"mine" | "forge" | "album" | "wanted" | "records" | "more" | "true">("mine");
   const [stage, setStage] = useState<"tunnel" | "ore">("tunnel");
   const [maxHp, setMaxHp] = useState(12);
   const [rockHp, setRockHp] = useState(12);
@@ -263,6 +264,8 @@ export default function Home() {
   const emptyNoticeId = useRef(0);
   const emptyDigStreak = useRef(0);
   const spaceHeld = useRef(false);
+  const autoMineTimer = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+  const strikeRef = useRef<(point?:{x:number;y:number})=>void>(()=>{});
   const sessionDigs = useRef(0);
   const [sessionDigsCount,setSessionDigsCount]=useState(0);
   const [sessionMisses,setSessionMisses]=useState(0);
@@ -322,6 +325,8 @@ export default function Home() {
 
   const continueMine = () => { const hp=10+Math.floor(rng.current()*6); setFound(null); setPendingOre(null); setFractures([]); setStage("tunnel"); setMaxHp(hp); setRockHp(hp); track("mine_started",{attempt:save.digs+1,biome:save.biome}); };
 
+  function playImpact(kind:"rock"|"clank"|"crack"|"miss"|"perfect"|"crit"){if(save.settings.master<=0||save.settings.sfx<=0)return;try{const C=window.AudioContext;const c=new C(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);const base=kind==="clank"?720:kind==="crack"?145:kind==="perfect"?980:kind==="crit"?520:kind==="miss"?60:82+Math.random()*36;o.type=kind==="clank"?"triangle":kind==="perfect"||kind==="miss"?"sine":"square";o.frequency.setValueAtTime(base,c.currentTime);o.frequency.exponentialRampToValueAtTime(kind==="clank"?340:kind==="perfect"?1400:kind==="crit"?200:kind==="miss"?40:45,c.currentTime+.09);g.gain.setValueAtTime((kind==="clank"?.18:kind==="perfect"?.22:kind==="crit"?.16:kind==="miss"?.06:.08)*save.settings.master*save.settings.sfx,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.12);o.start();o.stop(c.currentTime+.13)}catch{/* AudioContext unavailable or blocked; fail silently */}}
+
   const strike = (point?:{x:number;y:number}) => {
     if (found||trueFind) return;
     const strikePoint=point||{x:50,y:48};
@@ -364,7 +369,8 @@ export default function Home() {
     // CRITICAL CHECK — rolled on every successfully-landing strike (Perfect
     // or normal), independent of Perfect. Seeded/mechanical RNG.
     const isCrit = rng.current() < CRIT_CHANCE;
-    const damage = isPerfect && isCrit ? 3 : (isPerfect || isCrit) ? 2 : 1;
+    const tool=forgedItems.find(t=>t.id===save.equippedTool)||forgedItems[0];
+    const damage = (isPerfect && isCrit ? 3 : (isPerfect || isCrit) ? 2 : 1)*tool.damage;
     const hitKind = isPerfect && isCrit ? "perfectCrit" : isPerfect ? "perfect" : isCrit ? "crit" : "normal";
     const impactKind: "perfect" | "crit" | null = isPerfect ? "perfect" : isCrit ? "crit" : null;
     if (hitKind !== "normal") {
@@ -394,7 +400,7 @@ export default function Home() {
       // the ordinary empty/ore result — including on digs that would
       // otherwise be empty. It overrides that dig's normal outcome entirely.
       if(rng.current()<TRUE_CHANCE){const artifact=pickTrue(rng.current);emptyDigStreak.current=0;playImpact(impactKind??"crack");setSave(s=>{const digNumber=s.digs+1,isFirst=!s.trueArtifacts[artifact.id],veinDigsRemaining=Math.max(0,s.veinDigsRemaining-1),veinExpired=s.veinDigsRemaining>0&&veinDigsRemaining===0;if(veinExpired)emitGameplayEvent("VEIN_EXPIRED",{ore:s.veinOre});return {...s,digs:digNumber,trueArtifacts:{...s.trueArtifacts,[artifact.id]:(s.trueArtifacts[artifact.id]||0)+1},trueFirst:isFirst?{...s.trueFirst,[artifact.id]:digNumber}:s.trueFirst,lastDigAt:Date.now(),veinDigsRemaining,veinOre:veinExpired?null:s.veinOre}});sessionDigs.current++;setSessionDigsCount(c=>c+1);setTrueFind({artifact,digNumber:save.digs+1});track("true_artifact_found",{artifact_id:artifact.id,attempt:save.digs+1,biome:save.biome,trigger:"empty"});emitGameplayEvent("TRUE_ARTIFACT_FOUND",{artifact_id:artifact.id,trigger:"empty"});return;}
-      if(rng.current()<.2){playImpact(impactKind??"crack");setSave(s=>{const streak=s.streak+1,veinDigsRemaining=Math.max(0,s.veinDigsRemaining-1),veinExpired=s.veinDigsRemaining>0&&veinDigsRemaining===0;if(veinExpired)emitGameplayEvent("VEIN_EXPIRED",{ore:s.veinOre});return {...s,digs:s.digs+1,emptyDigs:s.emptyDigs+1,streak,longestStreak:Math.max(s.longestStreak,streak),newStreak:0,lastDigAt:Date.now(),veinDigsRemaining,veinOre:veinExpired?null:s.veinOre}});sessionDigs.current++;setSessionDigsCount(c=>c+1);setSessionDrought(d=>{const next=d+1;setSessionLongestDrought(l=>Math.max(l,next));return next;});const emptyRun=++emptyDigStreak.current,pool=emptyRun===1?EMPTY_INSULTS_NORMAL:emptyRun===2?EMPTY_INSULTS_MILD:emptyRun===3?EMPTY_INSULTS_HARSH:EMPTY_INSULTS_STRONG;
+      if(rng.current()<CANONICAL_EXCAVATION_PROBABILITIES.emptyDig){playImpact(impactKind??"crack");setSave(s=>{const streak=s.streak+1,veinDigsRemaining=Math.max(0,s.veinDigsRemaining-1),veinExpired=s.veinDigsRemaining>0&&veinDigsRemaining===0;if(veinExpired)emitGameplayEvent("VEIN_EXPIRED",{ore:s.veinOre});return {...s,digs:s.digs+1,emptyDigs:s.emptyDigs+1,streak,longestStreak:Math.max(s.longestStreak,streak),newStreak:0,lastDigAt:Date.now(),veinDigsRemaining,veinOre:veinExpired?null:s.veinOre}});sessionDigs.current++;setSessionDigsCount(c=>c+1);setSessionDrought(d=>{const next=d+1;setSessionLongestDrought(l=>Math.max(l,next));return next;});const emptyRun=++emptyDigStreak.current,pool=emptyRun===1?EMPTY_INSULTS_NORMAL:emptyRun===2?EMPTY_INSULTS_MILD:emptyRun===3?EMPTY_INSULTS_HARSH:EMPTY_INSULTS_STRONG;
         // eslint-disable-next-line react-hooks/purity -- cosmetic copy selection runs only from a completed-dig event handler.
         const [result,insult]=pool[Math.floor(Math.random()*pool.length)];setEmptyNotice({id:++emptyNoticeId.current,result,insult});track("dig_empty",{attempt:save.digs+1,biome:save.biome,empty_rate:.2,consecutive_empty:emptyRun});continueMine();return;}
       const band = depthBand(maxHp);
@@ -432,7 +438,7 @@ export default function Home() {
       if(veinExpiredOld&&!veinTriggered)emitGameplayEvent("VEIN_EXPIRED",{ore:s.veinOre});
       if(veinTriggered){setSessionVeins(v=>v+1);emitGameplayEvent("VEIN_EXPOSED",{ore:ore.id});}
       const milestoneDigs=(after===14&&s.milestoneDigs[ore.id]===undefined)?{...s.milestoneDigs,[ore.id]:s.digs+1}:s.milestoneDigs;
-      const next: Save = { ...s, digs: s.digs + 1, dust:s.dust+dustGain,dustEarned:s.dustEarned+dustGain, combos: { ...s.combos, [key]: (s.combos[key] || 0) + 1 }, ores: { ...s.ores, [ore.id]: (s.ores[ore.id] || 0) + 1 }, minerals: { ...s.minerals, [mineral.id]: (s.minerals[mineral.id] || 0) + 1 }, first: isNew ? { ...s.first, [key]: s.digs + 1 } : s.first, streak:newStreak,longestStreak:Math.max(s.longestStreak,newStreak),newStreak:newDiscoveryStreak,longestNewStreak:Math.max(s.longestNewStreak,newDiscoveryStreak), lastDigAt:Date.now(),huntTarget:targetHit?null:s.huntTarget,longestHunt:targetHit?Math.max(s.longestHunt,s.digs+1-s.huntStartedAtDig):s.longestHunt, milestones:{...s.milestones,...(after>=5?{[ore.id]:Math.max(s.milestones[ore.id]||0,after)}:{})}, milestoneDigs, veinDigsRemaining:veinTriggered?VEIN_DURATION:veinDigsRemaining, veinOre:veinTriggered?ore.id:(veinExpiredOld?null:s.veinOre) };
+      const next: Save = { ...s, digs: s.digs + 1, dust:s.dust+dustGain,dustEarned:s.dustEarned+dustGain, combos: { ...s.combos, [key]: (s.combos[key] || 0) + 1 }, ores: { ...s.ores, [ore.id]: (s.ores[ore.id] || 0) + 1 }, rawResources:{...s.rawResources,[ore.id]:(s.rawResources[ore.id]||0)+1}, minerals: { ...s.minerals, [mineral.id]: (s.minerals[mineral.id] || 0) + 1 }, first: isNew ? { ...s.first, [key]: s.digs + 1 } : s.first, streak:newStreak,longestStreak:Math.max(s.longestStreak,newStreak),newStreak:newDiscoveryStreak,longestNewStreak:Math.max(s.longestNewStreak,newDiscoveryStreak), lastDigAt:Date.now(),huntTarget:targetHit?null:s.huntTarget,longestHunt:targetHit?Math.max(s.longestHunt,s.digs+1-s.huntStartedAtDig):s.longestHunt, milestones:{...s.milestones,...(after>=5?{[ore.id]:Math.max(s.milestones[ore.id]||0,after)}:{})}, milestoneDigs, veinDigsRemaining:veinTriggered?VEIN_DURATION:veinDigsRemaining, veinOre:veinTriggered?ore.id:(veinExpiredOld?null:s.veinOre) };
       if(isNew)setSessionNew(n=>n+1);
       setSessionDrought(0);
       // Last-One escalation: purely presentational — scan every ore
@@ -455,12 +461,12 @@ export default function Home() {
       continueMine();
     }
   };
+  useEffect(()=>{strikeRef.current=strike});
 
   const strikeAtPointer=(event:React.MouseEvent<HTMLButtonElement>)=>{const rect=event.currentTarget.getBoundingClientRect();strike({x:Math.max(1,Math.min(99,(event.clientX-rect.left)/rect.width*100)),y:Math.max(2,Math.min(98,(event.clientY-rect.top)/rect.height*100))})};
   const followPointer=(event:React.PointerEvent<HTMLButtonElement>)=>{if(event.pointerType!=="mouse")return;const rock=event.currentTarget,rect=rock.getBoundingClientRect(),x=Math.max(1,Math.min(99,(event.clientX-rect.left)/rect.width*100)),y=Math.max(2,Math.min(98,(event.clientY-rect.top)/rect.height*100));rock.style.setProperty("--pick-x",`${x}%`);rock.style.setProperty("--pick-y",`${y}%`);rock.classList.add("pick-following")};
   const stopFollowing=(event:React.PointerEvent<HTMLButtonElement>)=>{event.currentTarget.classList.remove("pick-following");event.currentTarget.style.removeProperty("--pick-x");event.currentTarget.style.removeProperty("--pick-y")};
 
-  const playImpact=(kind:"rock"|"clank"|"crack"|"miss"|"perfect"|"crit")=>{if(save.settings.master<=0||save.settings.sfx<=0)return;try{const C=window.AudioContext;const c=new C(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);const base=kind==="clank"?720:kind==="crack"?145:kind==="perfect"?980:kind==="crit"?520:kind==="miss"?60:82+Math.random()*36;o.type=kind==="clank"?"triangle":kind==="perfect"||kind==="miss"?"sine":"square";o.frequency.setValueAtTime(base,c.currentTime);o.frequency.exponentialRampToValueAtTime(kind==="clank"?340:kind==="perfect"?1400:kind==="crit"?200:kind==="miss"?40:45,c.currentTime+.09);g.gain.setValueAtTime((kind==="clank"?.18:kind==="perfect"?.22:kind==="crit"?.16:kind==="miss"?.06:.08)*save.settings.master*save.settings.sfx,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.12);o.start();o.stop(c.currentTime+.13);}catch{/* AudioContext unavailable or blocked; fail silently */}};
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -468,15 +474,19 @@ export default function Home() {
       if(tab==="mine")event.preventDefault();
       if(event.repeat||spaceHeld.current)return;
       spaceHeld.current=true;
-      if(tab === "mine" && !found && !trueFind)strike();
+      if(tab === "mine" && !found && !trueFind){
+        strikeRef.current();
+        const tool=forgedItems.find(t=>t.id===save.equippedTool);
+        if(tool?.mode==="continuous")autoMineTimer.current=setInterval(()=>strikeRef.current(),tool.intervalMs||430);
+      }
     };
-    const onKeyUp=(event:KeyboardEvent)=>{if(event.code==="Space")spaceHeld.current=false};
-    const releaseSpace=()=>{spaceHeld.current=false};
+    const releaseSpace=()=>{spaceHeld.current=false;if(autoMineTimer.current){clearInterval(autoMineTimer.current);autoMineTimer.current=undefined}};
+    const onKeyUp=(event:KeyboardEvent)=>{if(event.code==="Space")releaseSpace()};
     window.addEventListener("keydown", onKey);
     window.addEventListener("keyup",onKeyUp);
     window.addEventListener("blur",releaseSpace);
-    return () => {window.removeEventListener("keydown", onKey);window.removeEventListener("keyup",onKeyUp);window.removeEventListener("blur",releaseSpace)};
-  });
+    return () => {window.removeEventListener("keydown", onKey);window.removeEventListener("keyup",onKeyUp);window.removeEventListener("blur",releaseSpace);if(autoMineTimer.current)clearInterval(autoMineTimer.current)};
+  },[tab,save.equippedTool,found,trueFind]);
 
   const unique = Object.keys(save.combos).length;
   const reset = () => { if (confirm("Erase every discovery and return to the cold, uncaring rock?")) { setSave(blank); setFound(null); setPendingOre(null); setEmptyNotice(null); setFractures([]); setCollapseBurst(null); setStage("tunnel"); setMaxHp(12); setRockHp(12); sessionDigs.current=0; setSessionDigsCount(0); setSessionMisses(0); setSessionVeins(0); setSessionNew(0); setSessionDrought(0); setSessionLongestDrought(0); consecutiveMisses.current=0; emptyDigStreak.current=0; } };
@@ -486,6 +496,7 @@ export default function Home() {
       <button className="brand" onClick={() => setTab("mine")}><span className="brand-mark">OW</span><span>ORE WHORE<small>COMPULSIVE GEOLOGY</small></span></button>
       <nav aria-label="Primary">
         <button className={tab === "mine" ? "active" : ""} onClick={() => setTab("mine")}>MINE</button>
+        <button className={tab === "forge" ? "active" : ""} onClick={() => setTab("forge")}>FORGE</button>
         <button className={tab === "album" ? "active" : ""} onClick={() => {setTab("album");track("album_opened",{completion:unique/225});}}>ALBUM <b>{unique}/225</b></button>
         <button className={tab === "wanted" ? "active" : ""} onClick={() => {setTab("wanted");track("missing_view_opened",{completion:unique/225});}}>WANTED</button>
         <button className={tab === "records" ? "active" : ""} onClick={() => setTab("records")}>RECORDS</button>
@@ -526,6 +537,7 @@ export default function Home() {
     </section>}
 
     {tab === "album" && <Album save={save} />}
+    {tab === "forge" && <Forge save={save} setSave={setSave}/>}
     {tab === "wanted" && <Wanted save={save} onHunt={(biome,target)=>{setSave(s=>({...s,biome,huntTarget:target,huntStartedAtDig:s.digs,huntCounts:{...s.huntCounts,[target]:(s.huntCounts[target]||0)+1}}));track("hunt_started",{biome,combination_id:target});setTab("mine");continueMine();}} />}
     {tab === "records" && <><Records save={save} onReset={reset} session={{digs:sessionDigsCount,misses:sessionMisses,veins:sessionVeins,newSpecimens:sessionNew,drought:sessionDrought,longestDrought:sessionLongestDrought}} /><HuntRecords save={save}/></>}
     {tab === "more" && <><VolumeRewards save={save}/><More save={save} setSave={setSave} onHelp={()=>{setTab("mine");setOnboarding(true)}} /></>}
@@ -672,6 +684,21 @@ function Onboarding({onDone}:{onDone:()=>void}){return <div className="onboardin
 function HuntRecords({save}:{save:Save}){const top=Object.entries(save.huntCounts).sort((a,b)=>b[1]-a[1])[0];const label=top?(()=>{const p=top[0].lastIndexOf("-");return `${ores.find(o=>o.id===top[0].slice(0,p))?.name} + ${minerals.find(m=>m.id===top[0].slice(p+1))?.name}`})():"No target repeatedly hunted";return <div className="hunt-records"><article><small>LONGEST NEW STREAK</small><strong>{save.longestNewStreak}</strong><span>fresh combinations in a row</span></article><article><small>MOST HUNTED TARGET</small><strong>{top?`${top[1]}×`:"—"}</strong><span>{label}</span></article><article><small>LONGEST TARGET HUNT</small><strong>{save.longestHunt}</strong><span>digs from pin to acquisition</span></article><article><small>EMPTY DIGS</small><strong>{save.emptyDigs}</strong><span>{save.digs?`${(save.emptyDigs/save.digs*100).toFixed(1)}% of all attempts`:"the mountain is saving them up"}</span></article></div>}
 
 function VolumeRewards({save}:{save:Save}){const pct=Object.keys(save.combos).length/225*100;return <div className="volume-rewards"><b>VOLUME I REWARDS</b>{[[10,"RUSTBITE"],[25,"GILDED"],[50,"MENACE"],[75,"KHORIUM"],[90,"TITANIUM"],[100,"ORE WHORE"]].map(x=><span className={pct>=Number(x[0])?"earned":""} key={x[0]}><strong>{x[0]}%</strong><small>{x[1]}</small></span>)}</div>}
+
+const craftingName=(id:string)=>ores.find(o=>o.id===id)?.name||processedMaterials.find(m=>m.id===id)?.name||id;
+const recipeUnlocked=(save:Save,unlock?:RecipeUnlock)=>!unlock||(!unlock.mine||save.unlockedBiomes.includes(unlock.mine))&&(!unlock.tool||save.ownedTools.includes(unlock.tool));
+function Forge({save,setSave}:{save:Save;setSave:React.Dispatch<React.SetStateAction<Save>>}){
+  const runMetallurgy=(id:string)=>setSave(s=>{const recipe=metallurgyRecipes.find(r=>r.id===id);if(!recipe||!recipeUnlocked(s,recipe.unlock)||!canAfford(s.rawResources,recipe.inputs))return s;return {...s,rawResources:spend(s.rawResources,recipe.inputs),processedMaterials:{...s.processedMaterials,[recipe.outputId]:(s.processedMaterials[recipe.outputId]||0)+recipe.outputQuantity}}});
+  const runForge=(id:string)=>setSave(s=>{const recipe=forgeRecipes.find(r=>r.id===id);if(!recipe||s.ownedTools.includes(recipe.resultingItemId)||!recipeUnlocked(s,recipe.unlock)||!canAfford(s.processedMaterials,recipe.inputs))return s;return {...s,processedMaterials:spend(s.processedMaterials,recipe.inputs),ownedTools:[...s.ownedTools,recipe.resultingItemId],equippedTool:recipe.resultingItemId}});
+  const current=forgedItems.find(t=>t.id===save.equippedTool)||forgedItems[0];
+  return <section className="page forge-page"><div className="page-head"><div><p className="eyebrow">DIG → REFINE / ALLOY → FORGE → ITEM</p><h2>THE <i>FORGE</i></h2></div><div className="completion"><span>EQUIPPED TOOL</span><strong>{current.name}</strong></div></div>
+    <p className="forge-intro">Cumulative ore discoveries remain in the Album. Spendable duplicate stock lives here. TRUE Artifacts remain safely outside the furnace.</p>
+    <h3 className="section-label">RAW RESOURCE STOCK</h3><div className="material-ledger raw-ledger">{ores.map(o=><article key={o.id}><img src={oreAsset(o.id)} alt=""/><span>{o.name}<small>AVAILABLE</small></span><strong>{save.rawResources[o.id]||0}</strong></article>)}</div>
+    <h3 className="section-label">METALLURGY · REFINE / ALLOY</h3><div className="recipe-grid">{metallurgyRecipes.map(r=>{const open=recipeUnlocked(save,r.unlock),ready=open&&canAfford(save.rawResources,r.inputs);return <article className={!open?"locked":""} key={r.id}><header><span>{r.operation}</span><strong>{r.name}</strong></header><div className="recipe-equation">{r.inputs.map(i=><b key={i.id}>{craftingName(i.id)} ×{i.quantity}</b>)}<i>→</i><em>{craftingName(r.outputId)} ×{r.outputQuantity}</em></div><button disabled={!ready} onClick={()=>runMetallurgy(r.id)}>{open?(ready?r.operation:"INSUFFICIENT ORE"):`LOCKED · ${r.unlock?.mine?.toUpperCase()} MINE`}</button></article>})}</div>
+    <h3 className="section-label">PROCESSED MATERIALS</h3><div className="material-ledger processed-ledger">{processedMaterials.map(m=><article key={m.id}><span>{m.name}<small>{m.description}</small></span><strong>{save.processedMaterials[m.id]||0}</strong></article>)}</div>
+    <h3 className="section-label">FORGED MINING TOOLS</h3><div className="tool-progression">{forgedItems.map(tool=>{const owned=save.ownedTools.includes(tool.id),recipe=forgeRecipes.find(r=>r.resultingItemId===tool.id),open=!recipe||recipeUnlocked(save,recipe.unlock),ready=!!recipe&&open&&canAfford(save.processedMaterials,recipe.inputs);return <article className={`${owned?"owned":""} ${save.equippedTool===tool.id?"equipped":""}`} key={tool.id}><span>TIER {tool.tier} · {tool.mode.toUpperCase()}</span><h3>{tool.name}</h3><p>{tool.description}</p>{recipe&&<div className="tool-cost">{recipe.inputs.map(i=><b key={i.id}>{craftingName(i.id)} ×{i.quantity}</b>)}</div>}<button disabled={!owned&&!ready} onClick={()=>owned?setSave(s=>({...s,equippedTool:tool.id})):runForge(recipe!.id)}>{save.equippedTool===tool.id?"EQUIPPED":owned?"EQUIP":open?(ready?"FORGE TOOL":"MATERIALS REQUIRED"):"BLUEPRINT LOCKED"}</button></article>})}</div>
+  </section>
+}
 
 function More({save,setSave,onHelp}:{save:Save;setSave:React.Dispatch<React.SetStateAction<Save>>;onHelp:()=>void}){
  const download=(name:string,data:unknown)=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));a.download=name;a.click();URL.revokeObjectURL(a.href)};
