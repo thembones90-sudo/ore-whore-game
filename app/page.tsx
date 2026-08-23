@@ -172,15 +172,15 @@ const toughnessStrikes = (toughness: number) => {
 // no rarity, no weight, no biome, no album slot. Uniform 1/7 selection
 // within the pool once the outer 0.05% gate (TRUE_CHANCE) has already
 // hit; adding artifacts later changes only the pool split, never the gate.
-type TrueArtifact = { id: string; name: string; lore: string };
+type TrueArtifact = { id:string;name:string;announcement:string;lore:string;peonBark:string;image:string;theme?:"gold"|"fel"|"biological"|"shadow"|"archive"|"glitch"|"frost" };
 const trueArtifactPool: TrueArtifact[] = [
-  { id: "ronaldo", name: "Panini Golden Sticker of Ronaldo Nazário", lore: "Sacred R9 relic. Non-negotiable." },
-  { id: "warglaive", name: "Warglaive of Illidan", lore: "Requires little philosophical justification." },
-  { id: "blaizeballs", name: "Blaize's Balls", lore: "A running joke, immortalized in mineral form." },
-  { id: "shadow", name: "Shadow the Panther", lore: "A blind man. A toy panther. An unkillable legend." },
-  { id: "whorearchives", name: "Whore Archives", lore: "A classified repository of hidden truths." },
-  { id: "patike", name: "Patike", lore: "The forbidden folder. Extremely classified. You shouldn't have this." },
-  { id: "invincible", name: "Invincible's Reins", lore: "Perhaps the drop rate was underground all along." },
+  {id:"ronaldo",name:"PANINI GOLDEN STICKER OF RONALDO NAZÁRIO",announcement:"THE PHENOMENON HAS BEEN DETECTED.",lore:"Some things are rarer than minerals. Some things are simply eternal.",peonBark:"Good kick man.",image:"/assets/true/ronaldo.webp",theme:"gold"},
+  {id:"warglaive",name:"WARGLAIVE OF ILLIDAN",announcement:"YOU ARE NOT PREPARED.",lore:"A crescent of fel-forged defiance. It remembers every hand unworthy of holding it.",peonBark:"Sharp rock.",image:"/assets/true/warglaive.webp",theme:"fel"},
+  {id:"blaizeballs",name:"BLAIZE'S BALLS",announcement:"BIOLOGICAL MATERIAL DETECTED. UNFORTUNATELY.",lore:"Two matching specimens. Classification was attempted and immediately abandoned.",peonBark:"...two rock?",image:"/assets/true/blaizeballs.webp",theme:"biological"},
+  {id:"shadow",name:"SHADOW THE PANTHER",announcement:"SOMETHING IS WATCHING FROM THE DARK.",lore:"The eyes appeared first. The rest waited until you were already afraid.",peonBark:"Kitty?",image:"/assets/true/shadow.webp",theme:"shadow"},
+  {id:"whorearchives",name:"WHORE ARCHIVES",announcement:"RESTRICTED RECORDS HAVE SURFACED.",lore:"A sealed record of names, depths, and decisions the mountain denies preserving.",peonBark:"Me can read?",image:"/assets/true/whorearchives.webp",theme:"archive"},
+  {id:"patike",name:"PATIKE",announcement:"DIRECTORY DETECTED. ACCESS SHOULD NOT EXIST.",lore:"The folder opened itself. The access log insists that you were never here.",peonBark:"Me open folder.",image:"/assets/true/patike.webp",theme:"glitch"},
+  {id:"invincible",name:"INVINCIBLE'S REINS",announcement:"MOUNT EQUIPMENT DETECTED. MOUNT ABSENT.",lore:"The reins are immaculate. Their owner remains committed to being elsewhere.",peonBark:"...where horse?",image:"/assets/true/invincible.webp",theme:"frost"},
 ];
 const TRUE_CHANCE = 0.0005;
 // Miss / Perfect / Critical pipeline constants — tunable after playtesting.
@@ -200,10 +200,6 @@ const MISS_LINES = [
   "GRAVITY ASSISTED. YOU DID NOT.",
   "GEOLOGICALLY UNBOTHERED.",
 ];
-// Canonical artwork slot — mirrors oreAsset(id). No files exist at this
-// path yet; TrueArtifactArt falls back to a placeholder sigil on load
-// error so dropping in real art later requires zero component changes.
-const trueAsset = (id: string) => `/assets/true/${id}.webp`;
 const pickTrue = (random: () => number) => trueArtifactPool[Math.min(trueArtifactPool.length - 1, Math.floor(random() * trueArtifactPool.length))];
 const makeRng = (seed:number) => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; };
 const pick = (items: Item[], random:()=>number, weights?:number[]) => { const ws=weights||items.map(i=>i.weight); let n=random()*ws.reduce((s,w)=>s+w,0); return items.find((_,i)=>(n-=ws[i])<=0)||items[0]; };
@@ -540,32 +536,33 @@ function EmptyReveal({attempt,onContinue}:{attempt:number;onContinue:()=>void}){
  return <div className="reveal empty-reveal"><div className="reveal-card"><button className="close" onClick={onContinue}>×</button><p className="eyebrow">THE MOUNTAIN HAS SPOKEN</p><div className="empty-mark">∅</div><h2>NOTHING.</h2><p>Absolutely nothing. Twenty percent of excavations produce only dust, regret, and a slightly wider tunnel.</p><div className="verdict duplicate"><span>EMPTY DIG</span><strong>ATTEMPT #{attempt}</strong><small>NO ORE · NO MINERAL · NO ALBUM PROGRESS</small></div><button className="continue" onClick={onContinue}>DIG SOMEWHERE ELSE <span>→</span></button></div></div>
 }
 
-function TrueArtifactArt({id}:{id:string}){
+function TrueArtifactArt({artifact}:{artifact:TrueArtifact}){
   const [missing,setMissing]=useState(false);
   return <span className="true-art-slot">
-    {!missing && <img className="true-art-img" src={trueAsset(id)} alt="" onError={()=>setMissing(true)}/>}
+    {!missing && <img className="true-art-img" src={artifact.image} alt="" onError={()=>setMissing(true)}/>}
     {missing && <span className="true-art-placeholder" aria-hidden="true">◆<small>ARTWORK PENDING</small></span>}
   </span>;
 }
 
 function TrueReveal({data,reducedMotion,onContinue}:{data:{artifact:TrueArtifact;digNumber:number};reducedMotion:boolean;onContinue:()=>void}){
-  const [stage,setStage]=useState<"pause"|"message"|"reveal">("pause");
+  const [stage,setStage]=useState<"announcement"|"pause"|"reveal">("announcement");
   const [canClose,setCanClose]=useState(false);
   useEffect(()=>{
-    const t1=setTimeout(()=>setStage("message"), reducedMotion?150:900);
-    const t2=setTimeout(()=>setStage("reveal"), reducedMotion?300:1900);
-    const t3=setTimeout(()=>setCanClose(true), 2000);
+    const t1=setTimeout(()=>setStage("pause"), reducedMotion?200:1150);
+    const t2=setTimeout(()=>setStage("reveal"), reducedMotion?400:2200);
+    const t3=setTimeout(()=>setCanClose(true), reducedMotion?500:2700);
     return ()=>{clearTimeout(t1);clearTimeout(t2);clearTimeout(t3)};
   },[reducedMotion]);
-  return <div className={`true-reveal stage-${stage}`} role="status" aria-live="assertive">
+  return <div className={`true-reveal stage-${stage} theme-${data.artifact.theme||"shadow"}`} role="status" aria-live="assertive">
     <div className="true-reveal-card">
+      {stage==="announcement" && <p className="true-alert">{data.artifact.announcement}</p>}
       {stage==="pause" && <div className="true-pause-mark" aria-hidden="true">◆</div>}
-      {stage!=="pause" && <p className="true-alert">ANOMALOUS OBJECT DETECTED</p>}
       {stage==="reveal" && <>
-        <TrueArtifactArt id={data.artifact.id}/>
         <p className="true-classification">TRUE ARTIFACT</p>
         <h2>{data.artifact.name}</h2>
+        <TrueArtifactArt artifact={data.artifact}/>
         <p className="true-lore">{data.artifact.lore}</p>
+        <div className="true-peon"><small>PEON</small><p>&ldquo;{data.artifact.peonBark}&rdquo;</p></div>
         <p className="true-meta">FOUND AFTER {data.digNumber.toLocaleString()} DIGS</p>
         <button className="continue" disabled={!canClose} onClick={onContinue}>ARCHIVE IT <span>→</span></button>
       </>}
@@ -580,7 +577,7 @@ function TrueArchive({save}:{save:Save}){
     <div className="page-head"><div><p className="eyebrow">NOT GEOLOGY. SOMETHING ELSE.</p><h2>TRUE <i>ARCHIVE</i></h2></div><div className="completion"><span>ARTIFACTS FOUND</span><strong>{owned.length}<small> / {trueArtifactPool.length}</small></strong></div></div>
     <p className="true-archive-intro">Common through Legendary belongs to the mountain. These do not. Each is independently possible on any dig, at any depth, regardless of mine, biome, streak, or luck. Odds: 1 in 2,000. No protection. No pattern.{totalFound?` Total anomalies logged: ${totalFound}.`:""}</p>
     <div className="true-grid">{trueArtifactPool.map(a=>{const count=save.trueArtifacts[a.id]||0,first=save.trueFirst[a.id];return <article key={a.id} className={count?"found":"locked"}>
-      <TrueArtifactArt id={a.id}/>
+      <TrueArtifactArt artifact={a}/>
       <h3>{count?a.name:"UNKNOWN ANOMALY"}</h3>
       <p>{count?a.lore:"Its outline refuses to resolve."}</p>
       <footer>{count?<><span>FOUND ×{count}</span>{first!==undefined&&<small>FOUND AFTER {first.toLocaleString()} DIGS</small>}</>:<span>???</span>}</footer>
