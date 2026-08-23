@@ -72,9 +72,12 @@ export const CANONICAL_EXCAVATION_PROBABILITIES = Object.freeze({emptyDig:0.20,m
 
 export const canAfford=(inventory:Record<string,number>,inputs:Ingredient[])=>inputs.every(i=>(inventory[i.id]||0)>=i.quantity);
 export const spend=(inventory:Record<string,number>,inputs:Ingredient[])=>inputs.reduce((next,i)=>({...next,[i.id]:(next[i.id]||0)-i.quantity}),{...inventory});
+export const maxCraftable=(inventory:Record<string,number>,inputs:Ingredient[])=>inputs.length?Math.max(0,Math.min(...inputs.map(i=>Math.floor((inventory[i.id]||0)/i.quantity)))):0;
+const scaledInputs=(inputs:Ingredient[],count:number)=>inputs.map(i=>({...i,quantity:i.quantity*count}));
 
 export type ResourceState={oreResources:Record<string,number>;mineralResources:Record<string,number>;processedResources:Record<string,number>;ownedTools:string[];toolTier:number};
 export const smeltAtomic=(state:ResourceState,recipe:MetallurgyRecipe):ResourceState|null=>canAfford(state.oreResources,recipe.inputs)?{...state,oreResources:spend(state.oreResources,recipe.inputs),processedResources:{...state.processedResources,[recipe.outputId]:(state.processedResources[recipe.outputId]||0)+recipe.outputQuantity}}:null;
+export const smeltBatchAtomic=(state:ResourceState,recipe:MetallurgyRecipe,count:number):ResourceState|null=>{const quantity=Math.floor(count),inputs=scaledInputs(recipe.inputs,quantity);return quantity>0&&canAfford(state.oreResources,inputs)?{...state,oreResources:spend(state.oreResources,inputs),processedResources:{...state.processedResources,[recipe.outputId]:(state.processedResources[recipe.outputId]||0)+recipe.outputQuantity*quantity}}:null};
 export const forgeAtomic=(state:ResourceState,recipe:ForgeRecipe):ResourceState|null=>{
   const tool=forgedItems.find(t=>t.id===recipe.resultingItemId),previous=forgedItems.find(t=>t.tier===(tool?.tier||0)-1);
   if(!tool||state.ownedTools.includes(tool.id)||(previous&&!state.ownedTools.includes(previous.id))||!canAfford(state.processedResources,recipe.processedInputs)||!canAfford(state.mineralResources,recipe.mineralInputs))return null;

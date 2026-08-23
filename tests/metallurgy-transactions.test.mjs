@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
-import {forgeAtomic,forgeRecipes,forgedItems,metallurgyRecipes,processedMaterials,smeltAtomic} from "../app/metallurgy.ts";
+import {forgeAtomic,forgeRecipes,forgedItems,maxCraftable,metallurgyRecipes,processedMaterials,smeltAtomic,smeltBatchAtomic} from "../app/metallurgy.ts";
 
 const game=readFileSync(new URL("../app/page.tsx",import.meta.url),"utf8");
 const ores=["copper","tin","silver","iron","gold","mithril","truesilver","dark","thorium","feliron","adamantite","khorium","cobalt","saronite","titanium"];
@@ -22,6 +22,21 @@ test("smelting is atomic, spends ore stock only, and persists processed stock",(
   const state=base({oreResources:{copper:2,tin:1},processedResources:{bronze:2}}),recipe=metallurgyRecipes.find(r=>r.id==="alloy-bronze");
   const next=smeltAtomic(state,recipe);assert.deepEqual(next.oreResources,{copper:0,tin:0});assert.equal(next.processedResources.bronze,3);assert.deepEqual(next.mineralResources,{});
   assert.equal(smeltAtomic(base({oreResources:{copper:1,tin:1}}),recipe),null);
+});
+
+test("late-game assemblies support maximum affordable atomic batches",()=>{
+  const saronite=metallurgyRecipes.find(r=>r.id==="assembly-saronite");
+  const titanium=metallurgyRecipes.find(r=>r.id==="assembly-titanium");
+  const state=base({oreResources:{saronite:38,gold:24,titanium:7,silver:11,cobalt:9}});
+  assert.equal(maxCraftable(state.oreResources,saronite.inputs),19);
+  const saroniteBatch=smeltBatchAtomic(state,saronite,19);
+  assert.equal(saroniteBatch.processedResources["saronite-assembly"],19);
+  assert.equal(saroniteBatch.oreResources.saronite,0);
+  assert.equal(saroniteBatch.oreResources.gold,5);
+  assert.equal(maxCraftable(state.oreResources,titanium.inputs),7);
+  const titaniumBatch=smeltBatchAtomic(state,titanium,7);
+  assert.equal(titaniumBatch.processedResources["titanium-assembly"],7);
+  assert.deepEqual({titanium:titaniumBatch.oreResources.titanium,silver:titaniumBatch.oreResources.silver,cobalt:titaniumBatch.oreResources.cobalt},{titanium:0,silver:4,cobalt:2});
 });
 
 test("forging spends processed and mineral stock only and enforces sequence",()=>{
@@ -49,7 +64,7 @@ test("recipe eras are obtainable and do not create mine-unlock circles",()=>{
 
 test("UI separates lifetime history from stock, confirms transactions, and preserves cosmetics",()=>{
   assert.match(game,/combos: \{ \.\.\.s\.combos/);assert.match(game,/ores: \{ \.\.\.s\.ores/);assert.match(game,/minerals: \{ \.\.\.s\.minerals/);
-  assert.match(game,/className="craft-confirm-overlay"/);assert.match(game,/CONFIRM &amp; CONSUME/);assert.match(game,/transactionBusy/);
+  assert.match(game,/className="craft-confirm-overlay"/);assert.match(game,/CONFIRM & CONSUME/);assert.match(game,/BUILD ALL ×/);assert.match(game,/transactionBusy/);
   assert.match(game,/Cosmetic model unchanged/);assert.doesNotMatch(game,/toolSkinId:tool\.id/);
 });
 
