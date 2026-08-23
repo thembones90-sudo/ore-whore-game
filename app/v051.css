@@ -1,0 +1,10 @@
+/* v0.5.1 — canonical generated mineral specimen artwork */
+.mineral-sprite{display:block;object-fit:contain;filter:drop-shadow(0 10px 8px #000b);user-select:none;pointer-events:none}
+.mineral-sprite-album{width:112px;height:112px;margin:7px auto 5px}
+.mineral-sprite-wanted{width:52px;height:52px;grid-row:1/3;align-self:center;margin:-5px 2px -5px -8px}
+.mineral-sprite-reveal{width:152px!important;height:152px!important;animation:pop .5s cubic-bezier(.2,1.8,.4,1)}
+.mineral-sprite-share{width:104px;height:104px;flex:none}
+.completion-row .mineral-sprite-completion{width:38px;height:38px;filter:drop-shadow(0 5px 4px #000)}
+.reveal.quick .mineral-sprite-reveal{width:92px!important;height:92px!important}
+.high-contrast .mineral-sprite{filter:drop-shadow(0 0 2px #fff) drop-shadow(0 8px 7px #000)}
+@media(max-width:760px){.mineral-sprite-album{width:92px;height:92px}.mineral-sprite-reveal{width:120px!important;height:120px!important}.completion-row .mineral-sprite-completion{width:30px;height:30px}}
