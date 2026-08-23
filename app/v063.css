@@ -1,0 +1,17 @@
+/* v0.6.3 — readable locked silhouettes without revealing artifact detail. */
+.true-grid article.locked .true-art-slot{
+  position:relative;opacity:1!important;filter:none!important;
+  border-color:#674d72!important;
+  background:radial-gradient(circle at 50% 46%,#382b3f 0,#201824 52%,#0c090e 100%)!important;
+  box-shadow:inset 0 0 38px #0008,inset 0 0 0 1px #b584ca12,0 0 26px #9e58bd18!important;
+}
+.true-grid article.locked .true-art-slot::before{content:"";position:absolute;inset:12%;border-radius:50%;background:radial-gradient(circle,#b47ac731,transparent 68%);filter:blur(9px)}
+.true-grid article.locked .true-art-silhouette{
+  position:relative;z-index:1;
+  background:linear-gradient(145deg,#92769d,#5d4967 55%,#3f3247)!important;
+  filter:drop-shadow(0 0 1px #d6b5df) drop-shadow(0 10px 8px #000b)!important;
+  opacity:.9;
+}
+.true-grid article.locked .true-art-placeholder.locked-placeholder{position:relative;z-index:1;color:#796083!important;filter:drop-shadow(0 1px #b999c5) drop-shadow(0 10px 8px #000)!important}
+.true-grid article.locked:hover .true-art-silhouette{background:linear-gradient(145deg,#a98ab4,#705779 58%,#4b3a53)!important;filter:drop-shadow(0 0 2px #e6c9ee) drop-shadow(0 12px 9px #000c)!important}
+.high-contrast .true-grid article.locked .true-art-silhouette{background:#b7a1bf!important;filter:drop-shadow(0 0 2px #fff)!important}
