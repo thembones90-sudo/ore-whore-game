@@ -185,7 +185,7 @@ const trueArtifactPool: TrueArtifact[] = [
   {id:"ronaldo",name:"PANINI GOLDEN STICKER OF RONALDO NAZÁRIO",announcement:"THE PHENOMENON HAS BEEN DETECTED.",lore:"Some things are rarer than minerals. Some things are simply eternal.",lockedClue:"Some numbers are worn. One was worshipped.",peonBark:"Boss... this not man. This Ronaldo. Peon take hat off.",peonBarkSequence:[{text:"Boss... this not man.",delayMs:0},{text:"This Ronaldo.",delayMs:700},{text:"Peon take hat off.",delayMs:1700}],image:"/assets/true/ronaldo.webp",selectionWeight:1,theme:"gold"},
   {id:"warglaive",name:"WARGLAIVE OF ILLIDAN",announcement:"YOU ARE NOT PREPARED.",lore:"A crescent of fel-forged defiance. It remembers every hand unworthy of holding it.",lockedClue:"A small thing carrying a very large grudge.",peonBark:"Sharp rock.",image:"/assets/true/warglaive.webp",selectionWeight:1,theme:"fel"},
   {id:"blaizeballs",name:"BLAIZE'S BALLS",announcement:"BIOLOGICAL MATERIAL DETECTED. UNFORTUNATELY.",lore:"Two matching specimens. Classification was attempted and immediately abandoned.",lockedClue:"An image was preserved that should have died with the scanner.",peonBark:"...two rock?",image:"/assets/true/blaizeballs.webp",selectionWeight:1,theme:"biological"},
-  {id:"shadow",name:"SHADOW THE PANTHER",announcement:"SOMETHING IS WATCHING FROM THE DARK.",lore:"The eyes appeared first. The rest waited until you were already afraid.",lockedClue:"He cannot see it. He knows exactly where it is. WUUUUUUUUUU",peonBark:"Kitty?",image:"/assets/true/shadow.webp",selectionWeight:1,theme:"shadow"},
+  {id:"shadow",name:"SHADOW THE PANTHER",announcement:"ANOMALOUS OBJECT DETECTED",lore:"He cannot see it. He knows exactly where it is.",lockedClue:"Something is watching from the dark.",peonBark:"Cat?",image:"/assets/true/shadow.webp",selectionWeight:1,theme:"shadow",systemResponse:"WUUUUUUUUUU"},
   {id:"whorearchives",name:"WHORE ARCHIVES",announcement:"RESTRICTED RECORDS HAVE SURFACED.",lore:"A sealed record of names, depths, and decisions the mountain denies preserving.",lockedClue:"There are records beneath the records.",peonBark:"Me can read?",image:"/assets/true/whorearchives.webp",selectionWeight:1,theme:"archive"},
   {id:"patike",name:"PATIKE",announcement:"DIRECTORY DETECTED. ACCESS SHOULD NOT EXIST.",lore:"The folder opened itself. The access log insists that you were never here.",lockedClue:"The folder exists. This is already too much information.",peonBark:"Me open folder.",image:"/assets/true/patike.webp",selectionWeight:1,theme:"glitch"},
   {id:"invincible",name:"INVINCIBLE'S REINS",announcement:"MOUNT EQUIPMENT DETECTED. MOUNT ABSENT.",lore:"The reins are immaculate. Their owner remains committed to being elsewhere.",lockedClue:"A loyal servant, both in life and death.",peonBark:"...where horse?",image:"/assets/true/invincible.webp",selectionWeight:1,theme:"frost"},
@@ -747,7 +747,7 @@ function TimedPeonBark({artifact,reducedMotion}:{artifact:TrueArtifact;reducedMo
 }
 
 function TrueReveal({data,reducedMotion,onContinue}:{data:{artifact:TrueArtifact;digNumber:number};reducedMotion:boolean;onContinue:()=>void}){
-  const [stage,setStage]=useState<"announcement"|"pause"|"ground"|"deep-pause"|"impossible"|"reveal">("announcement");
+  const [stage,setStage]=useState<"announcement"|"pause"|"shadow-form"|"ground"|"deep-pause"|"impossible"|"reveal">("announcement");
   const [canClose,setCanClose]=useState(false);
   useEffect(()=>{
     const timers:ReturnType<typeof setTimeout>[]=[];
@@ -759,6 +759,11 @@ function TrueReveal({data,reducedMotion,onContinue}:{data:{artifact:TrueArtifact
       after(reducedMotion?700:5400,()=>setStage("impossible"));
       after(reducedMotion?900:6900,()=>setStage("reveal"));
       after(reducedMotion?1100:7900,()=>setCanClose(true));
+    }else if(data.artifact.id==="shadow"){
+      after(reducedMotion?160:950,()=>setStage("pause"));
+      after(reducedMotion?300:1750,()=>setStage("shadow-form"));
+      after(reducedMotion?460:2900,()=>setStage("reveal"));
+      after(reducedMotion?620:4100,()=>setCanClose(true));
     }else{
       after(reducedMotion?200:1150,()=>setStage("pause"));
       after(reducedMotion?400:2200,()=>setStage("reveal"));
@@ -771,6 +776,7 @@ function TrueReveal({data,reducedMotion,onContinue}:{data:{artifact:TrueArtifact
     <div className="true-reveal-card">
       {stageAnnouncement && <p className="true-alert">{stageAnnouncement}</p>}
       {(stage==="pause"||stage==="deep-pause") && <div className="true-pause-mark" aria-hidden="true">◆</div>}
+      {stage==="shadow-form" && <div className="shadow-pre-reveal" aria-label="An unidentified quadrupedal silhouette"><TrueArtifactArt artifact={data.artifact} locked/></div>}
       {stage==="reveal" && <>
         <p className="true-classification">TRUE ARTIFACT</p>
         <h2>{data.artifact.name}</h2>

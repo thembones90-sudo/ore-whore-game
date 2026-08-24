@@ -1,0 +1,64 @@
+/* v0.6.8 — collision-proof mine navigation and Shadow's canonical reveal. */
+
+/* Mine selection participates in document flow. It can never paint over the wall. */
+.mine-screen>.volume-biomes{
+  position:relative!important;
+  inset:auto!important;
+  z-index:3;
+  width:min(1060px,88vw)!important;
+  margin:8px auto 10px!important;
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+}
+.mine-screen>.volume-biomes::before{grid-column:1/-1}
+.mine-screen>.volume-biomes .mine-card{min-width:0;min-height:52px;padding:8px 10px}
+.mine-screen>.volume-biomes .mine-card small{display:block;overflow:hidden;line-height:1.35;text-overflow:ellipsis}
+.mine-screen.stage-ore>.volume-biomes{width:min(760px,88vw)!important;grid-template-columns:1fr!important}
+.mine-screen.stage-ore>.volume-biomes::before{grid-column:1}
+
+/* Locked Shadow is deliberately absolute black: silhouette only, no readable features. */
+.true-grid article.locked:has(.true-art-silhouette[style*="shadow.webp"]) .true-art-slot,
+.shadow-pre-reveal .true-art-slot{
+  background:#000!important;
+  border-color:#161616!important;
+  box-shadow:inset 0 0 30px #000,0 0 34px #000!important;
+}
+.true-grid article.locked:has(.true-art-silhouette[style*="shadow.webp"]) .true-art-slot::before{display:none!important}
+.true-grid article.locked:has(.true-art-silhouette[style*="shadow.webp"]) .true-art-silhouette,
+.shadow-pre-reveal .true-art-silhouette{
+  background:#000!important;
+  filter:none!important;
+  opacity:1!important;
+}
+.shadow-pre-reveal{display:grid;place-items:center;animation:shadowShapeIn 1s ease-out both}
+.shadow-pre-reveal .true-art-slot{width:min(560px,82vw);height:min(430px,52vh);overflow:hidden}
+.shadow-pre-reveal .true-art-crop{background:#000!important}
+
+/* The discovery turns black into readable plush, seams, hardware and rim-lit volume. */
+.true-reveal.stage-reveal.theme-shadow .true-art-slot,
+.true-inspection.theme-shadow .true-art-slot{
+  background:radial-gradient(circle at 54% 42%,#66587040,#17111d 58%,#050306 82%)!important;
+  box-shadow:inset 0 0 48px #000,0 0 10px #e4d5ff,0 0 42px #a98bcf,0 0 100px #5a397e88!important;
+}
+.true-reveal.stage-reveal.theme-shadow .true-art-img,
+.true-inspection.theme-shadow .true-art-img{
+  filter:brightness(1.2) contrast(1.14) drop-shadow(-7px -3px 3px #d7c9ef88) drop-shadow(8px 12px 11px #000) drop-shadow(0 0 22px #b99bda88)!important;
+}
+.true-reveal.stage-reveal.theme-shadow .true-art-crop{animation:shadowLeashBob .48s 1.05s cubic-bezier(.2,.9,.35,1) both}
+.true-reveal.stage-reveal.theme-shadow .true-system{border-color:#b88bda;background:#0b0610!important;box-shadow:0 0 26px #ae76d855}
+.true-reveal.stage-reveal.theme-shadow .true-system p{font-size:18px;font-weight:900;letter-spacing:3px;color:#eadcff;text-shadow:0 0 18px #d594ff}
+@keyframes shadowShapeIn{from{opacity:0;transform:scale(.82);filter:blur(8px)}to{opacity:1;transform:scale(1);filter:none}}
+@keyframes shadowLeashBob{0%,100%{transform:none}42%{transform:translate(0,-11px) rotate(-1deg)}68%{transform:translate(0,4px) rotate(.4deg)}}
+.reduced-motion .shadow-pre-reveal,.reduced-motion .true-reveal.stage-reveal.theme-shadow .true-art-crop{animation:none!important}
+
+@media(max-width:1100px){
+  .mine-screen>.volume-biomes{order:4!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;margin-bottom:10px!important}
+  .mine-screen>.rock{order:5!important}
+  .mine-screen>.dig-panel{order:6!important}
+  .mine-screen>.album-link{order:7!important}
+}
+@media(max-width:600px){
+  .mine-screen>.volume-biomes{width:92vw!important;grid-template-columns:1fr!important}
+  .mine-screen>.volume-biomes::before{grid-column:1}
+  .shadow-pre-reveal .true-art-slot{width:88vw;height:42vh}
+}
