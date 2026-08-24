@@ -181,3 +181,8 @@
   .true-reveal.stage-reveal.theme-infernal .true-art-slot{width:min(88vw,540px)!important;height:clamp(230px,38vh,360px)!important}
   .true-reveal-copy{width:90vw;margin-top:14px;padding:16px 14px 18px}
 }
+
+/* Always-visible audio controls: soundtrack and mining effects should never be hidden in a settings page. */
+.audio-dock{display:flex;align-items:stretch;gap:6px;margin-left:14px;position:relative;z-index:4}.audio-dock button{min-width:82px;padding:7px 9px;border:1px solid #474b43;background:#121511;color:#777;font-size:7px;font-weight:900;letter-spacing:.8px;cursor:pointer}.audio-dock button.enabled{border-color:#90a43f;color:#e6f7a0;background:#1a2012}.audio-dock button span{display:block;margin-bottom:2px}.audio-dock label{display:grid;grid-template-columns:1fr auto;align-items:center;min-width:128px;padding:5px 9px;border:1px solid #3c4039;background:#10130f}.audio-dock label>span{grid-column:1/3;color:#969b8e;font-size:6px;font-weight:900;letter-spacing:1.1px}.audio-dock input[type="range"]{width:92px;height:12px;accent-color:var(--acid);cursor:pointer}.audio-dock input:disabled{opacity:.32;cursor:not-allowed}.audio-dock label b{color:var(--acid);font:8px monospace}
+@media(max-width:1450px){.audio-dock{position:fixed;right:12px;bottom:12px;z-index:180;padding:6px;border:1px solid #545947;background:#090b09ed;box-shadow:0 8px 28px #000}.depth{display:none}}
+@media(max-width:620px){.audio-dock{left:8px;right:8px;bottom:8px;justify-content:center}.audio-dock button{min-width:70px}.audio-dock button span{display:none}.audio-dock label{min-width:120px}.audio-dock label>span{font-size:5px}}

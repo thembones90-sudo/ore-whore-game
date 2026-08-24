@@ -12,15 +12,22 @@ test("canonical soundtrack is bundled and loops through the game audio element",
 });
 
 test("music and pickaxe effects have independent persisted toggles", () => {
-  assert.match(page, /musicEnabled:boolean;pickaxeSfxEnabled:boolean/);
-  assert.match(page, /musicEnabled:true,pickaxeSfxEnabled:true/);
+  assert.match(page, /musicVolume:number;sfx:number;musicEnabled:boolean;pickaxeSfxEnabled:boolean/);
+  assert.match(page, /musicVolume:\.65,sfx:\.8,musicEnabled:true,pickaxeSfxEnabled:true/);
   assert.match(page, /MUSIC · \{save\.settings\.musicEnabled\?"ON":"OFF"\}/);
   assert.match(page, /PICKAXE EFFECTS · \{save\.settings\.pickaxeSfxEnabled\?"ON":"OFF"\}/);
   assert.match(page, /if\(!save\.settings\.pickaxeSfxEnabled\|\|save\.settings\.master<=0/);
 });
 
 test("soundtrack obeys master volume and browser gesture playback policy", () => {
-  assert.match(page, /audio\.volume=Math\.min\(1,Math\.max\(0,save\.settings\.master\*\.42\)\)/);
+  assert.match(page, /audio\.volume=Math\.min\(1,Math\.max\(0,save\.settings\.master\*save\.settings\.musicVolume\)\)/);
   assert.match(page, /window\.addEventListener\("pointerdown",resume/);
   assert.match(page, /if\(!loaded\|\|!save\.settings\.musicEnabled\)\{audio\.pause\(\)/);
+});
+
+test("the top bar exposes always-visible synchronized audio controls", () => {
+  assert.match(page, /className="audio-dock" aria-label="Audio controls"/);
+  assert.match(page, /aria-label="Music volume"/);
+  assert.match(page, /Math\.round\(save\.settings\.musicVolume\*100\)/);
+  assert.match(page, /title="Toggle pickaxe effects"/);
 });
