@@ -11,7 +11,7 @@ test("every cosmetic selects a data-driven motion profile",()=>{
   assert.match(skins,/id:"slash-hook"/);
   assert.match(skins,/id:"pneumatic"/);
   assert.match(skins,/id:"graceful-arc"/);
-  assert.equal((skins.match(/animation: \{/g)||[]).length,4);
+  assert.equal((skins.match(/animation: \{/g)||[]).length,5);
   assert.match(page,/motion-\$\{activeSkin\.animation\.id\}/);
 });
 

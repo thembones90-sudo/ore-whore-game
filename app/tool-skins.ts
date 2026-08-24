@@ -5,9 +5,10 @@ export type ToolSkin = {
   artwork: string;
   flavor: string;
   unlocked: boolean;
+  unlockArtifactId?: string;
   bark?: string;
   barkSequence?: {text:string;delayMs:number}[];
-  silhouette: "pick" | "jackhammer" | "roseheart";
+  silhouette: "pick" | "jackhammer" | "roseheart" | "shovel";
   animation: ToolAnimationProfile;
 };
 
@@ -19,6 +20,7 @@ export type ToolAnimationProfile = {
 };
 
 export const DEFAULT_TOOL_SKIN_ID = "rock-bonker";
+export const ALIJA_SHOVEL_SKIN_ID = "alijas-shovel";
 
 export const toolSkins: ToolSkin[] = [
   {
@@ -66,7 +68,22 @@ export const toolSkins: ToolSkin[] = [
     silhouette: "roseheart",
     animation: {id:"graceful-arc",impactFx:"rose-petals",sfxFamily:"crystal-chime",engagedLoop:false},
   },
+  {
+    id: ALIJA_SHOVEL_SKIN_ID,
+    name: "ALIJA'S SHOVEL",
+    technicalName: "TRUE Artefact Shovel",
+    artwork: "/assets/true/alijas-shovel.webp",
+    flavor: "The legendary shovel. Equipment-category compliance was declined.",
+    unlocked: false,
+    unlockArtifactId: "alijas-shovel",
+    bark: "Boss, me need biggest shovel. This shovel best.",
+    silhouette: "shovel",
+    animation: {id:"bonk",impactFx:"dust",sfxFamily:"iron-bonk",engagedLoop:false},
+  },
 ];
 
-export const toolSkin = (id: string | undefined) =>
-  toolSkins.find((skin) => skin.id === id && skin.unlocked) ?? toolSkins[0];
+export const isToolSkinUnlocked = (skin: ToolSkin, unlocks: string[] = []) =>
+  skin.unlocked || unlocks.includes(skin.id);
+
+export const toolSkin = (id: string | undefined, unlocks: string[] = []) =>
+  toolSkins.find((skin) => skin.id === id && isToolSkinUnlocked(skin, unlocks)) ?? toolSkins[0];
