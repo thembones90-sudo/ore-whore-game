@@ -26,7 +26,7 @@ test("TRUE Artefacts are unique and previously found entries cannot roll again",
   assert.match(page, /if\(!configured\.length\)return null/);
   assert.match(page, /pickTrue\(rng\.current,save\.trueArtifacts\)/);
   assert.match(page, /trueArtifacts:\{\.\.\.s\.trueArtifacts,\[artifact\.id\]:1\}/);
-  assert.match(page, /if\(Number\(old\.trueArtifacts\?\.\[artifact\.id\]\|\|0\)>0\)trueArtifacts\[artifact\.id\]=1/);
+  assert.match(page, /artifact\.id!==ASOC_TICKET_ID&&Number\(old\.trueArtifacts\?\.\[artifact\.id\]\|\|0\)>0\)trueArtifacts\[artifact\.id\]=1/);
   assert.match(page, /encounter&&!trueArtifacts\[encounter\.artifactId\]/);
 });
 

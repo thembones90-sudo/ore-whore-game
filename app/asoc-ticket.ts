@@ -8,7 +8,7 @@ export const ASOC_TICKET_CHANCE = 0.001;
  */
 export const asocTicketChanceForDig = (
   equippedToolId: string,
-  ownedArtifacts: Record<string, number>,
-) => equippedToolId === ASOC_REQUIRED_TOOL_ID && !ownedArtifacts[ASOC_TICKET_ID]
+  runCompleted: boolean,
+) => equippedToolId === ASOC_REQUIRED_TOOL_ID && !runCompleted
   ? ASOC_TICKET_CHANCE
   : 0;

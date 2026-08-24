@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./endgame.css";
 import "./v02.css";
 import "./v03.css";
 import "./v031.css";
