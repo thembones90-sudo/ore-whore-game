@@ -44,6 +44,8 @@ test("the mine exposes a consumable control, countdown, barks, audio ramp and ac
   assert.match(data,/PEON IS THE PICKAXE NOW\./);
   assert.match(page,/playbackRate=starts\[index\]\+\(target-starts\[index\]\)\*smooth/);
   assert.match(css,/PEON OPERATING BEYOND SAFE BONK LIMITS/);
+  assert.match(css,/width:min\(1060px,calc\(100vw - 440px\)\)/);
+  assert.match(css,/@media\(max-width:1100px\)\{\.berserk-console\{order:2;width:min\(94vw,900px\)/);
   assert.match(css,/\.reduced-shake/);
   assert.match(css,/\.reduced-motion/);
   assert.ok(layout.lastIndexOf('import "./v080.css";')>layout.lastIndexOf('import "./v079.css";'));
