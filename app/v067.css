@@ -1,0 +1,141 @@
+/* v0.6.7 — MINE hierarchy pass: context yields to the playable wall. */
+.mine-screen{
+  padding:22px 0 56px;
+}
+.mine-copy{
+  width:min(760px,68vw);
+}
+.mine-copy h1{
+  margin:5px 0 7px;
+  font-size:clamp(42px,4.6vw,70px);
+  line-height:.88;
+  letter-spacing:-4px;
+}
+.mine-copy .eyebrow{
+  margin:0;
+}
+.mine-copy>p:last-child{
+  max-width:620px;
+  margin:10px auto 9px;
+  font-size:15px;
+  line-height:1.35;
+}
+.mine-mastery{
+  margin:8px auto 10px;
+}
+.extraction-quota:not(.quota-complete-compact)>div:first-child{
+  padding-bottom:4px;
+}
+.extraction-quota:not(.quota-complete-compact)>i{
+  height:5px;
+  margin-bottom:3px;
+}
+.extraction-quota:not(.quota-complete-compact)>.quota-list{
+  gap:4px;
+  padding:3px 4px 4px!important;
+}
+.extraction-quota:not(.quota-complete-compact)>.quota-list>span{
+  grid-template-columns:22px 1fr auto auto;
+  gap:5px;
+  min-height:30px;
+  padding:3px 5px;
+}
+.extraction-quota:not(.quota-complete-compact)>.quota-list img{
+  width:22px;
+  height:22px;
+}
+.extraction-quota:not(.quota-complete-compact)>small{
+  display:none;
+}
+.quota-complete-compact{
+  grid-template-columns:minmax(0,1fr) auto auto!important;
+  gap:10px!important;
+  min-height:42px!important;
+  padding:6px 10px!important;
+}
+.quota-complete-compact>div{
+  min-width:0;
+  gap:10px;
+}
+.quota-complete-compact>div span{
+  overflow:hidden;
+  font-size:8px;
+  letter-spacing:1.35px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.quota-complete-compact>div strong{
+  flex:0 0 auto;
+  font:10px monospace;
+}
+.quota-complete-compact>small{
+  grid-column:2!important;
+  grid-row:1!important;
+  padding:0!important;
+  font-size:7px;
+  letter-spacing:1.2px;
+  white-space:nowrap;
+}
+.quota-complete-compact button{
+  grid-column:3!important;
+  grid-row:1!important;
+  padding:7px 10px;
+}
+.rock{
+  margin-top:2px;
+}
+.dig-panel.instruction-collapsed{
+  width:min(620px,62vw);
+  min-height:56px;
+  justify-content:center;
+  padding:10px 22px;
+}
+.dig-panel.instruction-collapsed>.integrity:first-child{
+  display:block;
+  width:100%;
+  max-width:520px;
+}
+.dig-panel.instruction-collapsed .integrity>span{
+  text-align:center;
+}
+.dig-panel.instruction-collapsed .integrity>i{
+  justify-content:center;
+}
+.album-link{
+  margin-top:18px;
+}
+@media(max-width:1100px){
+  .mine-screen{display:flex;flex-direction:column}
+  .mine-copy{order:1}
+  .hunt-banner,.vein-banner,.artifact-modifier-hud{order:2}
+  .mine-mastery{order:3}
+  .rock{order:4}
+  .dig-panel{order:5}
+  .volume-biomes{order:6}
+  .album-link{order:7}
+  .mine-transition{order:8}
+  .mine-copy{width:min(760px,88vw)}
+  .mine-copy h1{font-size:clamp(40px,7vw,62px)}
+}
+@media(max-width:760px){
+  .mine-screen{padding:17px 0 38px}
+  .mine-copy{width:92vw}
+  .mine-copy h1{font-size:clamp(36px,10vw,54px);letter-spacing:-3px}
+  .mine-copy>p:last-child{margin:8px auto;font-size:13px}
+  .mine-mastery{margin:8px auto 10px}
+  .extraction-quota:not(.quota-complete-compact)>.quota-list{gap:6px;padding:7px 4px!important}
+  .extraction-quota:not(.quota-complete-compact)>.quota-list>span{grid-template-columns:28px 1fr auto auto;gap:7px;min-height:40px;padding:6px 8px}
+  .extraction-quota:not(.quota-complete-compact)>.quota-list img{width:28px;height:28px}
+  .extraction-quota:not(.quota-complete-compact)>small{display:block}
+  .quota-complete-compact{grid-template-columns:minmax(0,1fr) auto!important}
+  .quota-complete-compact>small{display:none}
+  .quota-complete-compact button{grid-column:2!important}
+  .dig-panel.instruction-collapsed{width:88vw;min-height:52px;padding:9px 14px}
+}
+@media(max-width:480px){
+  .mine-screen{padding-top:14px}
+  .mine-copy h1{font-size:clamp(34px,11vw,46px)}
+  .mine-copy>p:last-child{font-size:12px}
+  .quota-complete-compact>div strong{display:none}
+  .dig-panel.instruction-collapsed{width:94vw}
+}
