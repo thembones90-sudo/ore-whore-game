@@ -1,0 +1,129 @@
+/* v0.8.3 — Interface Constitution
+   Shared visual grammar only. No gameplay, excavation, or save logic. */
+:root{
+  --ui-bg:#090b09;
+  --ui-surface:#111410;
+  --ui-surface-raised:#171b16;
+  --ui-surface-soft:#1d211b;
+  --ui-line:#343a33;
+  --ui-line-strong:#596152;
+  --ui-text:#eeeae0;
+  --ui-muted:#9a9f96;
+  --ui-dim:#6e746c;
+  --ui-accent:var(--acid,#d9ff45);
+  --ui-danger:#e17959;
+  --ui-gold:#d8b34e;
+  --ui-purple:#d883f5;
+  --ui-space-1:6px;
+  --ui-space-2:10px;
+  --ui-space-3:16px;
+  --ui-space-4:24px;
+  --ui-space-5:36px;
+  --ui-radius:0px;
+  --ui-shadow:0 18px 48px #0008;
+  --ui-label:800 8px/1.25 Arial,sans-serif;
+}
+body{color:var(--ui-text);font-kerning:normal;text-rendering:optimizeLegibility}
+::selection{background:var(--ui-accent);color:#10130d}
+
+/* Canonical page hierarchy */
+.page{width:min(1500px,100%);margin-inline:auto;padding:clamp(28px,4vw,64px)}
+.page-head{position:relative;display:flex;align-items:end;justify-content:space-between;gap:var(--ui-space-4);padding:0 0 26px;border-bottom:1px solid var(--ui-line)}
+.page-head::after{content:"";position:absolute;left:0;bottom:-1px;width:clamp(72px,9vw,138px);height:2px;background:var(--ui-accent);box-shadow:0 0 18px color-mix(in srgb,var(--ui-accent) 35%,transparent)}
+.page-head .eyebrow,.section-label,.workshop-header small,.material-ledger>h3,.skin-locker>h3,.alloy-stash>h3{color:var(--ui-muted);font:var(--ui-label);letter-spacing:.24em;text-transform:uppercase}
+.page-head h2{margin:10px 0 0;color:var(--ui-text);line-height:.9;text-wrap:balance}
+.page-head h2 i{color:var(--ui-accent)}
+.page-head .completion{flex:none;min-width:150px;border:1px solid var(--ui-line);border-left:4px solid var(--ui-accent);background:linear-gradient(135deg,var(--ui-surface-raised),var(--ui-surface));box-shadow:var(--ui-shadow)}
+
+/* One industrial panel language */
+:where(.volume-overview,.overview-highlights,.record-grid,.settings-grid,.today-summary,.hunt-records,.wanted-sort,.wanted-filters,.wanted-list>article,.true-grid article,.material-ledger,.alloy-stash,.skin-locker,.upgrade-path,.equipped-board,.metallurgy-workbench,.craft-confirm,.ngplus-confirm section,.deep-way-failure section){
+  border-color:var(--ui-line)!important;
+  background-color:var(--ui-surface);
+}
+:where(.wanted-list>article,.true-grid article,.material-ledger,.alloy-stash,.skin-locker,.upgrade-path,.equipped-board,.metallurgy-workbench){box-shadow:0 14px 36px #0005}
+:where(.volume-overview,.record-grid,.settings-grid,.completion-stats){gap:1px;background-color:var(--ui-line)}
+:where(.volume-overview,.record-grid,.settings-grid)>*{background:linear-gradient(145deg,var(--ui-surface-raised),var(--ui-surface))}
+
+/* Canonical controls — special gameplay/art controls remain exempt. */
+button:not(.rock):not(.true-card-inspect){-webkit-tap-highlight-color:transparent}
+:where(.wanted-sort,.wanted-filters,.volume-missing,.wanted-list footer,.utility-buttons,.settings-grid,.upgrade-path footer,.skin-rack,.craft-confirm,.ngplus-confirm,.forbidden-tunnel-card footer,.completion-actions) button:not(.true-card-inspect){
+  min-height:40px;
+  border:1px solid var(--ui-line-strong);
+  background:linear-gradient(180deg,#1a1e18,#10130f);
+  color:var(--ui-text);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:border-color .16s ease,background .16s ease,color .16s ease,translate .16s ease,box-shadow .16s ease;
+}
+:where(.wanted-sort,.wanted-filters,.volume-missing,.wanted-list footer,.utility-buttons,.settings-grid,.upgrade-path footer,.skin-rack,.craft-confirm,.ngplus-confirm,.forbidden-tunnel-card footer,.completion-actions) button:not(:disabled):not(.true-card-inspect):hover{
+  border-color:var(--ui-accent);
+  color:var(--ui-accent);
+  background:linear-gradient(180deg,#252b1c,#151a11);
+  translate:0 -1px;
+  box-shadow:0 8px 22px #0007,inset 0 -2px color-mix(in srgb,var(--ui-accent) 28%,transparent);
+}
+button:not(.rock):not(.true-card-inspect):focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--ui-accent);outline-offset:3px}
+button:disabled{cursor:not-allowed;filter:saturate(.35);opacity:.48}
+input,select{border:1px solid var(--ui-line);background:#0d100d;color:var(--ui-text);accent-color:var(--ui-accent)}
+
+/* Navigation: compact, readable, consistent selection state. */
+.topbar{border-bottom-color:var(--ui-line);background:#0d100ef5;box-shadow:0 8px 26px #0005;backdrop-filter:blur(14px)}
+.topbar nav button{position:relative;color:var(--ui-muted);transition:color .15s ease,background .15s ease}
+.topbar nav button::after{content:"";position:absolute;left:24%;right:24%;bottom:-1px;height:2px;background:var(--ui-accent);scale:0 1;transition:scale .18s ease}
+.topbar nav button:hover{color:var(--ui-text);background:#ffffff05}
+.topbar nav button.active::after{scale:1 1}
+.topbar nav button.active{color:var(--ui-text)}
+.topbar nav b{border:1px solid #3b4039;background:#20241f;color:#d5d8d0}
+
+/* Cards and data density */
+.record-grid>div,.settings-grid>div,.volume-overview span{min-height:92px;padding:18px}
+.record-grid small,.settings-grid small,.volume-overview small,.completion-stats small{color:var(--ui-muted);font:var(--ui-label);letter-spacing:.19em}
+.record-grid strong,.settings-grid strong,.volume-overview strong{color:var(--ui-text)}
+.wanted-list>article,.true-grid article{transition:border-color .18s ease,background .18s ease,translate .18s ease,box-shadow .18s ease}
+.wanted-list>article:hover,.true-grid article.found:hover{z-index:1;border-color:var(--ui-line-strong)!important;background-color:var(--ui-surface-raised);translate:0 -2px;box-shadow:0 18px 42px #0009}
+.true-grid article.found{border-top:2px solid var(--ui-purple)!important}
+.true-grid article.locked{border-top:2px solid #4a3b4e!important}
+
+/* Overlay anatomy: readable frame, explicit close/control hierarchy. */
+:where(.craft-confirm-overlay,.ngplus-confirm,.deep-way-failure,.true-inspection,.true-reveal){overscroll-behavior:contain}
+:where(.craft-confirm,.ngplus-confirm section,.deep-way-failure section){position:relative;box-shadow:0 28px 90px #000c,inset 0 0 0 1px #ffffff08}
+:where(.craft-confirm,.ngplus-confirm section,.deep-way-failure section)::before{content:"";position:absolute;inset:8px;border:1px solid #ffffff0b;pointer-events:none}
+.close,.true-inspection-close{display:grid;place-items:center;min-width:44px;min-height:44px;border:1px solid var(--ui-line-strong);background:#0c0e0c;color:var(--ui-muted);transition:border-color .15s,color .15s,background .15s}
+.close:hover,.true-inspection-close:hover{border-color:var(--ui-danger);background:#25110d;color:#ffd7ca}
+
+/* Forge, Wanted, Records and More use the same section rhythm. */
+.forge-page,.wanted-page,.records-page,.more-page,.album-page,.true-archive-page{padding-top:clamp(34px,4vw,64px)}
+.workshop-header,.wanted-sort,.today-summary,.true-archive-intro{margin-top:var(--ui-space-4)}
+.material-ledger,.alloy-stash,.skin-locker,.upgrade-path{margin-top:var(--ui-space-3)}
+.workshop-sign,.forge-blueprint{box-shadow:var(--ui-shadow)}
+
+/* Responsive rules are compositional, not simple shrinkage. */
+@media(max-width:980px){
+  .page{padding-inline:22px}
+  .page-head{align-items:flex-start}
+  .topbar nav button{padding-inline:13px;letter-spacing:1.15px}
+  .record-grid,.settings-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:720px){
+  .page{padding:28px 14px 54px}
+  .page-head{display:grid;grid-template-columns:1fr;gap:16px}
+  .page-head .completion{width:100%;min-width:0}
+  .page-head h2{font-size:clamp(42px,13vw,62px)!important;letter-spacing:-3px!important}
+  .record-grid,.settings-grid,.volume-overview{grid-template-columns:1fr!important}
+  .record-grid>div,.settings-grid>div,.volume-overview span{min-height:76px}
+  .wanted-list>article,.true-grid article{box-shadow:none}
+  .true-archive-intro{font-size:15px;line-height:1.7}
+}
+@media(max-width:480px){
+  .page{padding-inline:10px}
+  .page-head h2{font-size:40px!important;letter-spacing:-2px!important}
+  .completion-actions{gap:10px}
+  :where(.craft-confirm,.ngplus-confirm section,.deep-way-failure section){padding:34px 16px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important}
+  .topbar nav button::after,.wanted-list>article,.true-grid article,button{transition-duration:0s!important}
+}
