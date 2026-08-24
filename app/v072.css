@@ -1,9 +1,10 @@
-/* v0.72 — authored Old Mine wall states, stationary environment, input-safe crossfades. */
-.old-mine-stage-art{position:absolute;inset:0;z-index:2;border-radius:inherit;overflow:hidden;pointer-events:none}
-.old-mine-stage-art i{position:absolute;inset:0;display:block;opacity:0;background-position:center;background-size:cover;background-repeat:no-repeat;transition:opacity 420ms ease;will-change:opacity}
-.old-mine-stage-art .old-stage-0{background-image:url('/assets/mines/old-mine-stage-0.webp')}.old-mine-stage-art .old-stage-1{background-image:url('/assets/mines/old-mine-stage-1.webp')}.old-mine-stage-art .old-stage-2{background-image:url('/assets/mines/old-mine-stage-2.webp')}.old-mine-stage-art .old-stage-3{background-image:url('/assets/mines/old-mine-stage-3.webp')}.old-mine-stage-art .old-stage-4{background-image:url('/assets/mines/old-mine-stage-4.webp');transition-duration:520ms}
-.biome-old .depletion-0 .old-stage-0,.biome-old .depletion-1 .old-stage-1,.biome-old .depletion-2 .old-stage-2,.biome-old .depletion-3 .old-stage-3,.biome-old .depletion-4 .old-stage-4{opacity:1}
-/* Authored damage replaces the synthetic cavity/rubble treatment only in Old Mine. */
-.biome-old .mine-depletion,.biome-old .depletion-structure{opacity:0!important}
-.biome-old.stage-ore .old-mine-stage-art,.biome-old.stage-artifact .old-mine-stage-art{filter:brightness(.82)}
-@media(prefers-reduced-motion:reduce){.old-mine-stage-art i{transition:none}}
+/* v0.72 — authored biome wall states, stationary environment, input-safe crossfades. */
+.mine-stage-art{position:absolute;inset:0;z-index:2;border-radius:inherit;overflow:hidden;pointer-events:none}
+.mine-stage-art i{position:absolute;inset:0;display:block;opacity:0;background-position:center;background-size:cover;background-repeat:no-repeat;transition:opacity 420ms ease;will-change:opacity}
+.old-mine-stage-art .mine-stage-0{background-image:url('/assets/mines/old-mine-stage-0.webp')}.old-mine-stage-art .mine-stage-1{background-image:url('/assets/mines/old-mine-stage-1.webp')}.old-mine-stage-art .mine-stage-2{background-image:url('/assets/mines/old-mine-stage-2.webp')}.old-mine-stage-art .mine-stage-3{background-image:url('/assets/mines/old-mine-stage-3.webp')}.old-mine-stage-art .mine-stage-4{background-image:url('/assets/mines/old-mine-stage-4.webp');transition-duration:520ms}
+.deep-mine-stage-art .mine-stage-0{background-image:url('/assets/mines/deep-mine-stage-0.webp')}.deep-mine-stage-art .mine-stage-1{background-image:url('/assets/mines/deep-mine-stage-1.webp')}.deep-mine-stage-art .mine-stage-2{background-image:url('/assets/mines/deep-mine-stage-2.webp')}.deep-mine-stage-art .mine-stage-3{background-image:url('/assets/mines/deep-mine-stage-3.webp')}.deep-mine-stage-art .mine-stage-4{background-image:url('/assets/mines/deep-mine-stage-4.webp');transition-duration:520ms}
+.depletion-0 .mine-stage-0,.depletion-1 .mine-stage-1,.depletion-2 .mine-stage-2,.depletion-3 .mine-stage-3,.depletion-4 .mine-stage-4{opacity:1}
+/* Authored damage replaces synthetic cavity/rubble treatment in completed biomes. */
+.biome-old .mine-depletion,.biome-old .depletion-structure,.biome-deep .mine-depletion,.biome-deep .depletion-structure{opacity:0!important}
+.stage-ore .mine-stage-art,.stage-artifact .mine-stage-art{filter:brightness(.82)}
+@media(prefers-reduced-motion:reduce){.mine-stage-art i{transition:none}}

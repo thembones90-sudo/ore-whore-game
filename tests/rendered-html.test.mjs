@@ -57,8 +57,8 @@ test("server-renders the ORE WHORE game shell", async () => {
   assert.match(html, /class="depletion-structure"/);
   assert.match(html, /SURVEY STATE/);
   assert.match(html, /INTACT FACE/);
-  assert.match(html, /class="old-mine-stage-art"/);
-  assert.match(html, /old-stage-4/);
+  assert.match(html, /mine-stage-art old-mine-stage-art/);
+  assert.match(html, /mine-stage-4/);
 
   // Sequential mine gating: Deep/Outland/Northrend start locked
   assert.match(html, /biome-card-deep\s+locked/);
