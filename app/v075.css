@@ -1,0 +1,23 @@
+/* v0.7.5 — discovered TRUE Artefact art floats cleanly; no opaque square behind it. */
+.true-art-slot:not(.locked-art){
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.true-grid article.found .true-art-slot{
+  border-color:transparent!important;
+  border-radius:0!important;
+  overflow:visible!important;
+}
+.true-grid article.found .true-art-slot>.true-art-crop{
+  overflow:visible!important;
+  clip-path:none!important;
+}
+.true-reveal.stage-reveal .true-art-slot:not(.locked-art),
+.true-inspection .true-art-slot:not(.locked-art){
+  background:transparent!important;
+  box-shadow:0 0 8px #fff,0 0 32px #ffe16f,0 0 95px #ffad1f66!important;
+}
+.true-reveal.stage-reveal .true-art-slot:not(.locked-art):before,
+.true-inspection .true-art-slot:not(.locked-art):before{
+  background:transparent!important;
+}
