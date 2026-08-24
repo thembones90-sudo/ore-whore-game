@@ -38,13 +38,13 @@ test("migration strips obsolete top-level probability while preserving pending t
   assert.match(game,/\.\.\.safeOld/);
 });
 
-test("schema 15 migration preserves lifetime records and reconstructs separate spendable inventories",()=>{
+test("schema 16 migration preserves lifetime records and reconstructs separate spendable inventories",()=>{
   assert.match(game,/oreResources=old\.oreResources/);
   assert.match(game,/mineralResources=old\.mineralResources/);
   assert.match(game,/processedResources=old\.processedResources/);
   assert.match(game,/ownedTools=Array\.isArray\(old\.ownedTools\)/);
   assert.match(game,/toolTier=Math\.max/);
-  assert.match(game,/schema:15/);
+  assert.match(game,/schema:16/);
   assert.match(game,/oreResources:\{\.\.\.s\.oreResources/);
   assert.match(game,/mineralResources:\{\.\.\.s\.mineralResources/);
 });

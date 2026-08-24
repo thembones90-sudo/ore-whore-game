@@ -10,7 +10,8 @@ export type AnalyticsEvent =
   | "forbidden_tunnel_second_chamber_reached" | "forbidden_tunnel_second_path_selected"
   | "forbidden_tunnel_sealed_passage" | "forbidden_tunnel_deep_way"
   | "artifact_modifier_activated" | "artifact_modifier_consumed" | "artifact_modifier_roll_failed"
-  | "artifact_won_from_modified_dig";
+  | "artifact_won_from_modified_dig" | "asoc_ticket_triggered"
+  | "berserk_activated" | "berserk_ended";
 
 const started = Date.now();
 export function track(event: AnalyticsEvent, context: Record<string, unknown> = {}) {

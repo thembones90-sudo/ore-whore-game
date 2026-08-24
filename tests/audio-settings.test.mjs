@@ -47,7 +47,7 @@ test("all six canonical pickaxe hits are bundled and randomized without immediat
   assert.match(page,/pickaxeHitPoolRef=useRef<HTMLAudioElement\[\]>/);
   assert.match(page,/if\(lastPickaxeHitRef\.current>=0&&index>=lastPickaxeHitRef\.current\)index\+\+/);
   assert.match(page,/const hit=template\.cloneNode\(true\) as HTMLAudioElement/);
-  assert.match(page,/hit\.volume=Math\.min\(1,save\.settings\.master\*save\.settings\.sfx\)/);
+  assert.match(page,/hit\.volume=Math\.min\(1,save\.settings\.master\*save\.settings\.sfx\*\(currentBerserk\?1\.18:1\)\)/);
 });
 
 test("soundtrack obeys master volume and browser gesture playback policy", () => {
