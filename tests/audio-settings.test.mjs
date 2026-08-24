@@ -4,12 +4,23 @@ import { readFileSync, statSync } from "node:fs";
 
 const page = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
 const soundtrack = new URL("../public/assets/audio/echoes-of-the-forgotten-crypt.wav", import.meta.url);
+const trueArtifactCue = new URL("../public/assets/audio/true-artefact.wav", import.meta.url);
 const pickaxeHits = Array.from({length:6},(_,index)=>new URL(`../public/assets/audio/pickaxe-hits/pick${index+1}.wav`,import.meta.url));
 
 test("canonical soundtrack is bundled and loops through the game audio element", () => {
   assert.ok(statSync(soundtrack).size > 1_000_000);
   assert.match(page, /echoes-of-the-forgotten-crypt\.wav/);
   assert.match(page, /<audio ref=\{soundtrackRef\}[^>]*loop/);
+});
+
+test("TRUE Artefact music is a one-shot priority override with bidirectional crossfades",()=>{
+  assert.ok(statSync(trueArtifactCue).size>10_000_000);
+  assert.match(page,/<audio ref=\{trueArtifactCueRef\}[^>]*true-artefact\.wav[^>]*preload="auto"/);
+  assert.match(page,/cue\.loop=false;cue\.currentTime=0;cue\.volume=0/);
+  assert.match(page,/runMusicCrossfade\(0,1,800,\(\)=>normal\.pause\(\)\)/);
+  assert.match(page,/cue\.duration-cue\.currentTime<=2\.2/);
+  assert.match(page,/runMusicCrossfade\(1,0,2000/);
+  assert.match(page,/\},\[trueFind\?\.artifact\.id\]\)/);
 });
 
 test("music and pickaxe effects have independent persisted toggles", () => {
@@ -30,9 +41,9 @@ test("all six canonical pickaxe hits are bundled and randomized without immediat
 });
 
 test("soundtrack obeys master volume and browser gesture playback policy", () => {
-  assert.match(page, /audio\.volume=Math\.min\(1,Math\.max\(0,save\.settings\.master\*save\.settings\.musicVolume\)\)/);
+  assert.match(page, /const level=Math\.min\(1,Math\.max\(0,save\.settings\.master\*save\.settings\.musicVolume\)\)/);
   assert.match(page, /window\.addEventListener\("pointerdown",resume/);
-  assert.match(page, /if\(!loaded\|\|!save\.settings\.musicEnabled\)\{audio\.pause\(\)/);
+  assert.match(page, /if\(!loaded\|\|!save\.settings\.musicEnabled\)\{normal\.pause\(\);cue\.pause\(\)/);
 });
 
 test("the top bar exposes always-visible synchronized audio controls", () => {
