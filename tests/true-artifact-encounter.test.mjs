@@ -31,10 +31,11 @@ test("TRUE Artefacts are unique and previously found entries cannot roll again",
 });
 
 test("all TRUE Artefact artwork is contained above a dedicated readable copy panel", () => {
+  assert.match(page, /<span className="true-art-crop">/);
   assert.match(page, /<div className="true-reveal-copy">/);
-  assert.match(revealCss, /\.true-reveal\.stage-reveal \.true-art-slot[\s\S]*?overflow:hidden!important/);
-  assert.match(revealCss, /\.true-reveal-copy\{[\s\S]*?z-index:8[\s\S]*?background:/);
-  assert.match(revealCss, /\.true-inspection \.true-art-slot\{overflow:hidden!important/);
+  assert.match(revealCss, /\.true-art-slot>\.true-art-crop\{[\s\S]*?overflow:clip!important[\s\S]*?contain:paint!important/);
+  assert.match(revealCss, /\.true-art-slot>\.true-art-crop>\.true-art-img\{[\s\S]*?object-fit:contain!important/);
+  assert.match(revealCss, /\.true-reveal\.stage-reveal \.true-reveal-copy,[\s\S]*?z-index:999!important[\s\S]*?background:/);
 });
 
 test("R9 receives the canonical Peon tribute", () => {

@@ -680,10 +680,12 @@ function MineCompletion({data,digs,onContinue}:{data:{completed:Biome;next?:Biom
 function TrueArtifactArt({artifact,locked=false}:{artifact:TrueArtifact;locked?:boolean}){
   const [missing,setMissing]=useState(false);
   return <span className={`true-art-slot${locked?" locked-art":""}${artifact.id==="asoc"?" asoc-art":""}`} role={locked?"img":undefined} aria-label={locked?"Undiscovered TRUE Artifact silhouette":undefined}>
-    {locked&&!missing&&<span className="true-art-silhouette" style={{"--artifact-mask":`url(${artifact.image})`} as React.CSSProperties}/>}
-    {!locked&&!missing&&<img className="true-art-img" src={artifact.image} alt="" onError={()=>setMissing(true)}/>}
-    {missing && <span className={`true-art-placeholder${locked?" locked-placeholder":""}`} aria-hidden="true">◆{!locked&&<small>ARTWORK PENDING</small>}</span>}
-    {locked&&<img className="true-mask-probe" src={artifact.image} alt="" onError={()=>setMissing(true)}/>}
+    <span className="true-art-crop">
+      {locked&&!missing&&<span className="true-art-silhouette" style={{"--artifact-mask":`url(${artifact.image})`} as React.CSSProperties}/>}
+      {!locked&&!missing&&<img className="true-art-img" src={artifact.image} alt="" onError={()=>setMissing(true)}/>}
+      {missing && <span className={`true-art-placeholder${locked?" locked-placeholder":""}`} aria-hidden="true">◆{!locked&&<small>ARTWORK PENDING</small>}</span>}
+      {locked&&<img className="true-mask-probe" src={artifact.image} alt="" onError={()=>setMissing(true)}/>}
+    </span>
   </span>;
 }
 
