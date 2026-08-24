@@ -14,7 +14,8 @@ test("first-extraction strike onboarding derives from persisted lifetime ore cou
 
 test("the visible ore shell does not repeat a redundant strike instruction",()=>{
   assert.doesNotMatch(page,/CRACK DEPOSIT/);
-  assert.match(page,/stage === "ore" \? "ORE SHELL"/);
+  assert.match(page,/DEPARTMENT SPECIMEN CASING/);
+  assert.match(page,/SHELL INTEGRITY/);
 });
 test("authored mine degradation is progress-derived at the canonical thresholds",()=>{
   assert.match(page,/return pct>=\.9\?4:pct>=\.65\?3:pct>=\.4\?2:pct>=\.2\?1:0/);

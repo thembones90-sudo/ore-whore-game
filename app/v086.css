@@ -1,0 +1,19 @@
+/* v0.86 — Armored ore specimen casing gauge. */
+.stage-ore .ore-integrity-panel{position:relative;width:min(860px,86vw);min-height:112px;padding:16px 24px 18px;border:1px solid color-mix(in srgb,var(--ore-light) 48%,#655841);border-left:5px solid var(--ore-light);background:linear-gradient(110deg,#11140ff5,#1c1d18f5 48%,#10120ff5);box-shadow:inset 0 1px #ffffff0d,inset 0 -18px 30px #0005,0 12px 35px #0009;overflow:hidden}
+.stage-ore .ore-integrity-panel:before,.stage-ore .ore-integrity-panel:after{content:"";position:absolute;top:8px;width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#bcb6a6,#4c4b44 48%,#171815 72%);box-shadow:0 calc(100% + 80px) #30312d}
+.stage-ore .ore-integrity-panel:before{left:9px}.stage-ore .ore-integrity-panel:after{right:9px}
+.stage-ore .ore-integrity-panel .integrity{width:100%;display:grid;gap:12px}
+.ore-integrity-head{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:end;gap:22px;text-align:left}
+.ore-integrity-head>span small,.ore-integrity-head>b small{display:block;margin-bottom:4px;color:#858777;font:700 7px/1 Arial,sans-serif;letter-spacing:1.8px}
+.ore-integrity-head>span strong{display:block;color:#eee9dc;font:700 15px/1.1 Arial,sans-serif;letter-spacing:.7px;text-shadow:0 2px 5px #000}
+.ore-integrity-head>b{font-style:normal;text-align:right}.ore-integrity-head>b strong{display:block;color:var(--ore-light);font:700 19px/1 monospace;text-shadow:0 0 12px color-mix(in srgb,var(--ore-light) 60%,transparent)}.ore-integrity-head>b em{color:#777;font-size:11px;font-style:normal}
+.ore-integrity-head>i{min-width:126px;padding:7px 9px;border:1px solid color-mix(in srgb,var(--ore-light) 34%,#4c4d46);background:#0d0f0c;color:#a6aa9b;font:800 7px/1 Arial,sans-serif;letter-spacing:1.4px;text-align:center;font-style:normal}
+.ore-shell-segments{position:relative;display:grid!important;grid-template-columns:repeat(12,1fr);gap:4px;height:16px;padding:3px;border:1px solid #4a4d43;background:#080a07;box-shadow:inset 0 3px 8px #000}
+.ore-shell-segments:after{content:"";position:absolute;inset:3px;pointer-events:none;background:linear-gradient(105deg,transparent 0 38%,#ffffff29 44%,transparent 50%);translate:-110% 0;animation:ore-gauge-scan 2.8s ease-in-out infinite}
+.integrity .ore-shell-segments>b{position:relative;width:auto!important;height:auto!important;min-width:0;background:#242720!important;border:1px solid #30332d;clip-path:polygon(0 0,92% 0,100% 50%,92% 100%,0 100%,7% 50%);overflow:hidden}
+.integrity .ore-shell-segments>b.full{background:linear-gradient(180deg,color-mix(in srgb,var(--ore-light) 80%,#fff),var(--ore-light) 55%,color-mix(in srgb,var(--ore-light) 55%,#10120e))!important;border-color:color-mix(in srgb,var(--ore-light) 66%,#fff);box-shadow:inset 0 1px #ffffff66,0 0 8px color-mix(in srgb,var(--ore-light) 45%,transparent)}
+.shell-damage-1 .ore-integrity-head>i{color:#d1c7ad;border-color:#726548}.shell-damage-2 .ore-integrity-head>i{color:#e9ba69;border-color:#9a6c38;background:#1a1008}.shell-damage-3 .ore-integrity-head>i{color:#ff8260;border-color:#c44c33;background:#220907;box-shadow:0 0 15px #d83b2933;animation:breach-warning .68s steps(2,end) infinite}.shell-damage-3 .ore-shell-segments{border-color:#b84a38}
+@keyframes ore-gauge-scan{0%,25%{translate:-110% 0}65%,100%{translate:110% 0}}
+@keyframes breach-warning{50%{filter:brightness(1.5);translate:1px 0}}
+.reduced-motion .ore-shell-segments:after,.reduced-motion .shell-damage-3 .ore-integrity-head>i{animation:none!important}
+@media(max-width:680px){.stage-ore .ore-integrity-panel{padding:14px 16px}.ore-integrity-head{grid-template-columns:1fr auto;gap:10px}.ore-integrity-head>i{grid-column:1/-1;min-width:0}.ore-integrity-head>span strong{font-size:12px}.ore-integrity-head>b strong{font-size:16px}}
