@@ -1,0 +1,82 @@
+/* v0.7.7 — Full visual feedback pass. Presentation only; gameplay remains data-owned. */
+
+/* Hit debris inherits the material of the active mine. */
+.rock .debris{left:var(--hit-x)!important;top:var(--hit-y)!important}
+.rock .debris i{background:var(--biome-debris)!important;box-shadow:0 0 5px #000,0 0 4px var(--biome-light)}
+.biome-old .debris i:nth-child(3n){width:13px;height:4px;background:#6d4b2d!important;clip-path:polygon(0 18%,100% 0,82% 100%,9% 77%)}
+.biome-deep .debris i{width:12px;height:10px;background:#44373b!important;box-shadow:0 0 5px #000,0 0 6px #bd3c32}
+.biome-deep .debris i:nth-child(2n){width:4px;height:4px;border-radius:50%;background:#ff6b32!important;box-shadow:0 0 9px #ff3e20}
+.biome-outland .debris i{background:#4d6938!important;box-shadow:0 0 7px #79ff3d}
+.biome-outland .debris i:nth-child(2n){width:5px;height:11px;border-radius:60% 40% 70% 30%;background:#82e941!important}
+.biome-northrend .debris i{background:linear-gradient(135deg,#e8fbff,#58a8c9)!important;clip-path:polygon(50% 0,100% 65%,65% 100%,0 70%);box-shadow:0 0 7px #7de4ff}
+
+/* Tool belongs to the scene instead of floating above it. */
+.canonical-tool-skin img{filter:drop-shadow(0 12px 7px #000e) drop-shadow(-3px -2px 3px var(--biome-light))!important}
+.biome-deep .canonical-tool-skin img{filter:sepia(.08) saturate(1.12) drop-shadow(0 12px 7px #000e) drop-shadow(-4px -2px 5px #a9343d)!important}
+.biome-outland .canonical-tool-skin img{filter:hue-rotate(-4deg) saturate(1.1) drop-shadow(0 12px 7px #000e) drop-shadow(-4px -2px 5px #65c63c)!important}
+.biome-northrend .canonical-tool-skin img{filter:saturate(.9) brightness(1.05) drop-shadow(0 12px 7px #000e) drop-shadow(-4px -2px 5px #65caea)!important}
+
+/* Damage-state crossfades receive a local collapse beat at the wall, not the UI. */
+.mine-stage-art i{transform:scale(1);filter:brightness(1);transition:opacity 520ms ease,transform 760ms cubic-bezier(.2,.8,.2,1),filter 520ms!important}
+.depletion-1 .mine-stage-1,.depletion-2 .mine-stage-2,.depletion-3 .mine-stage-3,.depletion-4 .mine-stage-4{animation:wall-state-arrival .76s ease both}
+@keyframes wall-state-arrival{0%{filter:brightness(.48) contrast(1.28);transform:scale(1.018)}42%{filter:brightness(1.16);transform:scale(.996)}100%{filter:brightness(1);transform:scale(1)}}
+
+/* Foreground parallax haze gives the wall a separate depth plane. */
+.mine-atmosphere{z-index:13!important;background:linear-gradient(104deg,transparent 0 28%,color-mix(in srgb,var(--biome-light) 9%,transparent) 43%,transparent 61%),radial-gradient(ellipse at 50% 112%,color-mix(in srgb,var(--biome-particle) 17%,transparent),transparent 58%)!important;mix-blend-mode:screen;animation:foreground-drift 9s ease-in-out infinite alternate}
+@keyframes foreground-drift{to{transform:translate3d(1.2%,-.7%,0) scale(1.015);opacity:.72}}
+
+/* Anomalous excavation escalates through four readable danger phases. */
+.artifact-rock.damage-0{--anomaly:#b233cb}
+.artifact-rock.damage-1{--anomaly:#d645e9;filter:drop-shadow(0 0 42px #d645e955)!important}
+.artifact-rock.damage-2{--anomaly:#f08df5;filter:drop-shadow(0 0 58px #ec59ff77)!important}
+.artifact-rock.damage-3,.artifact-rock.final-hit{--anomaly:#ffd76a;filter:brightness(1.08) drop-shadow(0 0 72px #ffcb4d99)!important}
+.artifact-rock.damage-2 .artifact-mass:before,.artifact-rock.damage-2 .artifact-mass:after{border-width:2px;animation-duration:3.2s}
+.artifact-rock.damage-3 .artifact-mass,.artifact-rock.final-hit .artifact-mass{border-color:#ffe48f;background:radial-gradient(circle,#3b270c 0 28%,#210c26 62%,#070508 78%);box-shadow:inset 0 0 64px #ffca45aa,0 0 62px #ffd04b88;animation-duration:.58s}
+.artifact-rock.damage-3 .persistent-fracture,.artifact-rock.final-hit .persistent-fracture{filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 11px #ffd34f);opacity:1}
+.artifact-rock.final-hit{animation:artifact-final-panic .09s steps(2,end) infinite!important}
+@keyframes artifact-final-panic{50%{translate:3px -2px;filter:brightness(1.35) drop-shadow(0 0 90px #ffd94f)}}
+
+/* Album specimens become shallow physical objects without enclosing black tiles. */
+.slots article{transform:perspective(700px) rotateX(0) rotateY(0);transform-style:preserve-3d;transition:transform .24s ease,border-color .24s,box-shadow .24s,background .24s}
+.slots article.found{background:radial-gradient(circle at 42% 22%,#2a2d2822,transparent 38%),linear-gradient(145deg,#191c19,#101210)!important;box-shadow:inset 0 1px #ffffff0b,0 9px 22px #0005}
+.slots article.found:hover{transform:perspective(700px) rotateX(1.5deg) rotateY(-2deg) translateY(-4px);border-color:#61685d;box-shadow:inset 0 1px #ffffff16,12px 18px 30px #0009}
+.slots article.found .mineral-sprite{transform:translateZ(18px);filter:drop-shadow(10px 14px 10px #000a) brightness(1.04);transition:transform .24s,filter .24s}
+.slots article.found:hover .mineral-sprite{transform:translateZ(26px) scale(1.045);filter:drop-shadow(13px 17px 12px #000c) brightness(1.12)}
+
+/* Forge is an operating workshop: furnace pulse, pressure sweep, steam, sparks. */
+.forge-page:before{animation:forge-heat 4.8s ease-in-out infinite alternate}
+.workshop-smoke:before,.workshop-smoke:after{content:"";position:absolute;bottom:8%;width:180px;height:70%;border-radius:50%;filter:blur(22px);opacity:.18;pointer-events:none;animation:forge-steam 8s ease-in-out infinite}
+.workshop-smoke:before{left:7%;background:linear-gradient(transparent,#c8b59655);transform:rotate(8deg)}
+.workshop-smoke:after{right:8%;background:linear-gradient(transparent,#899e6b44);animation-delay:-4s;transform:rotate(-9deg)}
+.machine-station{position:relative;overflow:hidden}
+.machine-station:after{content:"";position:absolute;inset:auto -20% 0;height:2px;background:linear-gradient(90deg,transparent,#ffb13b,#fff2ba,#ff8a24,transparent);box-shadow:0 0 12px #ff6a1f;animation:forge-spark-line 3.6s linear infinite;opacity:.55}
+.equipped-board:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 36%,#dfff6b0b 50%,transparent 64%);animation:gauge-sweep 4.2s linear infinite}
+@keyframes forge-heat{to{background-color:#2b160616}}
+@keyframes forge-steam{50%{translate:35px -38px;scale:1.18;opacity:.28}}
+@keyframes forge-spark-line{from{translate:-40% 0}to{translate:40% 0}}
+@keyframes gauge-sweep{from{background-position:-500px 0}to{background-position:500px 0}}
+
+/* Every model keeps its own authored swing signature. */
+.rock.hit.motion-slash-hook:before{content:"";position:absolute;z-index:28;left:calc(var(--hit-x) - 86px);top:calc(var(--hit-y) - 76px);width:130px;height:82px;border-top:3px solid #72ff43aa;border-radius:50%;filter:drop-shadow(0 0 7px #35ff22);transform:rotate(-34deg);animation:model-trail .42s ease-out both;pointer-events:none}
+.rock.hit.motion-pneumatic:before{content:"";position:absolute;z-index:28;left:calc(var(--hit-x) - 42px);top:calc(var(--hit-y) - 38px);width:84px;height:84px;border:2px solid #c8603c88;border-radius:50%;box-shadow:0 0 18px #a72f20;animation:pneumatic-ring .34s ease-out both;pointer-events:none}
+.rock.hit .canonical-tool-skin.skin-shovel:after{content:"";position:absolute;right:42%;bottom:16%;width:120px;height:38px;border-radius:50%;background:radial-gradient(ellipse,#b1916266,transparent 68%);filter:blur(3px);animation:shovel-spray .38s ease-out both}
+@keyframes model-trail{from{opacity:0;scale:.58}38%{opacity:.88}to{opacity:0;scale:1.15}}
+@keyframes pneumatic-ring{to{opacity:0;scale:1.8}}
+@keyframes shovel-spray{to{opacity:0;translate:-45px -22px;scale:1.55}}
+
+/* First-load mark assembles ceremonially; existing button keeps it immediately skippable. */
+.onboarding>div{isolation:isolate}
+.onboarding-logo{animation:brand-assembly 1.05s cubic-bezier(.12,.78,.18,1) both;filter:drop-shadow(0 24px 28px #000) drop-shadow(0 0 26px #8d4cff44)}
+.onboarding>div:before,.onboarding>div:after{content:"";position:absolute;left:50%;top:38%;z-index:-1;width:320px;height:2px;background:linear-gradient(90deg,transparent,#d88156,#a95bff,transparent);transform:translate(-50%,-50%);animation:brand-spark 1.25s ease-out both}
+.onboarding>div:after{transform:translate(-50%,-50%) rotate(90deg);animation-delay:.08s}
+@keyframes brand-assembly{0%{opacity:0;transform:scale(.72);filter:blur(12px) brightness(2)}55%{opacity:1;transform:scale(1.035);filter:blur(0) brightness(1.28)}100%{transform:scale(1)}}
+@keyframes brand-spark{0%{opacity:0;scale:.2}35%{opacity:1;scale:1.4}100%{opacity:0;scale:2.1}}
+
+/* Tunnel selection now feels like physically entering the chosen passage. */
+.passage-entering .forbidden-tunnel-card{overflow:hidden}
+.passage-entering .selected-entry{animation:tunnel-threshold-entry .62s cubic-bezier(.16,.8,.18,1) forwards!important}
+@keyframes tunnel-threshold-entry{0%{transform:translateY(-7px) translateZ(45px) scale(1.055)}70%{transform:translateY(-10px) translateZ(120px) scale(1.13);filter:brightness(1.12)}100%{transform:translateY(0) translateZ(260px) scale(1.34);filter:brightness(.18);opacity:.12}}
+
+@media(prefers-reduced-motion:reduce){
+  .mine-atmosphere,.mine-stage-art i,.forge-page:before,.workshop-smoke:before,.workshop-smoke:after,.machine-station:after,.equipped-board:after,.onboarding-logo,.onboarding>div:before,.onboarding>div:after,.passage-entering .selected-entry{animation:none!important;transition:none!important}
+}
