@@ -5,6 +5,7 @@ import { readFileSync, statSync } from "node:fs";
 const page = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
 const soundtrack = new URL("../public/assets/audio/echoes-of-the-forgotten-crypt.wav", import.meta.url);
 const trueArtifactCue = new URL("../public/assets/audio/true-artefact.wav", import.meta.url);
+const tunnelCue = new URL("../public/assets/audio/tunnels.wav", import.meta.url);
 const pickaxeHits = Array.from({length:6},(_,index)=>new URL(`../public/assets/audio/pickaxe-hits/pick${index+1}.wav`,import.meta.url));
 
 test("canonical soundtrack is bundled and loops through the game audio element", () => {
@@ -21,6 +22,15 @@ test("TRUE Artefact music is a one-shot priority override with bidirectional cro
   assert.match(page,/cue\.duration-cue\.currentTime<=2\.2/);
   assert.match(page,/runMusicCrossfade\(1,0,2000/);
   assert.match(page,/\},\[trueFind\?\.artifact\.id\]\)/);
+});
+
+test("Forbidden Tunnel owns a stable looping music override with smooth entry and exit",()=>{
+  assert.ok(statSync(tunnelCue).size>6_000_000);
+  assert.match(page,/<audio ref=\{tunnelCueRef\}[^>]*tunnels\.wav[^>]*preload="auto"/);
+  assert.match(page,/kind="tunnel";cue\.loop=true;cue\.currentTime=0;cue\.volume=0/);
+  assert.match(page,/runTunnelCrossfade\(0,1,900,\(\)=>normal\.pause\(\)\)/);
+  assert.match(page,/runTunnelCrossfade\(1,0,1800/);
+  assert.match(page,/\},\[save\.forbiddenTunnel\?\.id\]\)/);
 });
 
 test("music and pickaxe effects have independent persisted toggles", () => {
@@ -43,7 +53,7 @@ test("all six canonical pickaxe hits are bundled and randomized without immediat
 test("soundtrack obeys master volume and browser gesture playback policy", () => {
   assert.match(page, /const level=Math\.min\(1,Math\.max\(0,save\.settings\.master\*save\.settings\.musicVolume\)\)/);
   assert.match(page, /window\.addEventListener\("pointerdown",resume/);
-  assert.match(page, /if\(!loaded\|\|!save\.settings\.musicEnabled\)\{normal\.pause\(\);cue\.pause\(\)/);
+  assert.match(page, /if\(!loaded\|\|!save\.settings\.musicEnabled\)\{normal\.pause\(\);artifact\.pause\(\);tunnel\.pause\(\)/);
 });
 
 test("the top bar exposes always-visible synchronized audio controls", () => {

@@ -310,7 +310,8 @@ export default function Home() {
   const tunnelInputLocked=useRef(false);
   const soundtrackRef=useRef<HTMLAudioElement|null>(null);
   const trueArtifactCueRef=useRef<HTMLAudioElement|null>(null);
-  const musicOverrideRef=useRef({active:false,returning:false,token:0});
+  const tunnelCueRef=useRef<HTMLAudioElement|null>(null);
+  const musicOverrideRef=useRef<{active:boolean;returning:boolean;token:number;kind:"artifact"|"tunnel"|null}>({active:false,returning:false,token:0,kind:null});
   const musicFadeFrameRef=useRef<number|undefined>(undefined);
   const pickaxeHitPoolRef=useRef<HTMLAudioElement[]>([]);
   const lastPickaxeHitRef=useRef(-1);
@@ -320,27 +321,38 @@ export default function Home() {
   // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps -- mount-time localStorage hydration (migrate save, set onboarding/loaded, fire session_start/return_visit); seed intentionally excluded from deps so this never re-fires post-mount. Moving this to a lazy state initializer would change save-bootstrap and analytics-event timing/ordering; save behavior is protected (see HANDOFF_FOR_CLAUDE.md).
   useEffect(() => { try { const last=Number(localStorage.getItem("ore-whore-last-session")||0);if(last)track("return_visit",{hours_since_previous_session:(Date.now()-last)/3600000}); const raw = localStorage.getItem("ore-whore-save-v1"); if (raw){const old=JSON.parse(raw),restored=migrate(old);setSave(restored);if(restored.activeTrueEncounter){const encounter=restored.activeTrueEncounter,artifact=trueArtifactPool.find(a=>a.id===encounter.artifactId);if(artifact){setPendingTrue({artifact,trigger:encounter.trigger});setStage("artifact");setMaxHp(encounter.maxHp);setRockHp(encounter.hp);}}setOnboarding(!old.settings?.helpSeen&&!(old.digs>0));}else setOnboarding(true); } catch {setOnboarding(true)} setLoaded(true); track("session_start",{seed:seed||null,build:"v0.4",analytics_schema:2}); const end=()=>{localStorage.setItem("ore-whore-last-session",String(Date.now()));track("session_end",{session_digs:sessionDigs.current})}; addEventListener("pagehide",end); return()=>removeEventListener("pagehide",end); }, []);
   useEffect(() => { if (loaded) localStorage.setItem("ore-whore-save-v1", JSON.stringify(save)); }, [save, loaded]);
-  const runMusicCrossfade=(normalWeight:number,cueWeight:number,durationMs:number,onComplete?:()=>void)=>{
-    const normal=soundtrackRef.current,cue=trueArtifactCueRef.current;if(!normal||!cue)return;
+  const runCueCrossfade=(cue:HTMLAudioElement|null,normalWeight:number,cueWeight:number,durationMs:number,onComplete?:()=>void)=>{
+    const normal=soundtrackRef.current;if(!normal||!cue)return;
     if(musicFadeFrameRef.current!==undefined)cancelAnimationFrame(musicFadeFrameRef.current);
     const token=++musicOverrideRef.current.token,start=performance.now(),normalStart=normal.volume,cueStart=cue.volume;
     const frame=(now:number)=>{if(token!==musicOverrideRef.current.token)return;const p=Math.min(1,(now-start)/durationMs),smooth=p*p*(3-2*p),settings=audioSettingsRef.current,level=settings.musicEnabled?Math.min(1,settings.master*settings.musicVolume):0;normal.volume=Math.min(1,normalStart+(level*normalWeight-normalStart)*smooth);cue.volume=Math.min(1,cueStart+(level*cueWeight-cueStart)*smooth);if(p<1)musicFadeFrameRef.current=requestAnimationFrame(frame);else{musicFadeFrameRef.current=undefined;onComplete?.()}};
     musicFadeFrameRef.current=requestAnimationFrame(frame);
   };
-  useEffect(()=>{const normal=soundtrackRef.current,cue=trueArtifactCueRef.current;if(!normal||!cue)return;const level=Math.min(1,Math.max(0,save.settings.master*save.settings.musicVolume));if(!loaded||!save.settings.musicEnabled){normal.pause();cue.pause();normal.volume=0;cue.volume=0;return}if(musicOverrideRef.current.active){cue.volume=Math.min(cue.volume||level,level);if(!musicOverrideRef.current.returning&&cue.paused&&!cue.ended)cue.play().catch(()=>{});return}normal.volume=level;cue.volume=0;normal.play().catch(()=>{/* Browser will resume it on the next user gesture. */})},[loaded,save.settings.master,save.settings.musicVolume,save.settings.musicEnabled]);
-  useEffect(()=>{const resume=()=>{if(!save.settings.musicEnabled)return;const active=musicOverrideRef.current.active,audio=active?trueArtifactCueRef.current:soundtrackRef.current;if(audio?.paused)audio.play().catch(()=>{})};window.addEventListener("pointerdown",resume,{passive:true});window.addEventListener("keydown",resume);return()=>{window.removeEventListener("pointerdown",resume);window.removeEventListener("keydown",resume)}},[save.settings.musicEnabled]);
+  const runMusicCrossfade=(normalWeight:number,cueWeight:number,durationMs:number,onComplete?:()=>void)=>runCueCrossfade(trueArtifactCueRef.current,normalWeight,cueWeight,durationMs,onComplete);
+  const runTunnelCrossfade=(normalWeight:number,cueWeight:number,durationMs:number,onComplete?:()=>void)=>runCueCrossfade(tunnelCueRef.current,normalWeight,cueWeight,durationMs,onComplete);
+  useEffect(()=>{const normal=soundtrackRef.current,artifact=trueArtifactCueRef.current,tunnel=tunnelCueRef.current;if(!normal||!artifact||!tunnel)return;const level=Math.min(1,Math.max(0,save.settings.master*save.settings.musicVolume)),override=musicOverrideRef.current,activeCue=override.kind==="tunnel"?tunnel:artifact;if(!loaded||!save.settings.musicEnabled){normal.pause();artifact.pause();tunnel.pause();normal.volume=0;artifact.volume=0;tunnel.volume=0;return}if(override.active){activeCue.volume=Math.min(activeCue.volume||level,level);if(!override.returning&&activeCue.paused&&!activeCue.ended)activeCue.play().catch(()=>{});return}normal.volume=level;artifact.volume=0;tunnel.volume=0;normal.play().catch(()=>{/* Browser will resume it on the next user gesture. */})},[loaded,save.settings.master,save.settings.musicVolume,save.settings.musicEnabled]);
+  useEffect(()=>{const resume=()=>{if(!save.settings.musicEnabled)return;const override=musicOverrideRef.current,audio=override.active?(override.kind==="tunnel"?tunnelCueRef.current:trueArtifactCueRef.current):soundtrackRef.current;if(audio?.paused)audio.play().catch(()=>{})};window.addEventListener("pointerdown",resume,{passive:true});window.addEventListener("keydown",resume);return()=>{window.removeEventListener("pointerdown",resume);window.removeEventListener("keydown",resume)}},[save.settings.musicEnabled]);
   useEffect(()=>{
     if(!trueFind)return;
     const normal=soundtrackRef.current,cue=trueArtifactCueRef.current;if(!normal||!cue)return;
-    musicOverrideRef.current.active=true;musicOverrideRef.current.returning=false;cue.loop=false;cue.currentTime=0;cue.volume=0;
+    musicOverrideRef.current.active=true;musicOverrideRef.current.returning=false;musicOverrideRef.current.kind="artifact";cue.loop=false;cue.currentTime=0;cue.volume=0;
     if(save.settings.musicEnabled){void normal.play().catch(()=>{});void cue.play().catch(()=>{});runMusicCrossfade(0,1,800,()=>normal.pause())}
-    const restoreNormal=()=>{if(!musicOverrideRef.current.active||musicOverrideRef.current.returning)return;musicOverrideRef.current.returning=true;if(save.settings.musicEnabled)void normal.play().catch(()=>{});runMusicCrossfade(1,0,2000,()=>{cue.pause();musicOverrideRef.current.active=false;musicOverrideRef.current.returning=false})};
+    const restoreNormal=()=>{if(!musicOverrideRef.current.active||musicOverrideRef.current.kind!=="artifact"||musicOverrideRef.current.returning)return;musicOverrideRef.current.returning=true;if(save.settings.musicEnabled)void normal.play().catch(()=>{});runMusicCrossfade(1,0,2000,()=>{cue.pause();musicOverrideRef.current.active=false;musicOverrideRef.current.returning=false;musicOverrideRef.current.kind=null})};
     const approachEnding=()=>{if(Number.isFinite(cue.duration)&&cue.duration-cue.currentTime<=2.2)restoreNormal()};
     cue.addEventListener("timeupdate",approachEnding);cue.addEventListener("ended",restoreNormal);
     return()=>{cue.removeEventListener("timeupdate",approachEnding);cue.removeEventListener("ended",restoreNormal);restoreNormal()};
   // Deliberately keyed only to artifact identity: ordinary rerenders must never restart the one-shot cue.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[trueFind?.artifact.id]);
+  useEffect(()=>{
+    if(!save.forbiddenTunnel)return;
+    const normal=soundtrackRef.current,cue=tunnelCueRef.current;if(!normal||!cue||musicOverrideRef.current.active)return;
+    musicOverrideRef.current.active=true;musicOverrideRef.current.returning=false;musicOverrideRef.current.kind="tunnel";cue.loop=true;cue.currentTime=0;cue.volume=0;
+    if(save.settings.musicEnabled){void normal.play().catch(()=>{});void cue.play().catch(()=>{});runTunnelCrossfade(0,1,900,()=>normal.pause())}
+    return()=>{if(!musicOverrideRef.current.active||musicOverrideRef.current.kind!=="tunnel"||musicOverrideRef.current.returning)return;musicOverrideRef.current.returning=true;if(save.settings.musicEnabled)void normal.play().catch(()=>{});runTunnelCrossfade(1,0,1800,()=>{cue.pause();cue.currentTime=0;musicOverrideRef.current.active=false;musicOverrideRef.current.returning=false;musicOverrideRef.current.kind=null})};
+  // Tunnel state mutates while choices resolve; identity-only dependency prevents cue restarts.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[save.forbiddenTunnel?.id]);
   useEffect(()=>{const pool=PICKAXE_HIT_SOUNDS.map(src=>{const audio=new Audio(src);audio.preload="auto";audio.load();return audio});pickaxeHitPoolRef.current=pool;return()=>{pool.forEach(audio=>{audio.pause();audio.removeAttribute("src");audio.load()});pickaxeHitPoolRef.current=[]}},[]);
   // eslint-disable-next-line react-hooks/set-state-in-effect -- derives reward unlocks from save.combos count; moving this into the dig-mutation call site would touch protected progression logic (see HANDOFF_FOR_CLAUDE.md).
   useEffect(()=>{if(!loaded)return;const n=Object.keys(save.combos).length;const rewards:[number,string[]][]=[[23,["rust"]],[57,["gilded"]],[113,["menace"]],[169,["khoriumframe"]],[203,["titan"]],[225,["volumeone","orewhoretitle","orewhorepick","orewhorealbum","centerpiece"]]];const earned=rewards.filter(x=>n>=x[0]).flatMap(x=>x[1]).filter(id=>!save.unlocks.includes(id));if(earned.length)setSave(s=>({...s,unlocks:[...s.unlocks,...earned]}))},[loaded,save.combos,save.unlocks]);
@@ -589,6 +601,7 @@ export default function Home() {
   return <main className={`tab-${tab} ${save.settings.reducedMotion?"reduced-motion":""} ${save.settings.reducedShake?"reduced-shake":""} ${save.settings.highContrast?"high-contrast":""} cosmetic-${save.equipped}`}>
     <audio ref={soundtrackRef} src="/assets/audio/echoes-of-the-forgotten-crypt.wav" loop preload="metadata" aria-hidden="true"/>
     <audio ref={trueArtifactCueRef} src="/assets/audio/true-artefact.wav" preload="auto" aria-hidden="true"/>
+    <audio ref={tunnelCueRef} src="/assets/audio/tunnels.wav" preload="auto" aria-hidden="true"/>
     <header className="topbar">
       <button className="brand" onClick={() => setTab("mine")}><span className="brand-mark">OW</span><span>ORE WHORE<small>COMPULSIVE GEOLOGY</small></span></button>
       <nav aria-label="Primary">
