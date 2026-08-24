@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+const revealCss = await readFile(new URL("../app/v066.css", import.meta.url), "utf8");
 
 test("TRUE Artefacts require a concealed twenty-times-health excavation before reveal", () => {
   assert.match(page, /Math\.ceil\(maxHp\*20\)/);
@@ -27,6 +28,13 @@ test("TRUE Artefacts are unique and previously found entries cannot roll again",
   assert.match(page, /trueArtifacts:\{\.\.\.s\.trueArtifacts,\[artifact\.id\]:1\}/);
   assert.match(page, /if\(Number\(old\.trueArtifacts\?\.\[artifact\.id\]\|\|0\)>0\)trueArtifacts\[artifact\.id\]=1/);
   assert.match(page, /encounter&&!trueArtifacts\[encounter\.artifactId\]/);
+});
+
+test("all TRUE Artefact artwork is contained above a dedicated readable copy panel", () => {
+  assert.match(page, /<div className="true-reveal-copy">/);
+  assert.match(revealCss, /\.true-reveal\.stage-reveal \.true-art-slot[\s\S]*?overflow:hidden!important/);
+  assert.match(revealCss, /\.true-reveal-copy\{[\s\S]*?z-index:8[\s\S]*?background:/);
+  assert.match(revealCss, /\.true-inspection \.true-art-slot\{overflow:hidden!important/);
 });
 
 test("R9 receives the canonical Peon tribute", () => {

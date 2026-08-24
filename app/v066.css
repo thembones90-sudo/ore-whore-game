@@ -126,3 +126,58 @@
 .deep-way-failure{position:fixed;inset:0;z-index:1100;display:grid;place-items:center;padding:22px;background:#050305dd;backdrop-filter:blur(5px)}.deep-way-failure section{width:min(760px,94vw);padding:42px;border:1px solid #aa664e;background:linear-gradient(145deg,#21110e,#090706);box-shadow:0 25px 70px #000;text-align:center}.deep-way-failure small{color:#c68268;letter-spacing:3px}.deep-way-failure h2{margin:14px 0;color:#fff0df;font-size:clamp(30px,5vw,56px);line-height:1}.deep-way-failure p{color:#c0a79a;font:18px Georgia}.deep-way-failure blockquote{margin:25px auto;color:#ebd7cc;font:italic 16px Georgia}.deep-way-failure button{background:#d68b66}
 @media(max-width:700px){.forbidden-tunnel-overlay{padding:10px}.forbidden-tunnel-card{padding:22px 14px}.first-passages{grid-template-columns:1fr}.tunnel-passages{gap:8px}.tunnel-passages button{min-height:104px}.tunnel-passages button:before{inset:7% 22%;border-width:6px}.tunnel-passages button strong{margin-top:50px;font-size:14px}.tunnel-passages button small{display:none}.first-reveal{grid-template-columns:1fr}.forbidden-tunnel-card footer{display:block;text-align:center}.forbidden-tunnel-card footer button{width:100%;margin-top:18px}.artifact-modifier-hud{top:8px;padding:9px 12px}}
 @media(prefers-reduced-motion:reduce){.sealed-result .forbidden-tunnel-card,.tunnel-passages button{animation:none;transition:none}}
+
+/* TRUE Artefact layout contract: artwork is always contained; copy always owns a separate readable layer. */
+.true-reveal.stage-reveal{overflow-x:hidden!important;overflow-y:auto!important;align-items:start!important}
+.true-reveal.stage-reveal .true-reveal-card{justify-content:flex-start!important;min-height:100%;height:auto!important;padding-bottom:44px!important}
+.true-reveal.stage-reveal .true-art-slot,
+.true-reveal.stage-reveal.theme-gold .true-art-slot,
+.true-reveal.stage-reveal.theme-fel .true-art-slot,
+.true-reveal.stage-reveal.theme-infernal .true-art-slot{
+  position:relative!important;
+  flex:0 0 auto!important;
+  width:min(620px,82vw)!important;
+  height:clamp(280px,42vh,460px)!important;
+  overflow:hidden!important;
+  isolation:isolate;
+}
+.true-reveal.stage-reveal .true-art-img{
+  position:absolute!important;
+  inset:0!important;
+  z-index:1!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  padding:12px!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
+.true-reveal-copy{
+  position:relative;
+  z-index:8;
+  display:flex;
+  width:min(720px,88vw);
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+  margin-top:18px;
+  padding:20px 24px 22px;
+  border:1px solid #e4bc5d66;
+  background:linear-gradient(180deg,#171007f5,#090604f8);
+  box-shadow:0 18px 50px #000b,inset 0 1px #fff1b522,0 0 30px #ffbd271c;
+}
+.true-reveal-copy .true-lore{position:relative;z-index:1;margin:0!important;color:#f6e8ce!important;text-shadow:0 2px 8px #000,0 0 14px #000!important}
+.true-reveal-copy .true-peon,.true-reveal-copy .true-system,.true-reveal-copy .true-meta,.true-reveal-copy .continue{position:relative;z-index:1}
+.true-reveal-copy .continue{margin-top:4px!important}
+.true-inspection .true-art-slot{overflow:hidden!important;isolation:isolate}
+.true-inspection .true-art-img{max-width:100%!important;max-height:100%!important;object-fit:contain!important}
+.true-inspection-copy{position:relative;z-index:8;background:linear-gradient(180deg,#171007f2,#080504f8)!important;box-shadow:0 16px 42px #000b}
+@media(max-width:720px){
+  .true-reveal.stage-reveal .true-art-slot,
+  .true-reveal.stage-reveal.theme-gold .true-art-slot,
+  .true-reveal.stage-reveal.theme-fel .true-art-slot,
+  .true-reveal.stage-reveal.theme-infernal .true-art-slot{width:min(88vw,540px)!important;height:clamp(230px,38vh,360px)!important}
+  .true-reveal-copy{width:90vw;margin-top:14px;padding:16px 14px 18px}
+}

@@ -720,12 +720,14 @@ function TrueReveal({data,reducedMotion,onContinue}:{data:{artifact:TrueArtifact
         <p className="true-classification">TRUE ARTIFACT</p>
         <h2>{data.artifact.name}</h2>
         <TrueArtifactArt artifact={data.artifact}/>
-        {data.artifact.instruction&&<p className="true-instruction">{data.artifact.instruction}</p>}
-        <p className="true-lore">{data.artifact.lore}</p>
-        <TimedPeonBark artifact={data.artifact} reducedMotion={reducedMotion}/>
-        {data.artifact.systemResponse&&<div className="true-system"><small>SYSTEM</small><p>{data.artifact.systemResponse}</p></div>}
-        <p className="true-meta">FOUND AFTER {data.digNumber.toLocaleString()} DIGS</p>
-        <button className="continue" disabled={!canClose} onClick={onContinue}>ARCHIVE IT <span>→</span></button>
+        <div className="true-reveal-copy">
+          {data.artifact.instruction&&<p className="true-instruction">{data.artifact.instruction}</p>}
+          <p className="true-lore">{data.artifact.lore}</p>
+          <TimedPeonBark artifact={data.artifact} reducedMotion={reducedMotion}/>
+          {data.artifact.systemResponse&&<div className="true-system"><small>SYSTEM</small><p>{data.artifact.systemResponse}</p></div>}
+          <p className="true-meta">FOUND AFTER {data.digNumber.toLocaleString()} DIGS</p>
+          <button className="continue" disabled={!canClose} onClick={onContinue}>ARCHIVE IT <span>→</span></button>
+        </div>
       </>}
     </div>
   </div>;
