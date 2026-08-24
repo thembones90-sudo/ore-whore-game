@@ -1,0 +1,9 @@
+/* v0.89 — frictionless resource production and next-tool accounting */
+.machine-recipe .recipe-stock{display:grid;gap:3px;margin:10px 0 2px;padding:8px;border:1px solid #4a412d;background:#080a07}
+.machine-recipe .recipe-stock span{display:flex;justify-content:space-between;gap:8px;color:#898a80;font:700 7px/1.2 Arial;letter-spacing:.08em}
+.machine-recipe .recipe-stock strong{color:#eee;font:900 10px/1 monospace}
+.machine-recipe .recipe-stock .missing{color:#d58b58}.machine-recipe .recipe-stock .missing strong{color:#ff9a60}
+.machine-recipe .recipe-stock .complete{color:#93a85a}.machine-recipe .recipe-stock .complete strong{color:var(--acid)}
+.machine-recipe button{min-height:36px;font-size:9px;letter-spacing:.16em}
+.machine-recipe button:not(.unavailable){background:linear-gradient(#68792a,#2d370f);box-shadow:inset 0 1px #b1cc49}
+@media(max-width:720px){.machine-recipe .recipe-stock span{font-size:7px}.machine-recipe .recipe-stock strong{font-size:9px}}
