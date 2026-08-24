@@ -1,0 +1,21 @@
+/* v0.84 — Department assay reveal. New combinations are records, not acid-green alerts. */
+.reveal:not(.true-reveal){--assay-brass:#c89a4b;--assay-gold:#e1bb70;--assay-paper:#c9bda2;background:radial-gradient(circle at 50% 42%,#33291966 0,transparent 38%),linear-gradient(#070806f2,#030403f7)}
+.reveal:not(.true-reveal) .reveal-card{width:min(680px,92vw);padding:46px 46px 38px;overflow:hidden;background:linear-gradient(115deg,transparent 0 46%,#ffffff05 47%,transparent 48%) 0 0/180px 180px,radial-gradient(circle at 50% 17%,#373128 0,#1d1e1a 42%,#10120f 100%);border:1px solid #a77c3d;box-shadow:0 0 0 5px #090a08,0 0 0 6px #4e422f,0 32px 100px #000}
+.reveal:not(.true-reveal) .reveal-card::before{content:"FORM OW-225  ·  FIELD ASSAY  ·  PROPERTY OF THE DEPARTMENT";position:absolute;inset:9px 12px auto;height:22px;display:flex;align-items:center;justify-content:center;border:0;border-bottom:1px solid #6d5734;background:none;color:#8f7a57;font:700 7px/1 Arial,sans-serif;letter-spacing:2.2px;pointer-events:none}
+.reveal:not(.true-reveal) .reveal-card::after{content:"";position:absolute;inset:36px 12px 12px;border:1px solid #5e503733;pointer-events:none}
+.reveal:not(.true-reveal) .close{top:39px;right:21px;width:38px;height:38px;border:1px solid #66583e;background:#11130f;color:#a99d83;font-size:22px;line-height:1;z-index:3}
+.reveal:not(.true-reveal) .close:hover{border-color:var(--assay-gold);color:#f3e4bf}
+.reveal:not(.true-reveal) .eyebrow{margin:10px 54px 22px;color:var(--assay-gold);letter-spacing:3.2px}
+.reveal:not(.true-reveal) .combo-art{position:relative;margin:0 0 12px;padding:20px 0 10px}
+.reveal:not(.true-reveal) .combo-art::before,.reveal:not(.true-reveal) .combo-art::after{content:"SPECIMEN";position:absolute;top:3px;color:#706752;font:700 6px/1 Arial,sans-serif;letter-spacing:2px}
+.reveal:not(.true-reveal) .combo-art::before{left:15%}.reveal:not(.true-reveal) .combo-art::after{right:15%}
+.reveal:not(.true-reveal) .combo-art>b{width:42px;height:42px;display:grid;place-items:center;border:1px solid #80673d;border-radius:50%;background:#151611;color:var(--assay-brass);font:24px Georgia,serif;box-shadow:inset 0 0 12px #000,0 0 18px #b8863230}
+.reveal:not(.true-reveal) .names{padding:14px 0 19px;border-bottom:1px solid #5c5039}
+.reveal:not(.true-reveal) .names div small{color:#9b8e72}.reveal:not(.true-reveal) .names div strong{color:#eee8db;font-family:Georgia,serif;font-size:19px}.reveal:not(.true-reveal) .names>b{color:#847555}
+.reveal:not(.true-reveal) .verdict{position:relative;margin:22px 0 25px;padding:20px 18px 18px;border:1px solid #66583c;background:linear-gradient(90deg,#191a15,#272219 50%,#191a15);box-shadow:inset 0 0 24px #0008}
+.reveal:not(.true-reveal) .verdict::before{content:"DEPARTMENT ENTRY";position:absolute;left:50%;top:-5px;translate:-50% 0;padding:0 10px;background:#1d1e19;color:#7d6d4f;font:700 6px/1 Arial,sans-serif;letter-spacing:2px}
+.reveal:not(.true-reveal) .verdict span{color:var(--assay-gold);font-size:10px}.reveal:not(.true-reveal) .verdict strong{color:#f1e8d5;font-family:Georgia,serif;font-size:38px}.reveal:not(.true-reveal) .verdict small{color:#958b75}
+.reveal:not(.true-reveal) .continue{min-width:290px;padding:15px 23px;border:1px solid #e2bb70;background:linear-gradient(180deg,#c99b4e,#9c6b2d);color:#171109;box-shadow:inset 0 1px #ffe2a1,0 7px 20px #0009;text-shadow:0 1px #f1c976}
+.reveal:not(.true-reveal) .continue:hover{filter:brightness(1.12);transform:translateY(-1px);box-shadow:inset 0 1px #ffe7ae,0 9px 26px #000b,0 0 20px #b9853838}
+.reveal.quick:not(.true-reveal) .reveal-card{width:min(520px,92vw);padding:42px 30px 28px}.reveal.quick:not(.true-reveal) .eyebrow{margin-bottom:10px}.reveal.quick:not(.true-reveal) .verdict{margin:12px 0 18px}
+@media(max-width:600px){.reveal:not(.true-reveal) .reveal-card{padding:42px 20px 26px}.reveal:not(.true-reveal) .eyebrow{margin:8px 44px 16px;line-height:1.5}.reveal:not(.true-reveal) .combo-art::before,.reveal:not(.true-reveal) .combo-art::after{display:none}.reveal:not(.true-reveal) .names div strong{font-size:15px}.reveal:not(.true-reveal) .continue{min-width:0;width:100%}}
