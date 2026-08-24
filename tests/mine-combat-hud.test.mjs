@@ -4,13 +4,17 @@ import {readFileSync} from "node:fs";
 
 const page=readFileSync(new URL("../app/page.tsx",import.meta.url),"utf8");
 const css=readFileSync(new URL("../app/v087.css",import.meta.url),"utf8");
+const latestCss=readFileSync(new URL("../app/v090.css",import.meta.url),"utf8");
 const layout=readFileSync(new URL("../app/layout.tsx",import.meta.url),"utf8");
 
 test("Specimen Dust is a compact expandable combat skill",()=>{
   assert.match(page,/className="berserk-skill"/);
   assert.match(page,/aria-expanded=\{berserkOpen\|\|!!currentBerserk\}/);
   assert.match(page,/className="berserk-flyout"/);
+  assert.match(page,/className="berserk-active-chip"/);
   assert.match(css,/\.mine-screen>\.berserk-console\{position:fixed!important/);
+  assert.doesNotMatch(page,/\(berserkOpen\|\|currentBerserk\)&&<div className="berserk-flyout"/);
+  assert.match(latestCss,/\.berserk-active-chip\{width:68px/);
 });
 
 test("the playable wall is taller while the skill rail safely redocks responsively",()=>{
@@ -21,5 +25,5 @@ test("the playable wall is taller while the skill rail safely redocks responsive
 });
 
 test("combat HUD visual layer loads last",()=>{
-  assert.ok(layout.lastIndexOf('import "./v087.css"')>layout.lastIndexOf('import "./v086.css"'));
+  assert.ok(layout.lastIndexOf('import "./v090.css"')>layout.lastIndexOf('import "./v089.css"'));
 });
