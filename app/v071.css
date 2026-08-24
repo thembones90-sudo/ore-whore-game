@@ -1,0 +1,42 @@
+/* v0.71 — Three choices become three physical places. Cosmetic only. */
+.first-passages .tunnel-passages button,.first-passages button{min-height:410px;transform-style:preserve-3d;background:#030403;transition:transform .34s cubic-bezier(.2,.7,.2,1),filter .34s,border-color .25s,opacity .3s}
+.first-passages button:before{inset:18px 8% 58px;border-radius:38% 40% 3% 3%;background:
+  linear-gradient(180deg,transparent 52%,#020302d9 86%),
+  radial-gradient(ellipse at var(--light-x,58%) var(--light-y,45%),#bc7a303b 0 2%,#29241b 4%,transparent 13%),
+  radial-gradient(ellipse at var(--depth-x,50%) 54%,#010201 0 22%,#0c100c 39%,#252a23 42% 45%,#070907 60%,#020302 78%);
+  box-shadow:inset 0 0 72px #000,0 0 0 3px #080a08,0 12px 28px #000;transform:perspective(560px) rotateX(-1deg) scale(1);transition:transform .34s,filter .34s}
+.first-passages button:after{left:var(--light-x,58%);top:var(--lamp-y,92px);width:6px;height:7px;background:#d0a05a;box-shadow:0 0 7px 2px #d59a45,0 0 30px 9px #b8762738}
+.first-passages button i{position:absolute;inset:18px 8% 58px;z-index:1;overflow:hidden;border-radius:38% 40% 3% 3%;pointer-events:none}
+.first-passages button i:before,.first-passages button i:after{bottom:0;height:76%;width:5%;background:linear-gradient(90deg,#0b0906,#5a4026 43%,#1a120b);box-shadow:0 0 0 1px #070604,7px 0 15px #000b}
+.first-passages button i:before{left:9%;transform:rotate(var(--post-left,3deg))}.first-passages button i:after{right:9%;transform:rotate(var(--post-right,-3deg))}
+.first-passages button i b{position:absolute;display:block;pointer-events:none}
+/* overhead timber, rails, atmospheric veil, and foreground rubble */
+.first-passages button i b:nth-child(1){left:5%;right:5%;top:10%;height:7%;background:linear-gradient(#171009,#65462a 45%,#1b130c);box-shadow:0 5px 12px #000;transform:rotate(var(--beam-turn,0deg))}
+.first-passages button i b:nth-child(2),.first-passages button i b:nth-child(3){bottom:-3%;width:3px;height:58%;transform-origin:bottom;background:linear-gradient(#292d27,#6b705f 55%,#151714);opacity:var(--rail-opacity,.68)}
+.first-passages button i b:nth-child(2){left:43%;transform:rotate(var(--rail-left,9deg))}.first-passages button i b:nth-child(3){right:43%;transform:rotate(var(--rail-right,-9deg))}
+.first-passages button i b:nth-child(4){inset:0;background:linear-gradient(110deg,#98a78b08,transparent 34% 70%,#c8ad7a08),radial-gradient(ellipse at 50% 80%,transparent 48%,#000c 76%);opacity:.8}
+.first-passages button strong{margin-top:342px}.first-passages button small{position:relative;height:14px}.first-passages button small span,.first-passages button small em{display:block;font-style:normal;transition:opacity .2s,transform .2s}.first-passages button small em{position:absolute;left:0;right:0;top:0;opacity:0;transform:translateY(4px);color:#d6ddb9}
+.first-passages button:hover small span,.first-passages button:focus-visible small span{opacity:0;transform:translateY(-4px)}.first-passages button:hover small em,.first-passages button:focus-visible small em{opacity:1;transform:none}
+.first-passages button:hover:before,.first-passages button:focus-visible:before{transform:perspective(560px) rotateX(-1deg) scale(1.028);filter:brightness(1.12)}
+
+/* Six neutral visual families; all are shuffled independently of outcomes. */
+.passage-crooked{--post-left:8deg;--post-right:2deg;--beam-turn:-4deg;--depth-x:43%;--light-x:61%;--lamp-y:78px}
+.passage-rails{--rail-opacity:1;--rail-left:15deg;--rail-right:-15deg;--depth-x:50%;--light-x:46%;--light-y:39%;--lamp-y:112px}
+.passage-collapsed{--post-left:-2deg;--post-right:-8deg;--beam-turn:6deg;--depth-x:58%;--light-x:38%;--lamp-y:104px}
+.passage-collapsed i b:nth-child(4){background:linear-gradient(145deg,transparent 0 50%,#262a24 51% 55%,transparent 56%),linear-gradient(35deg,#090b09 0 13%,transparent 14% 78%,#111410 79%),radial-gradient(ellipse at 50% 80%,transparent 42%,#000d 70%)}
+.passage-bend{--depth-x:66%;--light-x:72%;--light-y:48%;--lamp-y:132px;--rail-opacity:.22}
+.passage-reinforced{--post-left:0deg;--post-right:0deg;--beam-turn:0deg;--depth-x:50%;--light-x:51%;--lamp-y:66px}
+.passage-reinforced i{box-shadow:inset 0 0 0 3px #343a32,inset 0 0 0 8px #0a0c0a}
+.passage-wide{--depth-x:48%;--light-x:37%;--lamp-y:116px;--rail-opacity:.35}
+.passage-wide:before{inset-left:3%;inset-right:3%;border-radius:28% 30% 3% 3%}
+
+/* Selection reads as entering a place, while outcomes remain hidden. */
+.passage-entering .forbidden-tunnel-card header,.passage-entering .forbidden-tunnel-card blockquote{opacity:.42;transition:opacity .25s}
+.passage-entering .first-passages{perspective:900px}
+.passage-entering .first-passages button{pointer-events:none}
+.passage-entering .selected-entry{z-index:4;border-color:#b8c899;transform:translateY(-7px) translateZ(45px) scale(1.055);filter:brightness(1.16);opacity:1}
+.passage-entering .selected-entry:before{transform:scale(1.08);filter:brightness(1.18) contrast(1.05)}
+.passage-entering .receding-entry{transform:scale(.965) translateZ(-40px);filter:brightness(.38) saturate(.5);opacity:.38}
+
+@media(max-width:700px){.first-passages .tunnel-passages button,.first-passages button{min-height:144px}.first-passages button:before,.first-passages button i{inset:7px 18% 29px}.first-passages button strong{margin-top:92px}.first-passages button:after{top:25px}.first-passages button i b:nth-child(1){height:10%}.passage-entering .selected-entry{transform:scale(1.025)}.passage-entering .receding-entry{transform:scale(.98)}}
+@media(prefers-reduced-motion:reduce){.first-passages button,.first-passages button:before,.passage-entering .selected-entry,.passage-entering .receding-entry{transition:none;transform:none}}
