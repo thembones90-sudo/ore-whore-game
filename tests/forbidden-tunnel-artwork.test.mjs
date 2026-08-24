@@ -10,7 +10,7 @@ test("all six Forbidden Tunnel cosmetic artworks ship and are wired",()=>{
     const asset=new URL(`../public/assets/tunnels/forbidden-tunnel-${variant}.webp`,import.meta.url);
     assert.ok(fs.existsSync(asset),`${variant} artwork is missing`);
     assert.ok(fs.statSync(asset).size>20_000,`${variant} artwork is unexpectedly small`);
-    assert.match(css,new RegExp(`\\.passage-${variant}\\{[^}]*forbidden-tunnel-${variant}\\.webp`));
+    assert.match(css,new RegExp(`\\.first-passages button\\.passage-${variant}\\{[^}]*forbidden-tunnel-${variant}\\.webp`));
   }
 });
 

@@ -25,12 +25,12 @@
 .first-passages button small{bottom:18px;height:14px;margin:0!important}
 .first-passages button:hover,.first-passages button:focus-visible{background-size:auto 103%!important;filter:brightness(1.12) contrast(1.03)!important}
 .first-passages button:hover:before,.first-passages button:focus-visible:before{filter:none!important;transform:none!important}
-.passage-crooked{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-crooked.webp')}
-.passage-rails{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-rails.webp')}
-.passage-collapsed{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-collapsed.webp')}
-.passage-bend{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-bend.webp')}
-.passage-reinforced{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-reinforced.webp')}
-.passage-wide{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-wide.webp')}
+.first-passages button.passage-crooked{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-crooked.webp')}
+.first-passages button.passage-rails{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-rails.webp')}
+.first-passages button.passage-collapsed{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-collapsed.webp')}
+.first-passages button.passage-bend{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-bend.webp')}
+.first-passages button.passage-reinforced{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-reinforced.webp')}
+.first-passages button.passage-wide{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-wide.webp')}
 .passage-entering .selected-entry{background-size:auto 108%!important}
 .passage-entering .receding-entry{background-size:auto 98%!important}
 @media(max-width:700px){
