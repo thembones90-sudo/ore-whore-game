@@ -292,6 +292,7 @@ export default function Home() {
   const [fractures,setFractures]=useState<{id:number;x:number;y:number;power:number}[]>([]);
   const [collapseBurst,setCollapseBurst]=useState<{id:number;x:number;y:number}|null>(null);
   const [found, setFound] = useState<{ ore: Item; mineral: Item; isNew: boolean; count: number } | null>(null);
+  const [assayTransfer,setAssayTransfer]=useState<{ore:Item;mineral:Item}|null>(null);
   const [emptyNotice,setEmptyNotice]=useState<{id:number;result:string;insult:string}|null>(null);
   const [trueFind,setTrueFind]=useState<{artifact:TrueArtifact;digNumber:number}|null>(null);
   const [pendingTrue,setPendingTrue]=useState<{artifact:TrueArtifact;trigger:"empty"|"ore"}|null>(null);
@@ -322,6 +323,7 @@ export default function Home() {
   const perfectIntervalRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
   const hitFeedbackTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const collapseTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const assayTransferTimer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined);
   const fractureId = useRef(0);
   const duplicateNoticeId = useRef(0);
   const savePulseTimer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined);
@@ -466,7 +468,7 @@ export default function Home() {
   }
 
   const strike = (point?:{x:number;y:number}) => {
-    if (found||trueFind||save.gameCompleted) return;
+    if (found||assayTransfer||trueFind||save.gameCompleted) return;
     const strikePoint=point||{x:50,y:48};
     setHitPoint(strikePoint);
 
@@ -593,11 +595,15 @@ export default function Home() {
       const fresh = unlocked(next, ore, mineral);
       next.achievements = [...s.achievements, ...fresh];
       if (fresh[0]) { const a = achievements.find(x => x.id === fresh[0])!; setTimeout(() => setToast(a), 650); }
-      if(isNew)setFound({ ore, mineral, isNew, count: next.combos[key] });
+      if(isNew){
+        setAssayTransfer({ore,mineral});
+        if(assayTransferTimer.current)clearTimeout(assayTransferTimer.current);
+        assayTransferTimer.current=setTimeout(()=>{setAssayTransfer(null);setFound({ore,mineral,isNew:true,count:next.combos[key]})},430);
+      }
       sessionDigs.current++;setSessionDigsCount(c=>c+1);
       const context={attempt:next.digs,session_dig:sessionDigs.current,ore_id:ore.id,mineral_id:mineral.id,combination_id:key,rarity:mineral.rarity,biome:s.biome,duplicate_count:next.combos[key],album_completion:Object.keys(next.combos).length/225,time_since_previous_dig_ms:s.lastDigAt?Date.now()-s.lastDigAt:null,hunt_boost:boost};
       track("mineral_found",context); track(isNew?"combination_new":"combination_duplicate",context);
-      if(isNew&&[5,10,12,14,15].includes(after)){track(after===15?"page_completed":after===14?"page_milestone_4":"page_milestone_3",{...context,page:ore.id,level:after}); setTimeout(()=>setMilestone({ore,level:after,attempts:next.ores[ore.id],missing:after===14?minerals.find(m=>!next.combos[`${ore.id}-${m.id}`]):undefined}),400);}
+      if(isNew&&[5,10,12,14,15].includes(after)){track(after===15?"page_completed":after===14?"page_milestone_4":"page_milestone_3",{...context,page:ore.id,level:after}); setTimeout(()=>setMilestone({ore,level:after,attempts:next.ores[ore.id],missing:after===14?minerals.find(m=>!next.combos[`${ore.id}-${m.id}`]):undefined}),950);}
       fresh.forEach(id=>track("achievement_unlocked",{achievement_id:id}));
       if(s.huntTarget===key)setTimeout(()=>setToast({name:"TARGET ACQUIRED",text:`${discoveryOreName(ore)} + ${mineral.name}. The hunt is over. Find a worse one.`}),250);
       return next;
@@ -641,7 +647,7 @@ export default function Home() {
   const activeTechnology=equippedMiningTool(save);
   const hasSuccessfulExtraction=Object.values(save.ores).some(count=>count>0);
   const showStrikeInstruction=stage==="artifact"||(stage==="tunnel"&&!hasSuccessfulExtraction);
-  const reset = () => { if (confirm("Erase every discovery and return to the cold, uncaring rock?")) { setSave(blank); rollMineCommentary(NORMAL_DIGGING_COMMENTARY); setFound(null); setPendingOre(null); setEmptyNotice(null); setFractures([]); setCollapseBurst(null); setStage("tunnel"); setMaxHp(12); setRockHp(12); sessionDigs.current=0; setSessionDigsCount(0); setSessionMisses(0); setSessionVeins(0); setSessionNew(0); setSessionDrought(0); setSessionLongestDrought(0); consecutiveMisses.current=0; emptyDigStreak.current=0; } };
+  const reset = () => { if (confirm("Erase every discovery and return to the cold, uncaring rock?")) { setSave(blank); rollMineCommentary(NORMAL_DIGGING_COMMENTARY); setFound(null); setAssayTransfer(null); setPendingOre(null); setEmptyNotice(null); setFractures([]); setCollapseBurst(null); setStage("tunnel"); setMaxHp(12); setRockHp(12); sessionDigs.current=0; setSessionDigsCount(0); setSessionMisses(0); setSessionVeins(0); setSessionNew(0); setSessionDrought(0); setSessionLongestDrought(0); consecutiveMisses.current=0; emptyDigStreak.current=0; } };
   const startNewGamePlus=()=>{setSave(s=>({...blank,settings:s.settings,unlocks:s.unlocks,equipped:s.equipped,toolSkinId:s.toolSkinId,achievements:s.achievements,trueArtifacts:s.trueArtifacts,trueFirst:s.trueFirst,completionCount:s.completionCount,asocTickets:s.asocTickets,newGamePlusLevel:s.newGamePlusLevel+1,firstCompletionDate:s.firstCompletionDate,latestCompletionDate:s.latestCompletionDate,completionHistory:s.completionHistory,runStartedAt:Date.now()}));setConfirmNewGamePlus(false);setCompletedBrowsing(false);setEndingActive(false);setTab("mine");setStage("tunnel");setMaxHp(12);setRockHp(12);setPendingOre(null);rollMineCommentary(NORMAL_DIGGING_COMMENTARY);};
 
   return <main className={`tab-${tab} ${save.settings.reducedMotion?"reduced-motion":""} ${save.settings.reducedShake?"reduced-shake":""} ${save.settings.highContrast?"high-contrast":""} cosmetic-${save.equipped} ${currentBerserk?`berserk-active berserk-${currentBerserk.id}`:""}`} style={{"--berserk-speed":currentBerserk?.intervalMultiplier||1,"--berserk-power":currentBerserk?.damageMultiplier||1} as React.CSSProperties}>
@@ -669,7 +675,7 @@ export default function Home() {
       </div>
     </header>
 
-    {tab === "mine" && <section className={`mine-screen biome-${save.biome} ${impact ? "screen-hit" : ""} stage-${stage}`} style={{"--biome-accent":biomeVisuals[save.biome].accent,"--biome-secondary":biomeVisuals[save.biome].secondary,"--biome-canvas":biomeVisuals[save.biome].canvas,"--biome-cavity":biomeVisuals[save.biome].cavity,"--biome-debris":biomeVisuals[save.biome].debris,"--biome-particle":biomeVisuals[save.biome].particle,"--biome-light":biomeVisuals[save.biome].light} as React.CSSProperties}>
+    {tab === "mine" && <section className={`mine-screen biome-${save.biome} ${impact ? "screen-hit" : ""} ${assayTransfer?"assay-transfer-active":""} stage-${stage}`} style={{"--biome-accent":biomeVisuals[save.biome].accent,"--biome-secondary":biomeVisuals[save.biome].secondary,"--biome-canvas":biomeVisuals[save.biome].canvas,"--biome-cavity":biomeVisuals[save.biome].cavity,"--biome-debris":biomeVisuals[save.biome].debris,"--biome-particle":biomeVisuals[save.biome].particle,"--biome-light":biomeVisuals[save.biome].light} as React.CSSProperties}>
       <div className="mine-copy"><p className="eyebrow">{save.gameCompleted?"SHIFT COMPLETE":stage === "artifact" ? "SYSTEM ALERT · IMPOSSIBLE DENSITY" : stage === "ore" ? "CLANK · DEPOSIT EXPOSED" : "SYSTEM / FOREMAN · ACTIVE DIRECTIVE"}</p><h1>{save.gameCompleted?<><span>YOU MAY </span><i>REST.</i></>:<CommentaryHeadline text={mineCommentary.headline} accentFirst={stage==="ore"}/>}</h1><p>{save.gameCompleted?"Or don't. New Game+ is right there.":mineCommentary.subtitle}</p></div>
       <div className="stats-row"><span><small>DEPOSITS</small>{save.digs}</span><span><small>UNIQUE</small>{unique}<em>/ 225</em></span><span><small>DRY STREAK</small>{save.streak}</span></div>
       {save.huntTarget&&<div className="hunt-banner"><span>HUNTING{huntBoost(save)>1?` · FOCUS +${Math.round((huntBoost(save)-1)*100)}%`:""}</span><strong>{(()=>{const p=save.huntTarget!.lastIndexOf("-");return `${ores.find(o=>o.id===save.huntTarget!.slice(0,p))?.name} + ${minerals.find(m=>m.id===save.huntTarget!.slice(p+1))?.name}`})()}</strong><button onClick={()=>setTab("wanted")}>VIEW TARGET</button></div>}
@@ -696,11 +702,13 @@ export default function Home() {
         <span className="crack c1"/><span className="crack c2"/><span className="crack c3"/>
         <span className={`perfect-ring ${perfectReady?"ready":""}`} aria-hidden="true"/>
         {stage === "ore" && pendingOre && <span className={`exposed-ore rarity-${pendingOre.rarity.toLowerCase()}`} style={{"--ore":pendingOre.color} as React.CSSProperties}><img className="ore-sprite ore-sprite-exposed" src={oreAsset(pendingOre.id)} alt=""/><strong>{pendingOre.name}</strong><small>{pendingOre.rarity.toUpperCase()}</small></span>}
+        {assayTransfer&&<span className="assay-specimen-transfer" aria-live="polite"><span><img src={oreAsset(assayTransfer.ore.id)} alt=""/><small>ORE SAMPLE</small></span><b>+</b><span><img src={mineralAsset(assayTransfer.mineral.id)} alt=""/><small>MINERAL SAMPLE</small></span><strong>ROUTING TO DEPARTMENT ASSAY</strong></span>}
         {stage === "artifact" && <span className="artifact-mass" aria-hidden="true"><i>?</i><strong>UNIDENTIFIED MASS</strong><small>CLASSIFICATION WITHHELD</small></span>}
         {impact && <span className="debris">{Array.from({length:8+Math.min(8,activeTechnology.tier)},(_,i)=><i key={i}/>)}</span>}
         <span className={`skin-impact-fx fx-${activeSkin.animation.impactFx}`} aria-hidden="true">{Array.from({length:6},(_,i)=><i key={i}/>)}</span>
         <span className={`pickaxe canonical-tool-skin skin-${activeSkin.silhouette}`} aria-hidden="true"><img src={activeSkin.artwork} alt=""/></span>
         {impact && <span className="impact-flash" aria-hidden="true"/>}
+        {impact&&<span className="material-impact" aria-hidden="true"><i/><i/><i/><i/><i/><i/></span>}
         {collapseBurst&&<span key={collapseBurst.id} className="collapse-rift" style={{"--collapse-x":`${collapseBurst.x}%`,"--collapse-y":`${collapseBurst.y}%`} as React.CSSProperties} aria-hidden="true"><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/></span>}
         {lastHitKind&&lastHitKind!=="miss"&&<span className="hit-callout" aria-hidden="true">{lastHitKind==="perfectCrit"?"PERFECT CRIT":lastHitKind==="perfect"?"PERFECT":lastHitKind==="crit"?"CRITICAL":"SOLID HIT"}</span>}
         {missFlash && <span className="miss-bark" role="status">{missFlash}</span>}
