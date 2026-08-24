@@ -1,0 +1,61 @@
+/* v0.70 — Mine faces now tell the quota story in five unmistakable visual acts. */
+.rock{--depletion-progress:0;--cavity-size:0%;--rubble-rise:0%;--support-opacity:0}
+.rock.depletion-1{--depletion-progress:.25;--cavity-size:28%;--rubble-rise:18%;--support-opacity:.24}
+.rock.depletion-2{--depletion-progress:.5;--cavity-size:45%;--rubble-rise:34%;--support-opacity:.48}
+.rock.depletion-3{--depletion-progress:.75;--cavity-size:64%;--rubble-rise:58%;--support-opacity:.76}
+.rock.depletion-4{--depletion-progress:1;--cavity-size:82%;--rubble-rise:84%;--support-opacity:1}
+
+/* The central excavation grows instead of merely darkening the original wall. */
+.mine-depletion{
+  opacity:1!important;filter:none!important;
+  background:
+    radial-gradient(ellipse at 50% 50%,#010201f8 0 calc(var(--cavity-size) * .42),#060806dc calc(var(--cavity-size) * .58),transparent var(--cavity-size)),
+    repeating-conic-gradient(from 4deg at 50% 51%,transparent 0 15deg,#020302cc 16deg 16.7deg,transparent 17.5deg 34deg)!important;
+  transition:background 1s ease,filter 1s ease;
+}
+.depletion-0 .mine-depletion{opacity:.03!important}
+.mine-depletion:before{
+  inset:7% 9% 8%!important;opacity:calc(var(--depletion-progress) * .92)!important;
+  transform:scale(calc(.45 + var(--depletion-progress) * .72))!important;
+  background:
+    repeating-conic-gradient(from 8deg at 50% 48%,transparent 0 8deg,#020302 9deg 9.8deg,transparent 10.5deg 23deg),
+    radial-gradient(ellipse at 50% 48%,transparent 36%,#121512 37% 39%,transparent 41%)!important;
+}
+.mine-depletion:after{
+  bottom:-5%!important;height:43%!important;opacity:calc(var(--depletion-progress) * .98)!important;
+  transform:translateY(calc(42% - var(--rubble-rise) * .42))!important;
+  background:
+    conic-gradient(from 32deg at 7% 82%,#171b18 0 20deg,transparent 21deg),
+    conic-gradient(from 14deg at 19% 75%,#323730 0 29deg,transparent 30deg),
+    conic-gradient(from 55deg at 34% 87%,#111511 0 24deg,transparent 25deg),
+    conic-gradient(from 25deg at 49% 76%,#282d29 0 30deg,transparent 31deg),
+    conic-gradient(from 42deg at 66% 86%,#151915 0 25deg,transparent 26deg),
+    conic-gradient(from 8deg at 82% 73%,#303632 0 28deg,transparent 29deg),
+    conic-gradient(from 70deg at 95% 88%,#121512 0 22deg,transparent 23deg)!important;
+}
+
+/* Timber/iron shoring becomes visible as the natural face is removed. */
+.depletion-structure{position:absolute;inset:0;z-index:5;pointer-events:none;overflow:hidden;border-radius:inherit;opacity:var(--support-opacity);transition:opacity .9s ease}
+.depletion-structure i{position:absolute;display:block;background:linear-gradient(90deg,#090806,#332719 18%,#5a4328 48%,#281d12 78%,#070605);border:1px solid #080706;box-shadow:inset 0 0 9px #000,0 6px 15px #000c}
+.depletion-structure i:nth-child(1),.depletion-structure i:nth-child(2){top:11%;bottom:9%;width:4.4%;transform:rotate(1.5deg)}
+.depletion-structure i:nth-child(1){left:12%}.depletion-structure i:nth-child(2){right:12%;transform:rotate(-1.5deg)}
+.depletion-structure i:nth-child(3){left:10%;right:10%;top:12%;height:5.5%;transform:rotate(.4deg)}
+.depletion-structure i:nth-child(4){left:16%;right:16%;bottom:13%;height:2.4%;opacity:.65;background:repeating-linear-gradient(90deg,#181a17 0 6%,#596056 6.5% 7.5%,#121411 8% 14%)}
+
+.depletion-status{position:absolute;z-index:13;left:20px;bottom:18px;display:flex;flex-direction:column;align-items:flex-start;padding:9px 12px 8px;border-left:3px solid var(--biome-accent);background:#070907d9;box-shadow:0 7px 20px #000b;pointer-events:none;text-align:left;opacity:.82;transition:opacity .2s}
+.depletion-status small{font-size:7px;letter-spacing:1.8px;color:#93988e}.depletion-status strong{margin-top:3px;font-size:10px;letter-spacing:1.4px;color:#e3e2d8}
+.rock:hover .depletion-status{opacity:.32}
+
+/* Each biome leaves a different scar on a completed mine. */
+.biome-old .depletion-4 .depletion-structure i{filter:sepia(.42)}
+.biome-deep .depletion-structure i{background:linear-gradient(90deg,#080607,#2b171f 20%,#593041 50%,#1c1015 80%,#050405)}
+.biome-deep .depletion-4 .mine-depletion{box-shadow:inset 0 0 80px #6e233820}
+.biome-outland .depletion-structure i{background:linear-gradient(90deg,#050805,#1b3217 20%,#405f2d 50%,#13230f 80%,#030503)}
+.biome-outland .depletion-3 .mine-depletion,.biome-outland .depletion-4 .mine-depletion{box-shadow:inset 0 0 95px #65c3382a}
+.biome-northrend .depletion-structure i{background:linear-gradient(90deg,#05090c,#183544 20%,#47788c 50%,#122b37 80%,#03070a)}
+.biome-northrend .depletion-3 .depletion-structure,.biome-northrend .depletion-4 .depletion-structure{filter:drop-shadow(0 0 8px #62cce044)}
+
+.stage-ore .depletion-status,.stage-artifact .depletion-status{display:none}
+.stage-ore .mine-depletion,.stage-artifact .mine-depletion{opacity:.18!important}
+@media(max-width:700px){.depletion-status{left:12px;bottom:11px;padding:6px 8px}.depletion-status small{display:none}.depletion-status strong{font-size:8px}.depletion-structure i:nth-child(1){left:8%}.depletion-structure i:nth-child(2){right:8%}}
+@media(prefers-reduced-motion:reduce){.mine-depletion,.mine-depletion:before,.mine-depletion:after,.depletion-structure{transition:none}}

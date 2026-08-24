@@ -98,6 +98,7 @@ const biomeQuotaTotal=(biome:Biome)=>biomePages[biome].reduce((total,id)=>total+
 const biomeQuotaProgress=(save:Save,biome:Biome)=>biomePages[biome].reduce((total,id)=>total+Math.min(save.ores[id]||0,oreQuota(id)),0);
 const biomeQuotaComplete=(save:Save,biome:Biome)=>biomePages[biome].every(id=>(save.ores[id]||0)>=oreQuota(id));
 const mineDepletionLevel=(save:Save,biome:Biome)=>{const pct=biomeQuotaProgress(save,biome)/biomeQuotaTotal(biome);return pct>=1?4:pct>=.75?3:pct>=.5?2:pct>=.25?1:0};
+const mineDepletionLabel=(level:number)=>["INTACT FACE","WORKINGS OPENED","HEAVY EXCAVATION","NEARLY STRIPPED","DEPLETED"][Math.max(0,Math.min(4,level))];
 const bestBiome=(ore:Item):Biome=>(Object.keys(biomeWeights) as Biome[]).sort((a,b)=>biomeWeights[b][ores.indexOf(ore)]-biomeWeights[a][ores.indexOf(ore)])[0];
 const bestAvailableBiome=(ore:Item,available:Biome[]):Biome=>[...available].sort((a,b)=>biomeWeights[b][ores.indexOf(ore)]-biomeWeights[a][ores.indexOf(ore)])[0]||"old";
 const huntBoost=(save:Save)=>save.huntTarget?Math.min(5,1+Math.max(0,save.digs-save.huntStartedAtDig-40)/20):1;
@@ -632,6 +633,8 @@ export default function Home() {
       <button className={`rock depletion-${mineDepletionLevel(save,save.biome)} motion-${activeSkin.animation.id} ${miningEngaged&&activeSkin.animation.engagedLoop?"mining-engaged":""} ${impact ? "hit" : ""} ${stage === "ore" ? "ore-rock" : ""} ${stage === "artifact" ? "artifact-rock" : ""} damage-${Math.floor((1-rockHp/maxHp)*4)} ${rockHp===1?"final-hit":""} ${lastHitKind?`hit-${lastHitKind==="perfectCrit"?"perfect-crit":lastHitKind}`:""}`} style={{"--hit-x":`${hitPoint.x}%`,"--hit-y":`${hitPoint.y}%`} as React.CSSProperties} onPointerEnter={followPointer} onPointerMove={followPointer} onPointerLeave={stopFollowing} onClick={strikeAtPointer} aria-label={stage === "artifact" ? "Excavate the unidentified impossible object" : stage === "ore" ? "Crack the exposed ore deposit" : "Strike the rock wall"}>
         <span className="mine-atmosphere" aria-hidden="true"/>
         <span className="mine-depletion" aria-hidden="true"/>
+        <span className="depletion-structure" aria-hidden="true"><i/><i/><i/><i/></span>
+        {stage==="tunnel"&&<span className="depletion-status" aria-hidden="true"><small>SURVEY STATE {mineDepletionLevel(save,save.biome)+1}/5</small><strong>{mineDepletionLabel(mineDepletionLevel(save,save.biome))}</strong></span>}
         <span className="ambient-fx" aria-hidden="true">
           {Array.from({length:12},(_,i)=><i key={i}/>) }
         </span>
