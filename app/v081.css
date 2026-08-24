@@ -1,0 +1,71 @@
+/* v0.8.1 — Collision-proof Mine layout and persistent feedback geometry. */
+.mine-screen{
+  display:flex!important;
+  flex-direction:column;
+  align-items:center;
+  overflow:hidden;
+  padding:22px 0 56px;
+}
+.mine-screen>.mine-copy{order:1;flex:0 0 var(--mine-header-lock);width:min(760px,88vw)}
+.mine-screen>.stats-row{
+  position:relative!important;
+  inset:auto!important;
+  order:2;
+  z-index:6;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:0;
+  width:min(1060px,88vw);
+  min-height:48px;
+  margin:8px auto 0;
+  padding:0;
+  border:1px solid #30362f;
+  border-left:5px solid var(--biome-accent);
+  background:#101310e8;
+}
+.mine-screen>.stats-row span{display:grid;grid-template-columns:1fr auto;align-items:center;padding:8px 14px;border-right:1px solid #30362f;font-size:16px}
+.mine-screen>.stats-row span:last-child{border-right:0}
+.mine-screen>.stats-row small{margin:0;font-size:7px;letter-spacing:1.6px}
+.mine-screen>.stats-row em{margin-left:4px}
+.mine-screen>.hunt-banner,.mine-screen>.vein-banner,.mine-screen>.artifact-modifier-hud{
+  position:relative!important;
+  inset:auto!important;
+  translate:none!important;
+  order:3;
+  width:min(1060px,88vw)!important;
+  margin:8px auto 0!important;
+  text-align:left;
+}
+.mine-screen>.berserk-console{order:4;width:min(1060px,88vw);margin:8px auto 0}
+.mine-screen>.mine-mastery{order:5;width:min(1060px,88vw);margin:8px auto 0}
+.mine-screen>.volume-biomes,
+.mine-screen.stage-ore>.volume-biomes{
+  order:6!important;
+  width:min(1060px,88vw)!important;
+  min-height:82px;
+  margin:8px auto 10px!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+}
+.mine-screen.stage-ore>.volume-biomes::before{grid-column:1/-1}
+.mine-screen>.rock{order:7;flex:0 0 auto;margin-top:2px}
+.mine-screen>.dig-panel{order:8;flex:0 0 auto}
+.mine-screen>.album-link{order:9}
+.mine-screen>.mine-transition{order:10}
+.hit-callout,.miss-bark{min-width:132px;text-align:center;white-space:nowrap}
+.local-save-pulse{position:fixed;left:18px;bottom:18px;z-index:80;display:flex;align-items:center;gap:8px;padding:8px 11px;border:1px solid #46513a;border-left:3px solid var(--acid);background:#0c100ce8;box-shadow:0 8px 24px #000a;pointer-events:none;animation:localSavePulse 1.35s ease both}
+.local-save-pulse i{display:grid;place-items:center;width:17px;height:17px;border-radius:50%;background:var(--acid);color:#10130d;font-size:10px;font-style:normal;font-weight:900}
+.local-save-pulse span{color:#bcc3b5;font-size:7px;font-weight:900;letter-spacing:1.5px}
+@keyframes localSavePulse{0%{opacity:0;transform:translateY(8px)}15%,72%{opacity:1;transform:none}100%{opacity:0;transform:translateY(3px)}}
+@media(max-width:1100px){
+  .mine-screen>.stats-row,.mine-screen>.berserk-console,.mine-screen>.mine-mastery,.mine-screen>.volume-biomes,.mine-screen.stage-ore>.volume-biomes{width:92vw!important}
+  .mine-screen>.volume-biomes,.mine-screen.stage-ore>.volume-biomes{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:620px){
+  .mine-screen>.stats-row{grid-template-columns:repeat(3,1fr)}
+  .mine-screen>.stats-row span{display:block;padding:7px 8px;text-align:center;font-size:14px}
+  .mine-screen>.stats-row small{margin-bottom:3px}
+  .mine-screen>.volume-biomes,.mine-screen.stage-ore>.volume-biomes{grid-template-columns:1fr!important;min-height:0}
+  .mine-screen>.volume-biomes::before,.mine-screen.stage-ore>.volume-biomes::before{grid-column:1}
+  .local-save-pulse{left:10px;bottom:10px}
+}
+@media(prefers-reduced-motion:reduce){.local-save-pulse{animation:none;opacity:1}}

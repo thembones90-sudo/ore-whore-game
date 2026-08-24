@@ -297,6 +297,7 @@ export default function Home() {
   const [pendingTrue,setPendingTrue]=useState<{artifact:TrueArtifact;trigger:"empty"|"ore"}|null>(null);
   const [duplicateNotice,setDuplicateNotice]=useState<{id:number;ore:Item;mineral:Item;count:number;dust:number}|null>(null);
   const [toast, setToast] = useState<{ name: string; text: string } | null>(null);
+  const [savePulse,setSavePulse]=useState(false);
   const [milestone, setMilestone] = useState<{ore:Item;level:number;missing?:Item;attempts:number} | null>(null);
   const [mineCompletion,setMineCompletion]=useState<{completed:Biome;next?:Biome}|null>(null);
   const [onboarding,setOnboarding]=useState(false);
@@ -323,6 +324,7 @@ export default function Home() {
   const collapseTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const fractureId = useRef(0);
   const duplicateNoticeId = useRef(0);
+  const savePulseTimer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined);
   const emptyNoticeId = useRef(0);
   const emptyDigStreak = useRef(0);
   const spaceHeld = useRef(false);
@@ -353,7 +355,7 @@ export default function Home() {
 
   // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps -- mount-time localStorage hydration (migrate save, set onboarding/loaded, fire session_start/return_visit); seed intentionally excluded from deps so this never re-fires post-mount. Moving this to a lazy state initializer would change save-bootstrap and analytics-event timing/ordering; save behavior is protected (see HANDOFF_FOR_CLAUDE.md).
   useEffect(() => { try { const last=Number(localStorage.getItem("ore-whore-last-session")||0);if(last)track("return_visit",{hours_since_previous_session:(Date.now()-last)/3600000}); const raw = localStorage.getItem("ore-whore-save-v1"); if (raw){const old=JSON.parse(raw),restored=migrate(old);setSave(restored);if(restored.activeTrueEncounter){const encounter=restored.activeTrueEncounter,artifact=trueArtifactPool.find(a=>a.id===encounter.artifactId);if(artifact){setMineCommentary(TRUE_ARTIFACT_COMMENTARY);setPendingTrue({artifact,trigger:encounter.trigger});setStage("artifact");setMaxHp(encounter.maxHp);setRockHp(encounter.hp);}}else rollMineCommentary(NORMAL_DIGGING_COMMENTARY);setOnboarding(!old.settings?.helpSeen&&!(old.digs>0));}else{rollMineCommentary(NORMAL_DIGGING_COMMENTARY);setOnboarding(true);} } catch {rollMineCommentary(NORMAL_DIGGING_COMMENTARY);setOnboarding(true)} setLoaded(true); track("session_start",{seed:seed||null,build:"v0.4",analytics_schema:2}); const end=()=>{localStorage.setItem("ore-whore-last-session",String(Date.now()));track("session_end",{session_digs:sessionDigs.current})}; addEventListener("pagehide",end); return()=>removeEventListener("pagehide",end); }, []);
-  useEffect(() => { if (loaded) localStorage.setItem("ore-whore-save-v1", JSON.stringify(save)); }, [save, loaded]);
+  useEffect(() => { if (!loaded)return;localStorage.setItem("ore-whore-save-v1", JSON.stringify(save));setSavePulse(true);if(savePulseTimer.current)clearTimeout(savePulseTimer.current);savePulseTimer.current=setTimeout(()=>setSavePulse(false),1350);return()=>{if(savePulseTimer.current)clearTimeout(savePulseTimer.current)}; }, [save, loaded]);
   const runCueCrossfade=(cue:HTMLAudioElement|null,normalWeight:number,cueWeight:number,durationMs:number,onComplete?:()=>void)=>{
     const normal=soundtrackRef.current;if(!normal||!cue)return;
     if(musicFadeFrameRef.current!==undefined)cancelAnimationFrame(musicFadeFrameRef.current);
@@ -520,7 +522,7 @@ export default function Home() {
     } else {
       setLastHitKind("normal");
       if(hitFeedbackTimer.current)clearTimeout(hitFeedbackTimer.current);
-      hitFeedbackTimer.current=setTimeout(() => setLastHitKind(null), 900);
+      hitFeedbackTimer.current=setTimeout(() => setLastHitKind(null), 1500);
     }
 
     const hit = rockHp - damage;
@@ -725,6 +727,7 @@ export default function Home() {
     {onboarding&&<Onboarding onDone={()=>{setOnboarding(false);setSave(s=>({...s,settings:{...s.settings,helpSeen:true}}));track("mine_started",{attempt:save.digs+1,biome:save.biome})}}/>}
     {mineCompletion&&<MineCompletion data={mineCompletion} digs={save.digs} onContinue={()=>{if(mineCompletion.next)setSave(s=>({...s,biome:mineCompletion.next!}));setMineCompletion(null);setTab("mine");continueMine();}}/>}
     {toast && <div className="achievement" role="button" tabIndex={0} onClick={() => setToast(null)} onKeyDown={(e)=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setToast(null)}}}><span>{toast.name.includes("MINE UNLOCKED")?"NEW MINE UNLOCKED":"ACHIEVEMENT UNLOCKED"}</span><strong>{toast.name}</strong><p>{toast.text}</p></div>}
+    {savePulse&&<div className="local-save-pulse" role="status" aria-live="polite"><i>✓</i><span>PROGRESS SAVED LOCALLY</span></div>}
   </main>;
 }
 
