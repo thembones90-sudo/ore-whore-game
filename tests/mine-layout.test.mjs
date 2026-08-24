@@ -17,9 +17,9 @@ test("the visible ore shell does not repeat a redundant strike instruction",()=>
   assert.match(page,/stage === "ore" \? "ORE SHELL"/);
 });
 test("authored mine degradation is progress-derived at the canonical thresholds",()=>{
-  assert.match(page,/if\(biome==="old"\|\|biome==="deep"\)return pct>=\.9\?4:pct>=\.65\?3:pct>=\.4\?2:pct>=\.2\?1:0/);
+  assert.match(page,/if\(biome!=="northrend"\)return pct>=\.9\?4:pct>=\.65\?3:pct>=\.4\?2:pct>=\.2\?1:0/);
   assert.match(page,/mine-stage-art/);
-  assert.match(page,/save\.biome==="old"\|\|save\.biome==="deep"/);
+  assert.match(page,/save\.biome!=="northrend"/);
 });
 
 test("mine hierarchy is compact and completed surveys collapse to one row",()=>{
