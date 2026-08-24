@@ -1,0 +1,93 @@
+/* v0.69 — Forbidden Tunnel visual overhaul. Mechanics remain unchanged. */
+.forbidden-tunnel-overlay{
+  --tunnel-accent:#c8e34e;
+  --tunnel-warm:#c78a3d;
+  background:
+    linear-gradient(180deg,#0204028f,#020302f2),
+    radial-gradient(ellipse at 50% 34%,#34452b 0,#11170f 28%,#050705 68%,#010201 100%);
+  perspective:1200px;
+}
+.forbidden-tunnel-overlay:before{
+  opacity:.72;
+  background:
+    linear-gradient(104deg,transparent 0 13%,#80965012 13.2% 13.7%,transparent 14% 86%,#80965012 86.3% 86.8%,transparent 87%),
+    repeating-linear-gradient(90deg,transparent 0 118px,#9fb66b09 119px 120px),
+    radial-gradient(ellipse at 50% 38%,transparent 12%,#000b 77%);
+}
+.forbidden-tunnel-overlay:after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.45;
+  background:repeating-radial-gradient(ellipse at 50% 110%,transparent 0 57px,#89946310 59px 61px,transparent 63px 120px);
+  mask-image:linear-gradient(to top,#000,transparent 45%);
+}
+.forbidden-tunnel-card{
+  width:min(1240px,96vw);padding:clamp(24px,3.2vw,48px);border-color:#76805d;
+  background:
+    linear-gradient(90deg,#b28a3b16 1px,transparent 1px) 0 0/96px 100%,
+    linear-gradient(145deg,#171d16fa,#070a07fc 72%);
+  box-shadow:0 38px 110px #000,0 0 80px #8ba64a24,inset 0 1px #b9ca8b42,inset 0 0 80px #000;
+  overflow:hidden;
+}
+.forbidden-tunnel-card:before,.forbidden-tunnel-card:after{content:"";position:absolute;pointer-events:none;z-index:-1}
+.forbidden-tunnel-card:before{inset:8px;border:1px solid #9aa47b24;box-shadow:inset 0 0 50px #000}
+.forbidden-tunnel-card:after{left:0;right:0;bottom:0;height:34%;background:linear-gradient(8deg,#000b,transparent),repeating-linear-gradient(98deg,transparent 0 74px,#7380440b 76px 78px)}
+.forbidden-tunnel-card header small{color:#b9c48d;font-size:10px;letter-spacing:5px}
+.forbidden-tunnel-card h2{text-shadow:0 3px 0 #000,0 0 30px #9bb54125}
+.forbidden-tunnel-card header p{max-width:720px;margin:14px auto;color:#c5c9b9}
+
+.tunnel-passages{gap:clamp(12px,1.6vw,24px);margin-top:30px}
+.tunnel-passages button{
+  --portal-shift:50%;min-height:340px;padding:0 18px 22px;border:1px solid #626b55;
+  background:
+    linear-gradient(180deg,transparent 50%,#020302eb 92%),
+    radial-gradient(ellipse at var(--portal-shift) 47%,#707d4560 0 2%,#283124 5%,#0b0f0b 25%,#020302 54%,#000 76%);
+  box-shadow:inset 0 -48px 70px #000,0 18px 32px #000b,inset 0 1px #d0d7b044;
+  isolation:isolate;clip-path:polygon(4% 0,96% 0,100% 5%,100% 100%,0 100%,0 5%);
+}
+.tunnel-passages button:nth-child(1){--portal-shift:42%}
+.tunnel-passages button:nth-child(2){--portal-shift:50%}
+.tunnel-passages button:nth-child(3){--portal-shift:58%}
+.tunnel-passages button:before{
+  inset:22px 13% 52px;border:0;border-radius:46% 46% 5% 5%;
+  background:
+    linear-gradient(90deg,transparent 46%,#303529 47% 49%,transparent 50% 54%,#303529 55% 57%,transparent 58%) bottom/100% 34% no-repeat,
+    radial-gradient(ellipse at 50% 68%,#000 0 39%,transparent 40%),
+    linear-gradient(90deg,#252a22 0 8%,transparent 8% 92%,#252a22 92%) ,
+    linear-gradient(#353a30 0 8%,transparent 8% 92%,#252a22 92%);
+  box-shadow:inset 0 0 65px #000,0 0 0 3px #0b0d0a,0 0 28px #000;
+  transform:perspective(440px) rotateX(-2deg);
+}
+.tunnel-passages button:after{
+  content:"";position:absolute;left:50%;top:48px;width:9px;height:9px;border-radius:50%;z-index:2;
+  background:#d9a247;box-shadow:0 0 8px 3px #f1b84b,0 0 32px 12px #cf8c2944;
+  animation:tunnelLamp 2.8s ease-in-out infinite alternate;
+}
+.tunnel-passages button:nth-child(2):after{animation-delay:-1.1s}.tunnel-passages button:nth-child(3):after{animation-delay:-2s}
+.tunnel-passages button i{position:absolute;inset:0;z-index:1;pointer-events:none}
+.tunnel-passages button i:before,.tunnel-passages button i:after{content:"";position:absolute;bottom:48px;width:3px;height:130px;background:linear-gradient(#1b1f19,#78805f 48%,#151814);transform-origin:bottom;opacity:.75}
+.tunnel-passages button i:before{left:42%;transform:rotate(11deg)}.tunnel-passages button i:after{right:42%;transform:rotate(-11deg)}
+.tunnel-passages button strong{margin-top:278px;font-size:21px;color:#f3f0e5;text-shadow:0 2px 5px #000;letter-spacing:4px}
+.tunnel-passages button small{color:#b7be9f;font-size:8px}
+.tunnel-passages button:hover,.tunnel-passages button:focus-visible{border-color:var(--tunnel-accent);transform:translateY(-6px) scale(1.012);filter:brightness(1.18);box-shadow:inset 0 -48px 70px #000,0 24px 40px #000d,0 0 28px #c8e34e28}
+.tunnel-passages button:hover:after,.tunnel-passages button:focus-visible:after{background:#eaff6b;box-shadow:0 0 9px 4px #eaff6b,0 0 42px 18px #bbdb454d}
+
+.tunnel-reveal span{padding:16px;border-color:#4d5545;background:linear-gradient(145deg,#111510,#080a08);box-shadow:inset 0 1px #fff08}
+.tunnel-reveal span.selected{border-color:var(--tunnel-accent);background:linear-gradient(145deg,#2a331c,#11160c);box-shadow:inset 5px 0 var(--tunnel-accent),0 0 24px #bfdc4030}
+.tunnel-reveal strong{font-size:15px;letter-spacing:.5px}
+.forbidden-tunnel-card blockquote{border-left-width:4px;box-shadow:0 8px 24px #0008}
+.forbidden-tunnel-card footer{position:relative;z-index:2;background:#090c09b8;padding:22px;border:1px solid #343b30}
+
+.forbidden-tunnel-overlay.chamber-second{--tunnel-accent:#f0a746;background:radial-gradient(ellipse at 50% 36%,#45311c,#100d08 42%,#020202 100%)}
+.chamber-second .tunnel-passages button{border-color:#765b3c;background:linear-gradient(180deg,transparent 50%,#020202ef 92%),radial-gradient(ellipse at var(--portal-shift) 47%,#9b633b5c 0 3%,#392a20 8%,#100d0a 28%,#020202 60%)}
+.chamber-second .forbidden-tunnel-card{border-color:#806442;box-shadow:0 38px 110px #000,0 0 80px #b76e302b,inset 0 1px #d8a15b33,inset 0 0 80px #000}
+.deep-victory .forbidden-tunnel-card{background:radial-gradient(circle at 50% 18%,#493314,#171006 58%,#070402)}
+.sealed-result .forbidden-tunnel-card:after{height:55%;background:linear-gradient(8deg,#000 5%,#1c1a13cc 32%,transparent 75%),repeating-linear-gradient(98deg,transparent 0 52px,#8b7b5519 54px 57px)}
+
+@keyframes tunnelLamp{from{opacity:.68;transform:translate(-50%,0) scale(.86)}to{opacity:1;transform:translate(-50%,1px) scale(1.12)}}
+@media(max-width:700px){
+  .tunnel-passages button{min-height:128px;clip-path:none}
+  .tunnel-passages button:before{inset:9px 22% 32px}
+  .tunnel-passages button:after{top:22px}
+  .tunnel-passages button i:before,.tunnel-passages button i:after{height:60px;bottom:30px}
+  .tunnel-passages button strong{margin-top:78px}
+}
+@media(prefers-reduced-motion:reduce){.tunnel-passages button:after{animation:none}}

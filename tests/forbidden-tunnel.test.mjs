@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {FORBIDDEN_TUNNEL_TRIGGER_CHANCE,artifactChanceForDig,canTriggerForbiddenTunnel,createForbiddenTunnel,markModifierRolled,modifierFor,sanitizeArtifactModifier,sanitizeForbiddenTunnel,selectFirstPath,selectSecondPath,simulateForbiddenTunnels} from "../app/forbidden-tunnel.ts";
+import {readFileSync} from "node:fs";
 
 const seq=(...n)=>{let i=0;return()=>n[i++%n.length]};
 test("trigger is one percent",()=>assert.equal(FORBIDDEN_TUNNEL_TRIGGER_CHANCE,.01));
@@ -29,3 +30,4 @@ test("invalid tunnel is rejected",()=>assert.equal(sanitizeForbiddenTunnel({id:"
 test("valid modifier survives sanitation",()=>assert.deepEqual(sanitizeArtifactModifier(modifierFor("deep")),modifierFor("deep")));
 test("invalid modifier is rejected",()=>assert.equal(sanitizeArtifactModifier({chance:.99,source:"hack",consumed:false}),null));
 test("million-run distribution matches model",()=>{const s=simulateForbiddenTunnels(1_000_000);for(const n of Object.values(s.first))assert.ok(Math.abs(n/1_000_000-1/3)<.002);assert.ok(Math.abs(s.second.deep/(s.second.deep+s.second.sealed)-.5)<.004);assert.ok(Math.abs(s.averageTunnelChance-.0259167)<.0002);assert.ok(Math.abs(s.overallBaselineRate-.00075417)<.00001)});
+test("forbidden tunnel uses the dedicated cinematic passage treatment",()=>{const css=readFileSync(new URL("../app/v069.css",import.meta.url),"utf8"),layout=readFileSync(new URL("../app/layout.tsx",import.meta.url),"utf8");assert.match(layout,/import "\.\/v069\.css"/);assert.match(css,/\.tunnel-passages button:after/);assert.match(css,/\.tunnel-passages button i:before/);assert.match(css,/\.forbidden-tunnel-overlay\.chamber-second/)});
