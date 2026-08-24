@@ -8,6 +8,7 @@ import { DEFAULT_TOOL_SKIN_ID, isToolSkinUnlocked, toolSkin, toolSkins } from ".
 import { artifactChanceForDig, canTriggerForbiddenTunnel, createForbiddenTunnel, FORBIDDEN_TUNNEL_TRIGGER_CHANCE, ORDINARY_TRUE_ARTIFACT_CHANCE, markModifierRolled, sanitizeArtifactModifier, sanitizeForbiddenTunnel, selectFirstPath, selectSecondPath, type ArtifactModifier, type FirstDirection, type ForbiddenTunnelState, type SecondDirection } from "./forbidden-tunnel";
 import { ASOC_TICKET_CHANCE, ASOC_TICKET_ID, asocTicketChanceForDig } from "./asoc-ticket";
 import { ALIJA_SHOVEL_ARTIFACT_ID, ALIJA_SHOVEL_SKIN_ID, artifactRewardUnlocks } from "./artifact-rewards";
+import { eligibleOreCommentary, NORMAL_DIGGING_COMMENTARY, selectMineCommentary, TRUE_ARTIFACT_COMMENTARY, type MineCommentary } from "./mine-commentary";
 
 type Rarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Mythic";
 type Item = { id: string; name: string; rarity: Rarity; weight: number; color: string; note: string; toughness?: number };
@@ -257,6 +258,11 @@ const migrate=(old:any):Save=>{
   const requested:Biome=biomeOrder.includes(old.biome)?old.biome:"old",biome=unlockedBiomes.includes(requested)?requested:unlockedBiomes[unlockedBiomes.length-1];return {...provisional,biome,unlockedBiomes,completedBiomes};
 }
 
+function CommentaryHeadline({text,accentFirst}:{text:string;accentFirst:boolean}){
+  const words=text.split(" "),accentIndex=accentFirst?0:words.length-1;
+  return <>{words.map((word,index)=><span key={`${word}-${index}`}>{index>0?" ":null}{index===accentIndex?<i>{word}</i>:word}</span>)}</>;
+}
+
 export default function Home() {
   const [save, setSave] = useState<Save>(blank);
   const [loaded, setLoaded] = useState(false);
@@ -265,6 +271,8 @@ export default function Home() {
   const [maxHp, setMaxHp] = useState(12);
   const [rockHp, setRockHp] = useState(12);
   const [pendingOre, setPendingOre] = useState<Item | null>(null);
+  const [mineCommentary,setMineCommentary]=useState<MineCommentary>(NORMAL_DIGGING_COMMENTARY[0]);
+  const commentaryHistory=useRef<string[]>([]);
   const [impact, setImpact] = useState<number | null>(null);
   const [miningEngaged,setMiningEngaged]=useState(false);
   const [quotaExpanded,setQuotaExpanded]=useState(false);
@@ -288,6 +296,7 @@ export default function Home() {
   const previousBiome=useRef<Biome>("old");
   const seed = typeof window !== "undefined" ? Number(new URLSearchParams(location.search).get("seed")) : 0;
   const rng = useState<{current:()=>number}>(() => ({current: makeRng(seed || Date.now())}))[0];
+  const rollMineCommentary=(pool:MineCommentary[])=>setMineCommentary(selectMineCommentary(pool,commentaryHistory.current,rng.current));
   // Perfect Strike phase reference — a fixed continuous metronome so the
   // timing window is learnable, not randomized per-strike. Lazy useState
   // initializer (not useRef(Date.now())) for the same render-purity reason
@@ -325,7 +334,7 @@ export default function Home() {
   audioSettingsRef.current=save.settings;
 
   // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps -- mount-time localStorage hydration (migrate save, set onboarding/loaded, fire session_start/return_visit); seed intentionally excluded from deps so this never re-fires post-mount. Moving this to a lazy state initializer would change save-bootstrap and analytics-event timing/ordering; save behavior is protected (see HANDOFF_FOR_CLAUDE.md).
-  useEffect(() => { try { const last=Number(localStorage.getItem("ore-whore-last-session")||0);if(last)track("return_visit",{hours_since_previous_session:(Date.now()-last)/3600000}); const raw = localStorage.getItem("ore-whore-save-v1"); if (raw){const old=JSON.parse(raw),restored=migrate(old);setSave(restored);if(restored.activeTrueEncounter){const encounter=restored.activeTrueEncounter,artifact=trueArtifactPool.find(a=>a.id===encounter.artifactId);if(artifact){setPendingTrue({artifact,trigger:encounter.trigger});setStage("artifact");setMaxHp(encounter.maxHp);setRockHp(encounter.hp);}}setOnboarding(!old.settings?.helpSeen&&!(old.digs>0));}else setOnboarding(true); } catch {setOnboarding(true)} setLoaded(true); track("session_start",{seed:seed||null,build:"v0.4",analytics_schema:2}); const end=()=>{localStorage.setItem("ore-whore-last-session",String(Date.now()));track("session_end",{session_digs:sessionDigs.current})}; addEventListener("pagehide",end); return()=>removeEventListener("pagehide",end); }, []);
+  useEffect(() => { try { const last=Number(localStorage.getItem("ore-whore-last-session")||0);if(last)track("return_visit",{hours_since_previous_session:(Date.now()-last)/3600000}); const raw = localStorage.getItem("ore-whore-save-v1"); if (raw){const old=JSON.parse(raw),restored=migrate(old);setSave(restored);if(restored.activeTrueEncounter){const encounter=restored.activeTrueEncounter,artifact=trueArtifactPool.find(a=>a.id===encounter.artifactId);if(artifact){setMineCommentary(TRUE_ARTIFACT_COMMENTARY);setPendingTrue({artifact,trigger:encounter.trigger});setStage("artifact");setMaxHp(encounter.maxHp);setRockHp(encounter.hp);}}else rollMineCommentary(NORMAL_DIGGING_COMMENTARY);setOnboarding(!old.settings?.helpSeen&&!(old.digs>0));}else{rollMineCommentary(NORMAL_DIGGING_COMMENTARY);setOnboarding(true);} } catch {rollMineCommentary(NORMAL_DIGGING_COMMENTARY);setOnboarding(true)} setLoaded(true); track("session_start",{seed:seed||null,build:"v0.4",analytics_schema:2}); const end=()=>{localStorage.setItem("ore-whore-last-session",String(Date.now()));track("session_end",{session_digs:sessionDigs.current})}; addEventListener("pagehide",end); return()=>removeEventListener("pagehide",end); }, []);
   useEffect(() => { if (loaded) localStorage.setItem("ore-whore-save-v1", JSON.stringify(save)); }, [save, loaded]);
   const runCueCrossfade=(cue:HTMLAudioElement|null,normalWeight:number,cueWeight:number,durationMs:number,onComplete?:()=>void)=>{
     const normal=soundtrackRef.current;if(!normal||!cue)return;
@@ -403,12 +412,12 @@ export default function Home() {
     return ids.filter(id => !next.achievements.includes(id));
   };
 
-  const continueMine = () => { const hp=10+Math.floor(rng.current()*6); setFound(null); setPendingOre(null); setPendingTrue(null); setFractures([]); setStage("tunnel"); setMaxHp(hp); setRockHp(hp); track("mine_started",{attempt:save.digs+1,biome:save.biome}); };
+  const continueMine = () => { const hp=10+Math.floor(rng.current()*6); rollMineCommentary(NORMAL_DIGGING_COMMENTARY); setFound(null); setPendingOre(null); setPendingTrue(null); setFractures([]); setStage("tunnel"); setMaxHp(hp); setRockHp(hp); track("mine_started",{attempt:save.digs+1,biome:save.biome}); };
 
   const selectForbiddenFirst=(direction:FirstDirection)=>{if(tunnelInputLocked.current)return;tunnelInputLocked.current=true;const current=save.forbiddenTunnel;if(!current||current.chamber!=="first"){tunnelInputLocked.current=false;return}const result=selectFirstPath(current,direction,rng.current);setSave(s=>s.forbiddenTunnel?.id===current.id&&s.forbiddenTunnel.chamber==="first"?{...s,forbiddenTunnel:result.tunnel,pendingArtifactModifier:result.modifier||s.pendingArtifactModifier}:s);const outcome=current.firstAssignments[direction];track("forbidden_tunnel_first_path_selected",{biome:save.biome,direction,assigned_outcome:outcome,session_dig:sessionDigs.current,seeded_test:!!seed});track("forbidden_tunnel_first_outcome",{outcome});if(outcome==="x5")track("forbidden_tunnel_second_chamber_reached",{biome:save.biome});else if(result.modifier)track("artifact_modifier_activated",{modifier:result.modifier.chance,source:result.modifier.source});setTimeout(()=>{tunnelInputLocked.current=false},0)};
   const selectForbiddenSecond=(direction:SecondDirection)=>{if(tunnelInputLocked.current)return;tunnelInputLocked.current=true;const current=save.forbiddenTunnel;if(!current||current.chamber!=="second"){tunnelInputLocked.current=false;return}const result=selectSecondPath(current,direction);setSave(s=>s.forbiddenTunnel?.id===current.id&&s.forbiddenTunnel.chamber==="second"?{...s,forbiddenTunnel:result.tunnel,pendingArtifactModifier:result.modifier}:s);const outcome=current.secondAssignments?.[direction];track("forbidden_tunnel_second_path_selected",{biome:save.biome,direction,assigned_outcome:outcome,session_dig:sessionDigs.current,seeded_test:!!seed});track(outcome==="deep"?"forbidden_tunnel_deep_way":"forbidden_tunnel_sealed_passage",{modifier:result.modifier?.chance});if(result.modifier)track("artifact_modifier_activated",{modifier:result.modifier.chance,source:result.modifier.source});setTimeout(()=>{tunnelInputLocked.current=false},0)};
 
-  const beginTrueEncounter=(artifact:TrueArtifact,trigger:"empty"|"ore")=>{const artifactHp=Math.max(60,Math.ceil(maxHp*20)),activeTrueEncounter:ActiveTrueEncounter={artifactId:artifact.id,trigger,hp:artifactHp,maxHp:artifactHp,startedAtDig:save.digs+1};emptyDigStreak.current=0;setPendingOre(null);setPendingTrue({artifact,trigger});setFractures([]);setStage("artifact");setMaxHp(artifactHp);setRockHp(artifactHp);setSave(s=>({...s,activeTrueEncounter}));playImpact("clank");track("true_artifact_encounter_started",{artifact_id:artifact.id,attempt:save.digs+1,biome:save.biome,trigger,health_multiplier:20,artifact_hp:artifactHp,tool_id:save.equippedTool});emitGameplayEvent("TRUE_ARTIFACT_ENCOUNTER_STARTED",{artifact_id:artifact.id,trigger,health_multiplier:20,artifact_hp:artifactHp});};
+  const beginTrueEncounter=(artifact:TrueArtifact,trigger:"empty"|"ore")=>{const artifactHp=Math.max(60,Math.ceil(maxHp*20)),activeTrueEncounter:ActiveTrueEncounter={artifactId:artifact.id,trigger,hp:artifactHp,maxHp:artifactHp,startedAtDig:save.digs+1};emptyDigStreak.current=0;setMineCommentary(TRUE_ARTIFACT_COMMENTARY);setPendingOre(null);setPendingTrue({artifact,trigger});setFractures([]);setStage("artifact");setMaxHp(artifactHp);setRockHp(artifactHp);setSave(s=>({...s,activeTrueEncounter}));playImpact("clank");track("true_artifact_encounter_started",{artifact_id:artifact.id,attempt:save.digs+1,biome:save.biome,trigger,health_multiplier:20,artifact_hp:artifactHp,tool_id:save.equippedTool});emitGameplayEvent("TRUE_ARTIFACT_ENCOUNTER_STARTED",{artifact_id:artifact.id,trigger,health_multiplier:20,artifact_hp:artifactHp});};
   const completeTrueEncounter=()=>{if(!pendingTrue)return;const {artifact,trigger}=pendingTrue,modifier=save.pendingArtifactModifier,trueChance=artifactChanceForDig(modifier,equippedMiningTool(save).trueArtifactChance),firstDiscovery=!save.trueArtifacts[artifact.id];playImpact("crack");setSave(s=>{const digNumber=s.digs+1,isFirst=!s.trueArtifacts[artifact.id],veinDigsRemaining=Math.max(0,s.veinDigsRemaining-1),veinExpired=s.veinDigsRemaining>0&&veinDigsRemaining===0;if(veinExpired)emitGameplayEvent("VEIN_EXPIRED",{ore:s.veinOre});if(isFirst)setTrueFind({artifact,digNumber});const unlocks=isFirst&&artifact.rewardSkinId?[...new Set([...s.unlocks,artifact.rewardSkinId])]:s.unlocks;return {...s,digs:digNumber,unlocks,trueArtifacts:{...s.trueArtifacts,[artifact.id]:1},trueFirst:isFirst?{...s.trueFirst,[artifact.id]:digNumber}:s.trueFirst,activeTrueEncounter:null,pendingArtifactModifier:null,lastDigAt:Date.now(),veinDigsRemaining,veinOre:veinExpired?null:s.veinOre}});if(firstDiscovery&&artifact.rewardSkinId)notify("success","PICKAXE SKIN UNLOCKED — ALIJA'S SHOVEL","Permanent cosmetic added to the Pickaxe Rack. Technology stats remain unchanged.");sessionDigs.current++;setSessionDigsCount(c=>c+1);setPendingTrue(null);if(modifier){track("artifact_modifier_consumed",{modifier:modifier.chance,source:modifier.source,success:true});track("artifact_won_from_modified_dig",{artifact_id:artifact.id,modifier:modifier.chance,source:modifier.source})}track("true_artifact_found",{artifact_id:artifact.id,attempt:save.digs+1,biome:save.biome,trigger,tool_id:save.equippedTool,true_artifact_chance:trueChance,health_multiplier:20});emitGameplayEvent("TRUE_ARTIFACT_FOUND",{artifact_id:artifact.id,trigger,tool_id:save.equippedTool,health_multiplier:20});};
 
   function playImpact(kind:"rock"|"clank"|"crack"|"miss"|"perfect"|"crit"){
@@ -517,6 +526,7 @@ export default function Home() {
       playImpact(impactKind??"clank");
       setFractures([]);
       setPendingOre(ore);
+      rollMineCommentary(eligibleOreCommentary(ore.rarity));
       setStage("ore");
       const oreHp = toughnessStrikes(ore.toughness ?? 1);
       setMaxHp(oreHp);
@@ -603,7 +613,7 @@ export default function Home() {
   const activeSkin=toolSkin(save.toolSkinId,save.unlocks);
   const hasSuccessfulExtraction=Object.values(save.ores).some(count=>count>0);
   const showStrikeInstruction=stage==="artifact"||(stage==="tunnel"&&!hasSuccessfulExtraction);
-  const reset = () => { if (confirm("Erase every discovery and return to the cold, uncaring rock?")) { setSave(blank); setFound(null); setPendingOre(null); setEmptyNotice(null); setFractures([]); setCollapseBurst(null); setStage("tunnel"); setMaxHp(12); setRockHp(12); sessionDigs.current=0; setSessionDigsCount(0); setSessionMisses(0); setSessionVeins(0); setSessionNew(0); setSessionDrought(0); setSessionLongestDrought(0); consecutiveMisses.current=0; emptyDigStreak.current=0; } };
+  const reset = () => { if (confirm("Erase every discovery and return to the cold, uncaring rock?")) { setSave(blank); rollMineCommentary(NORMAL_DIGGING_COMMENTARY); setFound(null); setPendingOre(null); setEmptyNotice(null); setFractures([]); setCollapseBurst(null); setStage("tunnel"); setMaxHp(12); setRockHp(12); sessionDigs.current=0; setSessionDigsCount(0); setSessionMisses(0); setSessionVeins(0); setSessionNew(0); setSessionDrought(0); setSessionLongestDrought(0); consecutiveMisses.current=0; emptyDigStreak.current=0; } };
 
   return <main className={`tab-${tab} ${save.settings.reducedMotion?"reduced-motion":""} ${save.settings.reducedShake?"reduced-shake":""} ${save.settings.highContrast?"high-contrast":""} cosmetic-${save.equipped}`}>
     <audio ref={soundtrackRef} src="/assets/audio/echoes-of-the-forgotten-crypt.wav" loop preload="metadata" aria-hidden="true"/>
@@ -629,7 +639,7 @@ export default function Home() {
     </header>
 
     {tab === "mine" && <section className={`mine-screen biome-${save.biome} ${impact ? "screen-hit" : ""} stage-${stage}`} style={{"--biome-accent":biomeVisuals[save.biome].accent,"--biome-secondary":biomeVisuals[save.biome].secondary,"--biome-canvas":biomeVisuals[save.biome].canvas,"--biome-cavity":biomeVisuals[save.biome].cavity,"--biome-debris":biomeVisuals[save.biome].debris,"--biome-particle":biomeVisuals[save.biome].particle,"--biome-light":biomeVisuals[save.biome].light} as React.CSSProperties}>
-      <div className="mine-copy"><p className="eyebrow">{stage === "artifact" ? "SYSTEM ALERT · IMPOSSIBLE DENSITY" : stage === "ore" ? "CLANK · DEPOSIT EXPOSED" : "SHIFT 01 · THE LONG WALL"}</p><h1>{stage === "artifact" ? <>DO NOT <i>STOP.</i></> : stage === "ore" ? <><i>ORE</i> FOUND.</> : <>KEEP <i>DIGGING.</i></>}</h1><p>{stage === "artifact" ? <>Something is buried inside. The mountain has increased resistance by <strong>2,000%.</strong></> : stage === "ore" ? `${pendingOre?.name}. Crack it open and see what ruined your evening.` : <>The rock does not care about your album.<br/>Unfortunately, you do.</>}</p></div>
+      <div className="mine-copy"><p className="eyebrow">{stage === "artifact" ? "SYSTEM ALERT · IMPOSSIBLE DENSITY" : stage === "ore" ? "CLANK · DEPOSIT EXPOSED" : "SYSTEM / FOREMAN · ACTIVE DIRECTIVE"}</p><h1><CommentaryHeadline text={mineCommentary.headline} accentFirst={stage==="ore"}/></h1><p>{mineCommentary.subtitle}</p></div>
       <div className="stats-row"><span><small>DEPOSITS</small>{save.digs}</span><span><small>UNIQUE</small>{unique}<em>/ 225</em></span><span><small>DRY STREAK</small>{save.streak}</span></div>
       {save.huntTarget&&<div className="hunt-banner"><span>HUNTING{huntBoost(save)>1?` · FOCUS +${Math.round((huntBoost(save)-1)*100)}%`:""}</span><strong>{(()=>{const p=save.huntTarget!.lastIndexOf("-");return `${ores.find(o=>o.id===save.huntTarget!.slice(0,p))?.name} + ${minerals.find(m=>m.id===save.huntTarget!.slice(p+1))?.name}`})()}</strong><button onClick={()=>setTab("wanted")}>VIEW TARGET</button></div>}
       {save.veinOre&&<div className="vein-banner"><span>VEIN EXPOSED</span><strong>{ores.find(o=>o.id===save.veinOre)?.name}</strong><small>{save.veinDigsRemaining} {save.veinDigsRemaining===1?"DIG":"DIGS"} REMAIN</small></div>}
