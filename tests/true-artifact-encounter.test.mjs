@@ -20,6 +20,15 @@ test("active TRUE Artefact encounters persist and restore without granting owner
   assert.match(page, /activeTrueEncounter:null,pendingArtifactModifier:null,lastDigAt/);
 });
 
+test("TRUE Artefacts are unique and previously found entries cannot roll again", () => {
+  assert.match(page, /!owned\[a\.id\]/);
+  assert.match(page, /if\(!configured\.length\)return null/);
+  assert.match(page, /pickTrue\(rng\.current,save\.trueArtifacts\)/);
+  assert.match(page, /trueArtifacts:\{\.\.\.s\.trueArtifacts,\[artifact\.id\]:1\}/);
+  assert.match(page, /if\(Number\(old\.trueArtifacts\?\.\[artifact\.id\]\|\|0\)>0\)trueArtifacts\[artifact\.id\]=1/);
+  assert.match(page, /encounter&&!trueArtifacts\[encounter\.artifactId\]/);
+});
+
 test("R9 receives the canonical Peon tribute", () => {
   assert.match(page, /peonBark:"Boss\.\.\. this not man\. This Ronaldo\. Peon take hat off\."/);
   assert.match(page, /\{text:"Boss\.\.\. this not man\.",delayMs:0\}/);
