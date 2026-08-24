@@ -7,9 +7,14 @@ const layout=readFileSync(new URL("../app/v067.css",import.meta.url),"utf8");
 
 test("first-extraction strike onboarding derives from persisted lifetime ore counts",()=>{
   assert.match(page,/const hasSuccessfulExtraction=Object\.values\(save\.ores\)\.some\(count=>count>0\)/);
-  assert.match(page,/const showStrikeInstruction=stage!=="tunnel"\|\|!hasSuccessfulExtraction/);
+  assert.match(page,/const showStrikeInstruction=stage==="artifact"\|\|\(stage==="tunnel"&&!hasSuccessfulExtraction\)/);
   assert.match(page,/\{showStrikeInstruction&&<div className="strike-instruction">/);
   assert.match(page,/showStrikeInstruction\?"":"instruction-collapsed"/);
+});
+
+test("the visible ore shell does not repeat a redundant strike instruction",()=>{
+  assert.doesNotMatch(page,/CRACK DEPOSIT/);
+  assert.match(page,/stage === "ore" \? "ORE SHELL"/);
 });
 
 test("mine hierarchy is compact and completed surveys collapse to one row",()=>{
