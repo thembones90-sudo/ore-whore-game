@@ -62,3 +62,14 @@
   .mine-screen>.volume-biomes::before{grid-column:1}
   .shadow-pre-reveal .true-art-slot{width:88vw;height:42vh}
 }
+
+/* Album ore navigation uses the same canonical artwork as mining and reveals. */
+.ore-tabs .ore-tab-art{
+  flex:0 0 auto;
+  width:46px;
+  height:46px;
+  object-fit:contain;
+  filter:drop-shadow(0 5px 5px #000b);
+}
+.ore-tabs button:hover .ore-tab-art,.ore-tabs button.selected .ore-tab-art{filter:brightness(1.12) drop-shadow(0 6px 6px #000) drop-shadow(0 0 8px #d9ff4533)}
+@media(max-width:760px){.ore-tabs .ore-tab-art{width:40px;height:40px}}

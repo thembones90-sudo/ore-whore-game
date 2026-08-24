@@ -16,3 +16,9 @@ test("mine selector is flow-owned and cannot overlap the playable wall",()=>{
   assert.match(css,/\.mine-screen>\.volume-biomes[\s\S]*grid-template-columns:repeat\(4/);
   assert.match(css,/@media\(max-width:1100px\)[\s\S]*\.mine-screen>\.volume-biomes\{order:4!important[\s\S]*\.mine-screen>\.rock\{order:5!important/);
 });
+
+test("all Album ore tabs use canonical ore artwork instead of color polygons",()=>{
+  assert.match(page,/className="ore-tab-art" src=\{oreAsset\(o\.id\)\}/);
+  assert.doesNotMatch(page,/className="ore-tabs volume-tabs"[\s\S]{0,800}<i style=\{\{background:o\.color\}\}/);
+  assert.match(css,/\.ore-tabs \.ore-tab-art\{/);
+});
