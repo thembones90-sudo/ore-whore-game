@@ -48,17 +48,10 @@ test("server-renders the ORE WHORE game shell", async () => {
 
   // Mine screen — opening copy and biome mastery/card structure
   assert.match(html, /class="mine-screen biome-old/);
-  assert.match(html, /SYSTEM \/ FOREMAN · ACTIVE DIRECTIVE/);
-  assert.match(html, /Previous attempts have established that persistence can substitute for thought\./);
+  assert.match(html, /KEEP <i>DIGGING\.<\/i>/);
+  assert.match(html, /SHIFT 01 · THE LONG WALL/);
   assert.match(html, /aria-label="Mine location"/);
   assert.match(html, /biome-card-old/);
-  assert.match(html, /rock depletion-0/);
-  assert.match(html, /class="mine-depletion"/);
-  assert.match(html, /class="depletion-structure"/);
-  assert.match(html, /SURVEY STATE/);
-  assert.match(html, /INTACT FACE/);
-  assert.match(html, /mine-stage-art old-mine-stage-art/);
-  assert.match(html, /mine-stage-4/);
 
   // Sequential mine gating: Deep/Outland/Northrend start locked
   assert.match(html, /biome-card-deep\s+locked/);

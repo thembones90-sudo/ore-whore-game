@@ -33,20 +33,6 @@ const eslintConfig = defineConfig([
     },
   },
   {
-    // Standard TS convention: a leading underscore marks a binding as
-    // intentionally unused (e.g. destructuring a field out of an object
-    // purely to omit it — see migrate()'s `_obsoleteTrueArtifactChance`/
-    // `_obsoleteArtifactChance` in app/page.tsx). Recognizing the
-    // convention here avoids scattering per-line disables for a pattern
-    // that's meaningful, working code rather than dead code.
-    rules: {
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", destructuredArrayIgnorePattern: "^_" },
-      ],
-    },
-  },
-  {
     languageOptions: {
       globals: {
         ...globals.browser,
