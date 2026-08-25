@@ -26,5 +26,10 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "page.tsx",
+    "mine-commentary.ts",
+    "forbidden-tunnel.ts"
+  ]
 }

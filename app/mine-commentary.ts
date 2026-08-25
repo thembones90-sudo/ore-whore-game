@@ -43,6 +43,37 @@ export const RARITY_COMMENTARY:Record<string,MineCommentary|undefined>={
 
 export const TRUE_ARTIFACT_COMMENTARY:MineCommentary={id:"true-stop",headline:"...STOP.",subtitle:"That is not ore."};
 
+// Ghost Mines (Chapter II) ambient pool — SYSTEM has incomplete information
+// here and stays clinical about it: measurements, observations, failed
+// classifications, confirmations without explanations. Never frightened,
+// never mystical. Peon is quieter and less frequent than elsewhere, so this
+// stays a small, restrained pool (existing anti-repeat logic in
+// selectMineCommentary already keeps it from feeling too repetitive).
+export const GHOST_MINE_AMBIENT_COMMENTARY:MineCommentary[]=[
+  {id:"ghost-acoustic",headline:"ACOUSTIC RETURN INCONSISTENT.",subtitle:"PEON: “...what?”"},
+  {id:"ghost-bio-none",headline:"BIOLOGICAL ACTIVITY: NONE DETECTED.",subtitle:"Confirmed."},
+  {id:"ghost-bio-still",headline:"BIOLOGICAL ACTIVITY: STILL NONE.",subtitle:"Noted for the record."},
+  {id:"ghost-no-match",headline:"NO SURVEY MATCH.",subtitle:"Checked twice."},
+  {id:"ghost-classification-failed",headline:"CLASSIFICATION UNSUCCESSFUL.",subtitle:"Sample matches no known stratum."},
+  {id:"ghost-measurement-unchanged",headline:"MEASUREMENT UNCHANGED.",subtitle:"Repeating it does not make it different."},
+  {id:"ghost-quiet-here",headline:"IT IS VERY QUIET HERE.",subtitle:"PEON: “...zug zug.”"},
+];
+
+// Ghost Mines one-time entrance sequence — shown once, on first entry, per
+// the design brief's exact script. Not the ambient pool above.
+export const GHOST_ENTRY_SYSTEM_OPENING:string[]=[
+  "Mine designation unavailable.",
+  "Geological survey unavailable.",
+  "Known geological profile: no match.",
+  "Biological activity: none detected.",
+  "Mine origin: unknown.",
+];
+export const GHOST_ENTRY_REGISTER={headline:"GHOST MINES",subtitle:"UNOFFICIAL DESIGNATION"};
+export const GHOST_ENTRY_CLOSING:{speaker:"SYSTEM"|"PEON";text:string}[]=[
+  {speaker:"SYSTEM",text:"Proceed."},
+  {speaker:"PEON",text:"...zug zug."},
+];
+
 export function eligibleOreCommentary(rarity:string):MineCommentary[]{
   const override=RARITY_COMMENTARY[rarity];
   return override?[...ORE_EXPOSED_COMMENTARY,override]:ORE_EXPOSED_COMMENTARY;
