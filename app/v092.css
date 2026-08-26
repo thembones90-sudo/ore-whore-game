@@ -1,0 +1,153 @@
+/* v0.9.2 — TRUE Artefact archive containment and Golden ASOC dossier. */
+.true-archive-page{overflow:visible}
+.true-grid{align-items:stretch}
+.true-grid article{
+  display:grid!important;
+  grid-template-rows:250px 1fr!important;
+  align-items:stretch!important;
+  gap:0!important;
+  min-width:0;
+  min-height:520px!important;
+  padding:24px 22px 20px!important;
+  overflow:hidden;
+}
+.true-card-media{
+  position:relative;
+  z-index:1;
+  display:grid;
+  place-items:center;
+  width:100%;
+  min-width:0;
+  height:250px;
+  overflow:hidden;
+  isolation:isolate;
+}
+.true-grid .true-card-media .true-art-slot{
+  position:relative!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:hidden!important;
+}
+.true-grid .true-card-media .true-art-crop{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  overflow:hidden!important;
+  clip-path:none!important;
+  contain:paint!important;
+}
+.true-grid .true-card-media .true-art-img{
+  position:absolute!important;
+  inset:10px!important;
+  display:block!important;
+  width:calc(100% - 20px)!important;
+  height:calc(100% - 20px)!important;
+  max-width:calc(100% - 20px)!important;
+  max-height:calc(100% - 20px)!important;
+  margin:0!important;
+  padding:0!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  transform:none!important;
+  filter:drop-shadow(0 14px 15px #000c) drop-shadow(0 0 14px #b85ada2b)!important;
+}
+.true-card-copy{
+  position:relative;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  width:100%;
+  min-width:0;
+  padding-top:14px;
+  border-top:1px solid #3b2a41;
+  background:linear-gradient(180deg,#120e15 0%,#100d12 100%);
+}
+.true-card-copy h3{max-width:100%;overflow-wrap:anywhere}
+.true-grid .true-card-copy>p{min-height:64px!important;padding:0 6px}
+.true-card-copy footer{margin-top:auto!important}
+.true-grid article.locked .true-card-media{
+  border:1px solid #4d3a55;
+  background:radial-gradient(circle at 50% 45%,#33273a,#0a080c 72%);
+}
+.true-grid article.locked .true-art-silhouette{
+  position:absolute!important;
+  inset:18px!important;
+  display:block!important;
+  width:calc(100% - 36px)!important;
+  height:calc(100% - 36px)!important;
+  -webkit-mask-image:var(--artifact-mask)!important;
+  mask-image:var(--artifact-mask)!important;
+  -webkit-mask-repeat:no-repeat!important;
+  mask-repeat:no-repeat!important;
+  -webkit-mask-position:center!important;
+  mask-position:center!important;
+  -webkit-mask-size:contain!important;
+  mask-size:contain!important;
+}
+.true-mask-probe{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+
+.asoc-archive-section{
+  margin-top:42px;
+  padding:28px;
+  border:1px solid #8a6328;
+  background:radial-gradient(circle at 72% 45%,#5b351b3b,transparent 38%),linear-gradient(135deg,#151109,#0b0907);
+  box-shadow:inset 0 1px #ffe19a2e,0 24px 60px #0008;
+}
+.asoc-archive-section>header{margin-bottom:22px;border-bottom:1px solid #5f4724;padding-bottom:18px}
+.asoc-archive-section>header small{color:#d8a94d;font:800 9px Arial;letter-spacing:3px}
+.asoc-archive-section>header h3{margin:7px 0 5px;color:#fff2c5;font-size:clamp(28px,4vw,52px);letter-spacing:-1px}
+.asoc-archive-section>header p{margin:0;color:#b5a27d;font:italic 16px/1.5 Georgia,serif}
+.true-grid article.asoc-dossier,.asoc-dossier{
+  position:relative;
+  display:grid!important;
+  grid-template-columns:minmax(280px,44%) 1fr;
+  grid-template-rows:auto!important;
+  min-height:390px!important;
+  padding:26px!important;
+  overflow:hidden;
+  border:1px solid #c18b35!important;
+  background:linear-gradient(120deg,#261707,#110d08 58%,#1d1208)!important;
+  box-shadow:inset 0 2px #ffd97755,0 0 46px #d58d1d20!important;
+}
+.asoc-dossier::before{
+  content:"ENDGAME CLEARANCE"!important;
+  position:absolute;
+  top:18px;
+  left:22px;
+  z-index:4;
+  color:#dcae57!important;
+  font:800 9px Arial,sans-serif;
+  letter-spacing:2px;
+  pointer-events:none;
+}
+.asoc-dossier .true-card-media{height:335px}
+.asoc-dossier .true-card-copy{align-items:flex-start;justify-content:center;padding:26px 28px;border:0;border-left:1px solid #745323;background:linear-gradient(90deg,#160f08,#100c08);text-align:left}
+.asoc-dossier .true-card-copy h3{font-size:clamp(28px,4vw,50px)!important;color:#fff0b6;text-shadow:0 0 24px #dd981d55}
+.asoc-dossier .true-card-copy>p{min-height:0!important;padding:0;text-align:left}
+.asoc-dossier .true-card-copy footer{align-items:flex-start;text-align:left}
+.true-ultimate-label{color:#e6b85f;font:900 9px Arial;letter-spacing:3px}
+.asoc-dossier .true-issued{display:grid;gap:5px;margin:18px 0;padding:12px 14px;border-left:3px solid #e2ad47;background:#2a190a;color:#d9ad57;font-size:9px;letter-spacing:1.5px}
+.asoc-dossier .true-issued strong{color:#fff0bb}
+
+@media(max-width:1020px){
+  .true-grid article{grid-template-rows:225px 1fr!important}
+  .true-card-media{height:225px}
+  .true-grid article.asoc-dossier,.asoc-dossier{grid-template-columns:1fr;grid-template-rows:270px auto!important}
+  .asoc-dossier .true-card-media{height:270px}
+  .asoc-dossier .true-card-copy{border-left:0;border-top:1px solid #745323;padding:22px}
+}
+@media(max-width:700px){
+  .true-grid article{grid-template-rows:240px 1fr!important;min-height:500px!important}
+  .true-card-media{height:240px}
+  .asoc-archive-section{padding:16px}
+  .true-grid article.asoc-dossier,.asoc-dossier{grid-template-rows:240px auto!important;padding:18px!important}
+  .asoc-dossier .true-card-media{height:240px}
+}
