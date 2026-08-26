@@ -1,0 +1,153 @@
+/* v1.00 — Peon / Shadez dialogue is a staged exchange, not a dark button with portraits. */
+.dialogue-onboarding{
+  --dialogue-peon:#cde34b;
+  --dialogue-peon-soft:#e7edc7;
+  --dialogue-shadez:#e06a82;
+  --dialogue-shadez-hot:#ff9caf;
+  --dialogue-ink:#f4f0e8;
+  --dialogue-muted:#aaa59a;
+  background:
+    radial-gradient(circle at 18% 72%,rgba(128,145,68,.12),transparent 28%),
+    radial-gradient(circle at 82% 68%,rgba(143,38,58,.16),transparent 30%),
+    repeating-linear-gradient(90deg,transparent 0 118px,rgba(255,255,255,.018) 119px 120px),
+    linear-gradient(180deg,#090c09 0%,#11130e 58%,#080a08 100%);
+}
+.avatar-dialogue{
+  width:min(1320px,96vw);
+  height:min(820px,94vh);
+  grid-template-columns:minmax(190px,29%) minmax(390px,1fr) minmax(190px,29%);
+  gap:clamp(18px,3.6vw,58px);
+}
+.avatar-dialogue:before{
+  content:"EMPLOYMENT COMMUNICATION CHANNEL";
+  position:absolute;
+  top:clamp(18px,4vh,48px);
+  left:50%;
+  translate:-50% 0;
+  color:#686d62;
+  font:900 9px/1 Arial,sans-serif;
+  letter-spacing:.34em;
+  white-space:nowrap;
+}
+.dialogue-avatar{
+  position:relative;
+  padding-bottom:10px;
+}
+.dialogue-avatar:after{
+  content:"";
+  width:min(210px,78%);
+  height:2px;
+  margin-top:3px;
+  background:linear-gradient(90deg,transparent,currentColor,transparent);
+  opacity:.65;
+}
+.dialogue-avatar img,.dialogue-avatar .shadez-voice-avatar{
+  max-width:350px;
+  border-width:3px;
+  box-shadow:0 26px 65px #000,0 0 0 8px rgba(255,255,255,.025);
+}
+.dialogue-avatar.peon{color:var(--dialogue-peon)}
+.dialogue-avatar.shadez{color:var(--dialogue-shadez-hot)}
+.dialogue-avatar.peon img{border-color:#77863f}
+.dialogue-avatar.shadez img{border-color:#b6475d;box-shadow:0 26px 65px #000,0 0 0 8px rgba(182,71,93,.08),0 0 36px rgba(182,71,93,.2)}
+.dialogue-avatar small,.dialogue-avatar.shadez small{
+  color:currentColor;
+  font-size:11px;
+  letter-spacing:.3em;
+  text-shadow:0 2px 12px #000;
+}
+.dialogue-avatar.active{transform:translateY(-10px) scale(1.045);filter:brightness(1.1) saturate(1.04)}
+.dialogue-avatar.inactive{opacity:.27;transform:translateY(8px) scale(.9);filter:saturate(.25) brightness(.5)}
+
+/* Explicit selectors defeat the legacy `.onboarding button { color:#111 }` rule. */
+.dialogue-onboarding .dialogue-cloud{
+  isolation:isolate;
+  min-height:300px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  margin:0;
+  padding:clamp(34px,4.2vw,62px);
+  overflow:visible;
+  color:var(--dialogue-ink);
+  border:1px solid #8e835f;
+  border-top-width:3px;
+  background:
+    linear-gradient(120deg,rgba(187,204,95,.07),transparent 42%),
+    linear-gradient(145deg,rgba(37,39,28,.99),rgba(10,12,10,.995));
+  box-shadow:0 30px 90px #000,0 0 0 8px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.05);
+}
+.dialogue-onboarding .dialogue-cloud:after{
+  content:"";
+  position:absolute;
+  inset:12px;
+  z-index:-1;
+  border:1px solid rgba(226,230,205,.07);
+  pointer-events:none;
+}
+.dialogue-onboarding.speaker-shadez .dialogue-cloud{
+  color:var(--dialogue-ink);
+  border-color:#b94a60;
+  background:
+    linear-gradient(120deg,rgba(211,67,95,.18),transparent 48%),
+    radial-gradient(circle at 100% 0,rgba(255,82,112,.1),transparent 40%),
+    linear-gradient(145deg,#351018 0%,#170b0e 52%,#090a09 100%);
+  box-shadow:0 30px 90px #000,0 0 0 8px rgba(55,9,18,.45),0 0 46px rgba(168,43,66,.12),inset 0 1px rgba(255,177,190,.08);
+}
+.dialogue-onboarding .dialogue-cloud small{
+  color:var(--dialogue-peon);
+  font-size:11px;
+  letter-spacing:.32em;
+}
+.dialogue-onboarding.speaker-shadez .dialogue-cloud small{color:var(--dialogue-shadez-hot)}
+.dialogue-onboarding .dialogue-cloud p,
+.dialogue-onboarding.speaker-shadez .dialogue-cloud p{
+  color:var(--dialogue-ink);
+  margin:24px 0 30px;
+  font-size:clamp(32px,3.7vw,58px);
+  line-height:1.06;
+  text-wrap:balance;
+  text-shadow:0 3px 18px rgba(0,0,0,.9);
+}
+.dialogue-onboarding .dialogue-cloud p{font-family:Georgia,serif;font-weight:650;letter-spacing:-.035em}
+.dialogue-onboarding.speaker-shadez .dialogue-cloud p{font-family:Arial,sans-serif;font-weight:900;letter-spacing:-.055em}
+.dialogue-onboarding .dialogue-cloud span{
+  width:max-content;
+  max-width:100%;
+  padding:9px 12px 8px;
+  color:#d8d0bd;
+  border:1px solid #4d5045;
+  background:rgba(0,0,0,.32);
+  font-size:9px;
+  letter-spacing:.23em;
+}
+.dialogue-onboarding.speaker-shadez .dialogue-cloud span{color:#f2d7dc;border-color:#6e303d}
+.dialogue-onboarding .dialogue-cloud:hover span,.dialogue-onboarding .dialogue-cloud:focus-visible span{color:#fff;border-color:currentColor}
+.dialogue-onboarding .dialogue-cloud:focus-visible{outline:2px solid var(--dialogue-peon);outline-offset:5px}
+.dialogue-onboarding.speaker-shadez .dialogue-cloud:focus-visible{outline-color:var(--dialogue-shadez-hot)}
+.dialogue-onboarding .dialogue-cloud:before{background:#202319;border-color:#8e835f}
+.dialogue-onboarding.speaker-shadez .dialogue-cloud:before{background:#200b10;border-color:#b94a60}
+
+@media(max-width:900px){
+  .avatar-dialogue{grid-template-columns:minmax(145px,25%) minmax(350px,1fr) minmax(145px,25%);gap:18px}
+  .dialogue-onboarding .dialogue-cloud{min-height:260px;padding:34px}
+}
+@media(max-width:760px){
+  .avatar-dialogue{height:96vh;grid-template-columns:1fr 1fr;grid-template-rows:minmax(170px,42%) 1fr;gap:8px;padding:38px 12px 12px}
+  .avatar-dialogue:before{top:14px;font-size:7px;letter-spacing:.23em}
+  .dialogue-avatar{align-self:end;padding:0 10px}
+  .dialogue-avatar.active{transform:scale(1.02)}
+  .dialogue-avatar.inactive{transform:scale(.9)}
+  .dialogue-avatar img,.dialogue-avatar .shadez-voice-avatar{max-width:210px}
+  .dialogue-onboarding .dialogue-cloud{align-self:stretch;min-height:0;padding:28px 24px;border-top-width:2px}
+  .dialogue-onboarding .dialogue-cloud p,.dialogue-onboarding.speaker-shadez .dialogue-cloud p{font-size:clamp(28px,8vw,42px);margin:18px 0 22px}
+  .dialogue-onboarding .dialogue-cloud small{font-size:9px}
+}
+@media(max-width:460px){
+  .avatar-dialogue{grid-template-rows:minmax(130px,35%) 1fr}
+  .dialogue-avatar small{font-size:8px}
+  .dialogue-onboarding .dialogue-cloud{padding:24px 20px}
+  .dialogue-onboarding .dialogue-cloud p,.dialogue-onboarding.speaker-shadez .dialogue-cloud p{font-size:27px}
+  .dialogue-onboarding .dialogue-cloud span{font-size:7px;letter-spacing:.15em}
+}
+@media(prefers-reduced-motion:reduce){.dialogue-avatar.active,.dialogue-avatar.inactive{transform:none}}
