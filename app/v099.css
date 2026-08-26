@@ -1,0 +1,20 @@
+/* v0.99 — an always-available, deliberately guarded fresh-start control. */
+.new-game-control{align-self:stretch;min-width:108px;padding:0 16px;border:0;border-left:1px solid #32352f;background:#111410;color:#aaa;font:800 10px/1 var(--font-sans,Arial,sans-serif);letter-spacing:.14em;cursor:pointer;transition:color .18s ease,background .18s ease,border-color .18s ease}
+.new-game-control span{display:block;margin-bottom:6px;color:#d29a72;font-size:18px;transition:transform .28s ease}
+.new-game-control:hover,.new-game-control:focus-visible{background:#1c1512;border-left-color:#d16f4c;color:#f3eee6;outline:none}
+.new-game-control:hover span,.new-game-control:focus-visible span{transform:rotate(-70deg)}
+.new-game-confirm{position:fixed;inset:0;z-index:100000;display:grid;place-items:center;padding:24px;background:rgba(2,4,3,.9);backdrop-filter:blur(12px)}
+.new-game-confirm section{width:min(680px,100%);padding:clamp(28px,5vw,58px);border:1px solid #9e4f3a;border-top:4px solid #d16f4c;background:linear-gradient(145deg,#17100e,#0b0d0b 62%);box-shadow:0 28px 90px #000,0 0 70px rgba(163,59,32,.12)}
+.new-game-confirm small{color:#d67b5a;font:800 11px/1.2 var(--font-sans,Arial,sans-serif);letter-spacing:.28em}
+.new-game-confirm h2{margin:16px 0 12px;color:#f3eee6;font:900 clamp(34px,6vw,64px)/.92 var(--font-sans,Arial,sans-serif);letter-spacing:-.04em}
+.new-game-confirm p,.new-game-confirm li{color:#c6c1b8;font-size:16px;line-height:1.55}
+.new-game-confirm ul{margin:22px 0;padding:18px 18px 18px 40px;border:1px solid #382923;background:#0a0c0a}
+.new-game-confirm blockquote{margin:20px 0 28px;padding:15px 18px;border-left:3px solid #d16f4c;background:#21130f;color:#d8cfc5;font-family:Georgia,serif;font-style:italic}
+.new-game-confirm blockquote b{margin-right:8px;color:#d67b5a;font:800 10px/1 var(--font-sans,Arial,sans-serif);letter-spacing:.18em}
+.new-game-confirm section>div{display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap}
+.new-game-confirm button{min-height:52px;padding:0 22px;border:1px solid #56574e;background:#111410;color:#e5e0d7;font-weight:900;letter-spacing:.1em;cursor:pointer}
+.new-game-confirm button:hover,.new-game-confirm button:focus-visible{border-color:#e8e2d8;outline:none}
+.new-game-confirm button.erase{border-color:#d16f4c;background:#b3442d;color:#fff}
+.new-game-confirm button.erase:hover,.new-game-confirm button.erase:focus-visible{background:#e15b3e;box-shadow:0 0 28px rgba(225,91,62,.25)}
+@media(max-width:1180px){.new-game-control{min-width:74px;padding:0 10px;font-size:8px}.new-game-control span{font-size:15px}.topbar{flex-wrap:wrap}.new-game-control{min-height:54px}}
+@media(max-width:680px){.new-game-confirm{padding:12px}.new-game-confirm section{padding:26px 20px}.new-game-confirm section>div{display:grid}.new-game-confirm button{width:100%}.new-game-control{order:5;min-height:42px;width:100%;border-left:0;border-top:1px solid #32352f}.new-game-control span{display:inline;margin:0 7px 0 0}}
