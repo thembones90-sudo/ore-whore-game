@@ -48,8 +48,17 @@ test("server-renders the ORE WHORE game shell", async () => {
 
   // Mine screen — opening copy and biome mastery/card structure
   assert.match(html, /class="mine-screen biome-old/);
-  assert.match(html, /KEEP <i>DIGGING\.<\/i>/);
-  assert.match(html, /SHIFT 01 · THE LONG WALL/);
+  // The Foreman headline is intentionally randomized. Validate that SSR emits
+  // one canonical normal-digging line instead of requiring the obsolete fixed copy.
+  const normalHeadlines = [
+    "HIT IT AGAIN.", "THE ROCK REMAINS.", "CONTINUE, GENIUS.", "STILL A WALL.",
+    "PROGRESS. ALLEGEDLY.", "APPLY MORE FORCE.", "BACK TO WORK.", "SWING, PEON.",
+    "VERY IMPRESSIVE.", "KEEP HITTING IT.", "DIG, PROFESSIONAL.", "MORE VIOLENCE.",
+    "ONWARDS, MY STEED.",
+  ];
+  const visibleText = html.replace(/<!--.*?-->/gs, "").replace(/<[^>]+>/g, "");
+  assert.ok(normalHeadlines.some(headline=>visibleText.includes(headline)), "expected one canonical randomized Foreman headline");
+  assert.match(html, /SYSTEM \/ FOREMAN · ACTIVE DIRECTIVE/);
   assert.match(html, /aria-label="Mine location"/);
   assert.match(html, /biome-card-old/);
 

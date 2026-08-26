@@ -6,7 +6,7 @@ import {forgeAtomic,forgeRecipes,forgedItems,forgeWithPrerequisitesAtomic,maxCra
 const game=readFileSync(new URL("../app/page.tsx",import.meta.url),"utf8");
 const ores=["copper","tin","silver","iron","gold","mithril","truesilver","dark","thorium","feliron","adamantite","khorium","cobalt","saronite","titanium"];
 const minerals=["malachite","tigerseye","shadowgem","mossagate","jade","moonstone","citrine","aquamarine","starruby","vitriol","largeopal","sapphire","diamond","emerald","arcane"];
-const base=(overrides={})=>({oreResources:{},mineralResources:{},processedResources:{},ownedTools:["rusty-pickaxe"],toolTier:0,...overrides});
+const base=(overrides={})=>({oreResources:{},mineralResources:{},processedResources:{},ownedTools:["rusty-pickaxe"],toolTier:0,dust:0,dustSpent:0,...overrides});
 
 test("canonical processing table and raw costs are exact",()=>{
   const expected={
@@ -58,9 +58,10 @@ test("upgrade path plans and atomically builds missing prerequisites before forg
   assert.equal(forgeWithPrerequisitesAtomic(base({oreResources:{copper:5,tin:3},mineralResources:{malachite:2,tigerseye:1}}),recipe),null,"partial raw stock cannot be consumed");
 });
 
-test("all canonical tools have merged processed and mineral recipes",()=>{
-  assert.equal(forgeRecipes.length,10);
-  for(const recipe of forgeRecipes){assert.ok(recipe.processedInputs.length);assert.ok(recipe.mineralInputs.length);const tool=forgedItems.find(t=>t.id===recipe.resultingItemId);assert.equal(recipe.unlock?.tool,forgedItems.find(t=>t.tier===tool.tier-1)?.id)}
+test("canonical standard tools use merged recipes and the Ghost tool uses its locked direct-resource recipe",()=>{
+  assert.equal(forgeRecipes.length,11);
+  for(const recipe of forgeRecipes){const tool=forgedItems.find(t=>t.id===recipe.resultingItemId);assert.equal(recipe.unlock?.tool,forgedItems.find(t=>t.tier===tool.tier-1)?.id);if(tool.id!=="ghostforged-pick"){assert.ok(recipe.processedInputs.length);assert.ok(recipe.mineralInputs.length)}}
+  const ghost=forgeRecipes.at(-1);assert.deepEqual(ghost.oreInputs,[{id:"gravesilver",quantity:5},{id:"stillwater",quantity:2},{id:"hushstone",quantity:1},{id:"thorium",quantity:10},{id:"titanium",quantity:5}]);assert.equal(ghost.dustCost,500);
 });
 
 test("all 15 ores and all 15 minerals have an economic purpose",()=>{
@@ -69,7 +70,7 @@ test("all 15 ores and all 15 minerals have an economic purpose",()=>{
 });
 
 test("recipe eras are obtainable and do not create mine-unlock circles",()=>{
-  const tierEra=["old","old","old","deep","deep","outland","northrend","northrend","northrend","northrend","northrend"];
+  const tierEra=["old","old","old","deep","deep","outland","northrend","northrend","northrend","northrend","northrend","ghost"];
   for(const recipe of forgeRecipes){const tool=forgedItems.find(t=>t.id===recipe.resultingItemId);assert.equal(recipe.unlock?.mine||"old",tierEra[tool.tier]);}
 });
 
@@ -83,7 +84,7 @@ test("UI separates lifetime history from stock, confirms transactions, and prese
 
 test("migration is schema-versioned and idempotent by construction",()=>{
   assert.match(game,/old\.oreResources[\s\S]*?old\.rawResources/);assert.match(game,/old\.mineralResources[\s\S]*?mineralCounts/);assert.match(game,/old\.processedResources[\s\S]*?old\.processedMaterials/);
-  assert.match(game,/toolTier=Math\.max/);assert.match(game,/schema:17/);
+  assert.match(game,/toolTier=Math\.max/);assert.match(game,/schema:20/);
 });
 
 test("Titanium discoveries use the canonical IDE TITTY callout without renaming the ore ID",()=>{

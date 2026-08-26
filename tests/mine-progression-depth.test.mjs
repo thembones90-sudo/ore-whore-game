@@ -5,23 +5,31 @@ import fs from "node:fs";
 const game=fs.readFileSync(new URL("../app/page.tsx",import.meta.url),"utf8");
 const metallurgy=fs.readFileSync(new URL("../app/metallurgy.ts",import.meta.url),"utf8");
 
-test("canonical Old, Deep, and Outland extraction quotas are centralized",()=>{
-  assert.match(game,/progressionQuotaOverrides:Partial<Record<string,number>>=\{copper:40,tin:30,silver:20,iron:25,gold:10,mithril:40,truesilver:35,dark:30,thorium:35,feliron:70,adamantite:60,khorium:20\}/);
+test("canonical standard-mine extraction quotas are centralized",()=>{
+  assert.match(game,/progressionQuotaOverrides:Partial<Record<string,number>>=\{copper:40,tin:30,silver:20,iron:25,gold:10,mithril:40,truesilver:35,dark:30,thorium:35,feliron:70,adamantite:60,khorium:20,cobalt:80,saronite:65,titanium:20\}/);
   assert.equal(40+30+20+25+10,125);
   assert.equal(40+35+30+35,140);
   assert.equal(70+60+20,150);
+  assert.equal(80+65+20,165);
 });
 
-test("Outland native weights are 50/40/10 and Northrend remains unchanged",()=>{
+test("Outland and Northrend native weights preserve their canonical 50/40/10 and 55/35/10 splits",()=>{
   assert.match(game,/outland:\[0,0,0,0,0,0,0,0,0,50,40,10,0,0,0,0,0,0,0\]/);
-  assert.match(game,/northrend:\[0,0,0,0,0,0,0,0,0,0,0,0,38,35,20,0,0,0,0\]/);
+  assert.match(game,/northrend:\[0,0,0,0,0,0,0,0,0,0,0,0,55,35,10,0,0,0,0\]/);
 });
 
-test("mine descent requires both extraction and owned functional shaft rating",()=>{
-  assert.match(game,/mineRequiredShaftRating:Record<Biome,1\|2\|3\|4>=\{old:1,deep:2,outland:3,northrend:4,ghost:4\}/);
-  assert.match(game,/biomeQuotaComplete\(save,biome\)&&\(!next\|\|ownedShaftRating\(save\)>=mineRequiredShaftRating\[next\]\)/);
-  assert.match(game,/save\.ownedTools\.map\(id=>forgedItems\.find\(tool=>tool\.id===id\)\?\.shaftRating\|\|1\)/);
+test("mine descent requires extraction and the equipped functional shaft rating",()=>{
+  assert.match(game,/mineRequiredShaftRating:Partial<Record<Biome,1\|2\|3\|4>>=\{old:1,deep:2,outland:3,northrend:4\}/);
+  assert.doesNotMatch(game,/mineRequiredShaftRating:Partial<Record<Biome,1\|2\|3\|4>>=\{[^\n}]*ghost/);
+  assert.match(game,/equippedShaftRating=.*save\.equippedTool/);
+  assert.match(game,/biomeQuotaComplete\(save,biome\)&&\(!required\|\|equippedShaftRating\(save\)>=required\)/);
+  assert.doesNotMatch(game,/ownedShaftRating/);
   assert.doesNotMatch(game,/toolSkinId[^\n]{0,120}mineRequiredShaftRating/);
+});
+
+test("extraction completion is stored independently from descent authorization",()=>{
+  assert.match(game,/completedBiomes=biomeOrder\.filter\(b=>biomeQuotaComplete\(provisional,b\)\)/);
+  assert.doesNotMatch(game,/completedBiomes=biomeOrder\.filter\(b=>mineDescentAuthorized/);
 });
 
 test("functional tool data carries a capped shaft rating independent of cosmetic models",()=>{

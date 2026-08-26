@@ -15,7 +15,7 @@ test("metallurgy foundation contains the canonical initial pipeline without coal
 
 test("equipped technology supplies the ordinary TRUE Artifact chance",()=>{
   assert.match(tunnel,/ORDINARY_TRUE_ARTIFACT_CHANCE=0\.0005/);
-  assert.match(data,/TOOL_TRUE_ARTIFACT_CHANCES = \[0\.0005,0\.0006,0\.0008,0\.001,0\.0015,0\.002,0\.003,0\.004,0\.005,0\.0075,0\.01\]/);
+  assert.match(data,/TOOL_TRUE_ARTIFACT_CHANCES = \[0\.0005,0\.0006,0\.0008,0\.001,0\.0015,0\.002,0\.003,0\.004,0\.005,0\.0075,0\.01,0\.01\]/);
   assert.match(game,/artifactChanceForDig\(modifier,equippedMiningTool\(save\)\.trueArtifactChance\)/);
   assert.match(game,/CANONICAL_EXCAVATION_PROBABILITIES\.emptyDig/);
 });
@@ -38,13 +38,13 @@ test("migration strips obsolete top-level probability while preserving pending t
   assert.match(game,/\.\.\.safeOld/);
 });
 
-test("schema 17 migration preserves lifetime records and reconstructs separate spendable inventories",()=>{
+test("schema 20 migration preserves lifetime records and reconstructs separate spendable inventories",()=>{
   assert.match(game,/oreResources=old\.oreResources/);
   assert.match(game,/mineralResources=old\.mineralResources/);
   assert.match(game,/processedResources=old\.processedResources/);
   assert.match(game,/ownedTools=Array\.isArray\(old\.ownedTools\)/);
   assert.match(game,/toolTier=Math\.max/);
-  assert.match(game,/schema:17/);
+  assert.match(game,/schema:20/);
   assert.match(game,/oreResources:\{\.\.\.s\.oreResources/);
   assert.match(game,/mineralResources:\{\.\.\.s\.mineralResources/);
 });

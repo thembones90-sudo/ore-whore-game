@@ -62,16 +62,20 @@ export const GHOST_MINE_AMBIENT_COMMENTARY:MineCommentary[]=[
 // Ghost Mines one-time entrance sequence — shown once, on first entry, per
 // the design brief's exact script. Not the ambient pool above.
 export const GHOST_ENTRY_SYSTEM_OPENING:string[]=[
-  "Mine designation unavailable.",
+  "Unknown cavity system detected.",
   "Geological survey unavailable.",
   "Known geological profile: no match.",
+  "Structural supports: none detected.",
+  "Rail infrastructure: none detected.",
   "Biological activity: none detected.",
   "Mine origin: unknown.",
 ];
-export const GHOST_ENTRY_REGISTER={headline:"GHOST MINES",subtitle:"UNOFFICIAL DESIGNATION"};
+export const GHOST_ENTRY_REGISTER={headline:"UNKNOWN CAVITY NETWORK",subtitle:"NO AUTHORIZED DESIGNATION"};
 export const GHOST_ENTRY_CLOSING:{speaker:"SYSTEM"|"PEON";text:string}[]=[
-  {speaker:"SYSTEM",text:"Proceed."},
-  {speaker:"PEON",text:"...zug zug."},
+  {speaker:"SYSTEM",text:"Continued excavation is not recommended."},
+  {speaker:"SYSTEM",text:"Unfortunately, you requested indefinite excavation."},
+  {speaker:"SYSTEM",text:"Employment status: ACTIVE."},
+  {speaker:"PEON",text:"Tunnel already dug? Good. Less work."},
 ];
 
 export function eligibleOreCommentary(rarity:string):MineCommentary[]{

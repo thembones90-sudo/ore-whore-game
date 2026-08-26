@@ -1,5 +1,5 @@
 export type MetallurgyOperation = "REFINE" | "ALLOY";
-export type RecipeUnlock = { mine?: "old" | "deep" | "outland" | "northrend"; tool?: string };
+export type RecipeUnlock = { mine?: "old" | "deep" | "outland" | "northrend" | "ghost"; tool?: string };
 export type Ingredient = { id: string; quantity: number };
 
 export type ProcessedMaterial = { id: string; name: string; description: string };
@@ -12,10 +12,12 @@ export type ForgedItem = {
   shaftRating: 1|2|3|4;
   mode: "manual" | "continuous"; inputMode:"click"|"hold"; holdToMine:boolean; continuousMining:boolean;
   damage: number; actionDurationMs:number; trueArtifactChance:number; intervalMs?: number; recipeId?:string; icon:string;
+  ghostCapable:boolean;
   description: string;
 };
 export type ForgeRecipe = {
   id: string; resultingItemId: string; processedInputs: Ingredient[]; mineralInputs: Ingredient[];
+  oreInputs?:Ingredient[];dustCost?:number;
   unlock?: RecipeUnlock; category: "MINING TOOL"; description?: string;
 };
 
@@ -42,7 +44,7 @@ export const metallurgyRecipes: MetallurgyRecipe[] = [
   {id:"assembly-titanium",name:"Build Titanium Assembly",operation:"ALLOY",inputs:[{id:"titanium",quantity:1},{id:"silver",quantity:1},{id:"cobalt",quantity:1}],outputId:"titanium-assembly",outputQuantity:1,unlock:{mine:"northrend"}},
 ];
 
-export const TOOL_TRUE_ARTIFACT_CHANCES = [0.0005,0.0006,0.0008,0.001,0.0015,0.002,0.003,0.004,0.005,0.0075,0.01] as const;
+export const TOOL_TRUE_ARTIFACT_CHANCES = [0.0005,0.0006,0.0008,0.001,0.0015,0.002,0.003,0.004,0.005,0.0075,0.01,0.01] as const;
 export const forgedItems: ForgedItem[] = ([
   {id:"rusty-pickaxe",name:"ROCK BONKER",technicalName:"Peon Pickaxe",category:"MINING TOOL",tier:0,mode:"manual",inputMode:"click",holdToMine:false,continuousMining:false,damage:1,actionDurationMs:430,icon:"/assets/tools/tool-rock-bonker.webp",description:"Wood, leather, ugly iron, and violence. The absolute bottom of the ladder."},
   {id:"bronze-pickaxe",name:"BRONZE BONKER",technicalName:"Bronze Pickaxe",category:"MINING TOOL",tier:1,mode:"manual",inputMode:"click",holdToMine:false,continuousMining:false,damage:1.15,actionDurationMs:410,recipeId:"forge-bronze-pickaxe",icon:"/assets/tools/tool-bronze-pickaxe.webp",description:"A modestly faster manual tool and your introduction to alloying."},
@@ -55,7 +57,8 @@ export const forgedItems: ForgedItem[] = ([
   {id:"advanced-excavator",name:"ROCK EATER",technicalName:"Advanced Excavator",category:"MINING TOOL",tier:8,mode:"continuous",inputMode:"hold",holdToMine:true,continuousMining:true,damage:1.75,actionDurationMs:220,intervalMs:220,recipeId:"forge-advanced-excavator",icon:"/assets/tools/tool-advanced-excavator.webp",description:"An industrial cutting head built to consume the wall continuously."},
   {id:"endgame-machine",name:"MOUNTAIN HURTER",technicalName:"Endgame Mining Machine",category:"MINING TOOL",tier:9,mode:"continuous",inputMode:"hold",holdToMine:true,continuousMining:true,damage:2,actionDurationMs:180,intervalMs:180,recipeId:"forge-endgame-machine",icon:"/assets/tools/tool-endgame-machine.webp",description:"Every proven metal in the workshop, weaponized against geography."},
   {id:"ultimate-machine",name:"MOUNTAIN FUCKER",technicalName:"Ultimate Mining Machine",category:"MINING TOOL",tier:10,mode:"continuous",inputMode:"hold",holdToMine:true,continuousMining:true,damage:2.5,actionDurationMs:150,intervalMs:150,recipeId:"forge-ultimate-machine",icon:"/assets/tools/tool-ultimate-machine.webp",description:"Ultimate technology. The Peon has exhausted his engineering vocabulary."},
-] as Omit<ForgedItem,"trueArtifactChance"|"shaftRating">[]).map(tool=>({...tool,shaftRating:Math.min(4,tool.tier+1) as 1|2|3|4,trueArtifactChance:TOOL_TRUE_ARTIFACT_CHANCES[tool.tier]}));
+  {id:"ghostforged-pick",name:"GHOSTFORGED PICK",technicalName:"Ghost-Capable Mining Chassis",category:"MINING TOOL",tier:11,mode:"continuous",inputMode:"hold",holdToMine:true,continuousMining:true,damage:2.5,actionDurationMs:150,intervalMs:150,recipeId:"forge-ghostforged-pick",icon:"/assets/tools/tool-ultimate-machine.webp",description:"Conventional engineering made unsuitable for unconventional stone."},
+] as Omit<ForgedItem,"trueArtifactChance"|"shaftRating"|"ghostCapable">[]).map(tool=>({...tool,shaftRating:Math.min(4,tool.tier+1) as 1|2|3|4,trueArtifactChance:TOOL_TRUE_ARTIFACT_CHANCES[tool.tier],ghostCapable:tool.id==="ghostforged-pick"}));
 
 export const forgeRecipes: ForgeRecipe[] = [
   {id:"forge-bronze-pickaxe",resultingItemId:"bronze-pickaxe",processedInputs:[{id:"bronze",quantity:3}],mineralInputs:[{id:"malachite",quantity:2},{id:"tigerseye",quantity:1}],category:"MINING TOOL",unlock:{tool:"rusty-pickaxe"}},
@@ -68,6 +71,7 @@ export const forgeRecipes: ForgeRecipe[] = [
   {id:"forge-advanced-excavator",resultingItemId:"advanced-excavator",processedInputs:[{id:"khorium-alloy",quantity:6},{id:"felsteel",quantity:4}],mineralInputs:[{id:"diamond",quantity:1}],category:"MINING TOOL",unlock:{mine:"northrend",tool:"advanced-drill"}},
   {id:"forge-endgame-machine",resultingItemId:"endgame-machine",processedInputs:[{id:"titanium-assembly",quantity:5},{id:"saronite-assembly",quantity:3}],mineralInputs:[{id:"emerald",quantity:1},{id:"arcane",quantity:1}],category:"MINING TOOL",unlock:{mine:"northrend",tool:"advanced-excavator"}},
   {id:"forge-ultimate-machine",resultingItemId:"ultimate-machine",processedInputs:[{id:"titanium-assembly",quantity:8},{id:"saronite-assembly",quantity:5},{id:"khorium-alloy",quantity:5}],mineralInputs:[{id:"diamond",quantity:1},{id:"emerald",quantity:1},{id:"arcane",quantity:2}],category:"MINING TOOL",unlock:{mine:"northrend",tool:"endgame-machine"}},
+  {id:"forge-ghostforged-pick",resultingItemId:"ghostforged-pick",processedInputs:[],mineralInputs:[],oreInputs:[{id:"gravesilver",quantity:5},{id:"stillwater",quantity:2},{id:"hushstone",quantity:1},{id:"thorium",quantity:10},{id:"titanium",quantity:5}],dustCost:500,category:"MINING TOOL",unlock:{mine:"ghost",tool:"ultimate-machine"}},
 ];
 
 export const CANONICAL_EXCAVATION_PROBABILITIES = Object.freeze({emptyDig:0.20,miss:0.05,critical:0.05});
@@ -77,13 +81,13 @@ export const spend=(inventory:Record<string,number>,inputs:Ingredient[])=>inputs
 export const maxCraftable=(inventory:Record<string,number>,inputs:Ingredient[])=>inputs.length?Math.max(0,Math.min(...inputs.map(i=>Math.floor((inventory[i.id]||0)/i.quantity)))):0;
 const scaledInputs=(inputs:Ingredient[],count:number)=>inputs.map(i=>({...i,quantity:i.quantity*count}));
 
-export type ResourceState={oreResources:Record<string,number>;mineralResources:Record<string,number>;processedResources:Record<string,number>;ownedTools:string[];toolTier:number};
+export type ResourceState={oreResources:Record<string,number>;mineralResources:Record<string,number>;processedResources:Record<string,number>;ownedTools:string[];toolTier:number;dust:number;dustSpent:number};
 export const smeltAtomic=(state:ResourceState,recipe:MetallurgyRecipe):ResourceState|null=>canAfford(state.oreResources,recipe.inputs)?{...state,oreResources:spend(state.oreResources,recipe.inputs),processedResources:{...state.processedResources,[recipe.outputId]:(state.processedResources[recipe.outputId]||0)+recipe.outputQuantity}}:null;
 export const smeltBatchAtomic=(state:ResourceState,recipe:MetallurgyRecipe,count:number):ResourceState|null=>{const quantity=Math.floor(count),inputs=scaledInputs(recipe.inputs,quantity);return quantity>0&&canAfford(state.oreResources,inputs)?{...state,oreResources:spend(state.oreResources,inputs),processedResources:{...state.processedResources,[recipe.outputId]:(state.processedResources[recipe.outputId]||0)+recipe.outputQuantity*quantity}}:null};
 export type ForgePrerequisitePlan={oreInputs:Ingredient[];processedFromStock:Ingredient[];mineralInputs:Ingredient[];crafts:{recipeId:string;count:number;outputId:string;quantity:number}[]};
 const combineInputs=(inputs:Ingredient[])=>Object.entries(inputs.reduce<Record<string,number>>((all,i)=>({...all,[i.id]:(all[i.id]||0)+i.quantity}),{})).map(([id,quantity])=>({id,quantity}));
 export const planForgePrerequisites=(state:ResourceState,recipe:ForgeRecipe):ForgePrerequisitePlan|null=>{
-  const crafts:ForgePrerequisitePlan["crafts"]=[],oreInputs:Ingredient[]=[],processedFromStock:Ingredient[]=[];
+  const crafts:ForgePrerequisitePlan["crafts"]=[],oreInputs:Ingredient[]=[...(recipe.oreInputs||[])],processedFromStock:Ingredient[]=[];
   for(const input of recipe.processedInputs){
     const stock=Math.min(state.processedResources[input.id]||0,input.quantity),deficit=input.quantity-stock;
     if(stock)processedFromStock.push({id:input.id,quantity:stock});
@@ -99,12 +103,12 @@ export const planForgePrerequisites=(state:ResourceState,recipe:ForgeRecipe):For
 };
 export const forgeWithPrerequisitesAtomic=(state:ResourceState,recipe:ForgeRecipe):ResourceState|null=>{
   const tool=forgedItems.find(t=>t.id===recipe.resultingItemId),previous=forgedItems.find(t=>t.tier===(tool?.tier||0)-1),plan=planForgePrerequisites(state,recipe);
-  if(!tool||!plan||state.ownedTools.includes(tool.id)||(previous&&!state.ownedTools.includes(previous.id))||!canAfford(state.oreResources,plan.oreInputs)||!canAfford(state.mineralResources,recipe.mineralInputs))return null;
+  if(!tool||!plan||state.ownedTools.includes(tool.id)||(previous&&!state.ownedTools.includes(previous.id))||!canAfford(state.oreResources,plan.oreInputs)||!canAfford(state.mineralResources,recipe.mineralInputs)||state.dust<(recipe.dustCost||0))return null;
   const produced=plan.crafts.reduce((all,c)=>({...all,[c.outputId]:(all[c.outputId]||0)+c.quantity}),{...state.processedResources});
-  return {...state,oreResources:spend(state.oreResources,plan.oreInputs),processedResources:spend(produced,recipe.processedInputs),mineralResources:spend(state.mineralResources,recipe.mineralInputs),ownedTools:[...state.ownedTools,tool.id],toolTier:tool.tier};
+  return {...state,oreResources:spend(state.oreResources,plan.oreInputs),processedResources:spend(produced,recipe.processedInputs),mineralResources:spend(state.mineralResources,recipe.mineralInputs),dust:state.dust-(recipe.dustCost||0),dustSpent:state.dustSpent+(recipe.dustCost||0),ownedTools:[...state.ownedTools,tool.id],toolTier:tool.tier};
 };
 export const forgeAtomic=(state:ResourceState,recipe:ForgeRecipe):ResourceState|null=>{
   const tool=forgedItems.find(t=>t.id===recipe.resultingItemId),previous=forgedItems.find(t=>t.tier===(tool?.tier||0)-1);
-  if(!tool||state.ownedTools.includes(tool.id)||(previous&&!state.ownedTools.includes(previous.id))||!canAfford(state.processedResources,recipe.processedInputs)||!canAfford(state.mineralResources,recipe.mineralInputs))return null;
-  return {...state,processedResources:spend(state.processedResources,recipe.processedInputs),mineralResources:spend(state.mineralResources,recipe.mineralInputs),ownedTools:[...state.ownedTools,tool.id],toolTier:tool.tier};
+  if(!tool||state.ownedTools.includes(tool.id)||(previous&&!state.ownedTools.includes(previous.id))||!canAfford(state.processedResources,recipe.processedInputs)||!canAfford(state.mineralResources,recipe.mineralInputs)||!canAfford(state.oreResources,recipe.oreInputs||[])||state.dust<(recipe.dustCost||0))return null;
+  return {...state,oreResources:spend(state.oreResources,recipe.oreInputs||[]),processedResources:spend(state.processedResources,recipe.processedInputs),mineralResources:spend(state.mineralResources,recipe.mineralInputs),dust:state.dust-(recipe.dustCost||0),dustSpent:state.dustSpent+(recipe.dustCost||0),ownedTools:[...state.ownedTools,tool.id],toolTier:tool.tier};
 };

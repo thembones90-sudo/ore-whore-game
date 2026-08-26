@@ -5,10 +5,10 @@ import {readFileSync} from "node:fs";
 const game=readFileSync(new URL("../app/page.tsx",import.meta.url),"utf8");
 
 const expected={
-  old:[28,20,12,18,10,0,0,0,0,0,0,0,0,0,0],
-  deep:[0,0,0,0,0,22,18,15,18,0,0,0,0,0,0],
-  outland:[0,0,0,0,0,0,0,0,0,34,34,18,0,0,0],
-  northrend:[0,0,0,0,0,0,0,0,0,0,0,0,38,35,20],
+  old:[28,20,12,18,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  deep:[0,0,0,0,0,22,18,15,18,0,0,0,0,0,0,0,0,0,0],
+  outland:[0,0,0,0,0,0,0,0,0,50,40,10,0,0,0,0,0,0,0],
+  northrend:[0,0,0,0,0,0,0,0,0,0,0,0,55,35,10,0,0,0,0],
 };
 
 test("mine spawn tables contain only their canonical native ores",()=>{

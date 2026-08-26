@@ -67,16 +67,20 @@ test("undiscovered Ghost ore identity is concealed via a single reusable helper,
 
 test("Ghost Mines entrance sequence matches the specified script and fires only once", () => {
   assert.deepEqual(GHOST_ENTRY_SYSTEM_OPENING, [
-    "Mine designation unavailable.",
+    "Unknown cavity system detected.",
     "Geological survey unavailable.",
     "Known geological profile: no match.",
+    "Structural supports: none detected.",
+    "Rail infrastructure: none detected.",
     "Biological activity: none detected.",
     "Mine origin: unknown.",
   ]);
-  assert.deepEqual(GHOST_ENTRY_REGISTER, { headline: "GHOST MINES", subtitle: "UNOFFICIAL DESIGNATION" });
+  assert.deepEqual(GHOST_ENTRY_REGISTER, { headline: "UNKNOWN CAVITY NETWORK", subtitle: "NO AUTHORIZED DESIGNATION" });
   assert.deepEqual(GHOST_ENTRY_CLOSING, [
-    { speaker: "SYSTEM", text: "Proceed." },
-    { speaker: "PEON", text: "...zug zug." },
+    { speaker: "SYSTEM", text: "Continued excavation is not recommended." },
+    { speaker: "SYSTEM", text: "Unfortunately, you requested indefinite excavation." },
+    { speaker: "SYSTEM", text: "Employment status: ACTIVE." },
+    { speaker: "PEON", text: "Tunnel already dug? Good. Less work." },
   ]);
   assert.match(game, /ghostEntrySeen:boolean/);
   assert.match(game, /save\.biome!=="ghost"\|\|save\.ghostEntrySeen\)return;setGhostEntry\(true\)/);
@@ -100,9 +104,9 @@ test("ambient commentary selection respects anti-repeat history for the Ghost po
   assert.ok(new Set(selected.slice(0, 5)).size >= 4, "anti-repeat should avoid immediate repeats within the small pool");
 });
 
-test("save schema was bumped for the new ghostEntrySeen field, and blank/migrate agree", () => {
-  assert.match(game, /schema: 18,settings:defaultSettings/);
-  assert.match(game, /schema:18,runStartedAt:Number\(old\.runStartedAt\)/);
+test("save schema migration preserves Ghost entrance and inefficiency feedback state", () => {
+  assert.match(game, /schema: 20,settings:defaultSettings/);
+  assert.match(game, /schema:20,employmentAgreementSigned:/);
 });
 
 test("mine-completion descent ceremony has Ghost Mines diagnostics in its own clinical voice", () => {

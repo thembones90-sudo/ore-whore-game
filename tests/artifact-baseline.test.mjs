@@ -4,7 +4,7 @@ import {forgedItems} from "../app/metallurgy.ts";
 import {ORDINARY_TRUE_ARTIFACT_CHANCE,artifactChanceForDig,markModifierRolled,modifierFor} from "../app/forbidden-tunnel.ts";
 
 test("ordinary baseline is exactly one in two thousand",()=>assert.equal(ORDINARY_TRUE_ARTIFACT_CHANCE,.0005));
-test("every technology tier owns the canonical Artifact probability",()=>assert.deepEqual(forgedItems.map(t=>t.trueArtifactChance),[.0005,.0006,.0008,.001,.0015,.002,.003,.004,.005,.0075,.01]));
+test("every technology tier owns the canonical Artifact probability",()=>assert.deepEqual(forgedItems.map(t=>t.trueArtifactChance),[.0005,.0006,.0008,.001,.0015,.002,.003,.004,.005,.0075,.01,.01]));
 test("MOUNTAIN FUCKER reaches the one percent hard cap",()=>{const tool=forgedItems.find(t=>t.name==="MOUNTAIN FUCKER");assert.equal(artifactChanceForDig(null,tool.trueArtifactChance),.01)});
 test("changing equipped technology changes the ordinary roll",()=>{for(const tool of forgedItems)assert.equal(artifactChanceForDig(null,tool.trueArtifactChance),tool.trueArtifactChance)});
 test("changing cosmetic cannot alter ordinary roll",()=>{for(const _skin of ["standard","revenant","pretty-bonker"])assert.equal(artifactChanceForDig(null),.0005)});
