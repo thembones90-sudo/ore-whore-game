@@ -1014,7 +1014,7 @@ function TrueArchive({save}:{save:Save}){
       <h3>{count?a.name:"???"}</h3>
       <p>{count?a.lore:<em>&ldquo;{asoc?"Clearance insufficient. Identity withheld.":a.lockedClue}&rdquo;</em>}</p>
       {asoc&&<div className="true-issued"><span>{count?"STATUS: SECURED":"STATUS: CLASSIFIED"}</span><strong>{count?"HOLDER: YOU":"AUTHORIZATION WITHHELD"}</strong></div>}
-      {count&&a.instruction&&<p className="true-archive-instruction">{a.instruction}</p>}
+      {count>0&&a.instruction&&<p className="true-archive-instruction">{a.instruction}</p>}
       <footer>{count?<><span>{asoc?"TICKET":"FOUND"} ×{count}</span>{first!==undefined&&<small>FOUND AFTER {first.toLocaleString()} DIGS</small>}</>:<span>{asoc?"ELIGIBILITY: CLASSIFIED":"NOT DISCOVERED"}</span>}</footer>
     </div>
     {count>0&&<button className="true-card-inspect" onClick={()=>setSelected(a)} aria-label={`View ${a.name}`}/>} 
