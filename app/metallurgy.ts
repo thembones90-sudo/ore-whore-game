@@ -9,6 +9,7 @@ export type MetallurgyRecipe = {
 };
 export type ForgedItem = {
   id: string; name: string; technicalName:string; category: "MINING TOOL"; tier: number; planned?:boolean;
+  shaftRating: 1|2|3|4;
   mode: "manual" | "continuous"; inputMode:"click"|"hold"; holdToMine:boolean; continuousMining:boolean;
   damage: number; actionDurationMs:number; trueArtifactChance:number; intervalMs?: number; recipeId?:string; icon:string;
   description: string;
@@ -54,7 +55,7 @@ export const forgedItems: ForgedItem[] = ([
   {id:"advanced-excavator",name:"ROCK EATER",technicalName:"Advanced Excavator",category:"MINING TOOL",tier:8,mode:"continuous",inputMode:"hold",holdToMine:true,continuousMining:true,damage:1.75,actionDurationMs:220,intervalMs:220,recipeId:"forge-advanced-excavator",icon:"/assets/tools/tool-advanced-excavator.webp",description:"An industrial cutting head built to consume the wall continuously."},
   {id:"endgame-machine",name:"MOUNTAIN HURTER",technicalName:"Endgame Mining Machine",category:"MINING TOOL",tier:9,mode:"continuous",inputMode:"hold",holdToMine:true,continuousMining:true,damage:2,actionDurationMs:180,intervalMs:180,recipeId:"forge-endgame-machine",icon:"/assets/tools/tool-endgame-machine.webp",description:"Every proven metal in the workshop, weaponized against geography."},
   {id:"ultimate-machine",name:"MOUNTAIN FUCKER",technicalName:"Ultimate Mining Machine",category:"MINING TOOL",tier:10,mode:"continuous",inputMode:"hold",holdToMine:true,continuousMining:true,damage:2.5,actionDurationMs:150,intervalMs:150,recipeId:"forge-ultimate-machine",icon:"/assets/tools/tool-ultimate-machine.webp",description:"Ultimate technology. The Peon has exhausted his engineering vocabulary."},
-] as Omit<ForgedItem,"trueArtifactChance">[]).map(tool=>({...tool,trueArtifactChance:TOOL_TRUE_ARTIFACT_CHANCES[tool.tier]}));
+] as Omit<ForgedItem,"trueArtifactChance"|"shaftRating">[]).map(tool=>({...tool,shaftRating:Math.min(4,tool.tier+1) as 1|2|3|4,trueArtifactChance:TOOL_TRUE_ARTIFACT_CHANCES[tool.tier]}));
 
 export const forgeRecipes: ForgeRecipe[] = [
   {id:"forge-bronze-pickaxe",resultingItemId:"bronze-pickaxe",processedInputs:[{id:"bronze",quantity:3}],mineralInputs:[{id:"malachite",quantity:2},{id:"tigerseye",quantity:1}],category:"MINING TOOL",unlock:{tool:"rusty-pickaxe"}},

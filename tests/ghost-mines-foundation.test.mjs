@@ -49,7 +49,7 @@ test("Ghost Mines spawn table only spawns its own four native ores", () => {
 
 test("Ghost Mines quota can diverge from the global rarity table via an explicit override map", () => {
   assert.match(game, /const oreQuotaOverrides:Partial<Record<string,number>>=\{gravesilver:30,stillwater:20,hushstone:8,revenantseye:3\}/);
-  assert.match(game, /const oreQuota=\(id:string\)=>oreQuotaOverrides\[id\]\?\?rarityQuota\[/);
+  assert.match(game, /const oreQuota=\(id:string\)=>progressionQuotaOverrides\[id\]\?\?oreQuotaOverrides\[id\]\?\?rarityQuota\[/);
   // Global rarity-table numbers (10/7/3/1) would total 21 — the whole point
   // of the override was to avoid inheriting that. Confirm the actual
   // provisional total is meaningfully larger.
