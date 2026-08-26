@@ -1,0 +1,76 @@
+/* v0.9.6 — Completion descent controls remain reachable on every viewport. */
+.mine-completion{
+  place-items:start center;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  padding:clamp(8px,1.6vh,20px) 20px 112px;
+}
+.completion-certificate{
+  max-height:none;
+  overflow:visible;
+}
+.next-mine-reveal.actionable{
+  cursor:pointer;
+  outline:0;
+  transition:border-color .18s ease,box-shadow .18s ease,filter .18s ease,transform .18s ease;
+}
+.next-mine-reveal.actionable:hover,
+.next-mine-reveal.actionable:focus-visible{
+  border-color:var(--completion-accent);
+  box-shadow:0 0 0 1px var(--completion-accent),inset 0 0 52px color-mix(in srgb,var(--completion-accent) 13%,transparent);
+  filter:brightness(1.08);
+  transform:translateY(-2px);
+}
+.next-mine-reveal.actionable:focus-visible::after{
+  content:"ENTER SHAFT";
+  position:absolute;
+  right:18px;
+  bottom:12px;
+  color:var(--completion-accent);
+  font:900 8px/1 Arial,sans-serif;
+  letter-spacing:2px;
+}
+.completion-descent-dock{
+  position:fixed;
+  z-index:8;
+  right:clamp(12px,3vw,48px);
+  bottom:clamp(12px,2vh,24px);
+  display:grid;
+  gap:5px;
+  min-width:min(360px,calc(100vw - 24px));
+  min-height:66px;
+  padding:13px 22px;
+  border:1px solid color-mix(in srgb,var(--completion-accent) 72%,#fff);
+  border-left:6px solid var(--completion-accent);
+  background:linear-gradient(110deg,color-mix(in srgb,var(--completion-card) 86%,#060706),#080a08f5);
+  box-shadow:0 14px 44px #000d,0 0 22px color-mix(in srgb,var(--completion-accent) 18%,transparent);
+  color:#f1f0e9;
+  text-align:left;
+  cursor:pointer;
+}
+.completion-descent-dock small{
+  color:var(--completion-accent);
+  font:900 8px/1 Arial,sans-serif;
+  letter-spacing:2.2px;
+}
+.completion-descent-dock strong{
+  font:900 15px/1.1 Arial,sans-serif;
+  letter-spacing:1.4px;
+}
+.completion-descent-dock:hover,
+.completion-descent-dock:focus-visible{
+  transform:translateY(-3px);
+  filter:brightness(1.16);
+  outline:2px solid var(--completion-accent);
+  outline-offset:3px;
+}
+.completion-descent-dock:disabled{cursor:wait;opacity:.72}
+.mine-completion.descending .completion-descent-dock{pointer-events:none;animation:interface-descend .9s cubic-bezier(.65,0,.9,.35) both}
+@media(max-width:760px){
+  .mine-completion{padding:6px 6px 96px}
+  .completion-descent-dock{right:8px;bottom:8px;min-width:calc(100vw - 16px)}
+}
+@media(prefers-reduced-motion:reduce){
+  .next-mine-reveal.actionable,.completion-descent-dock{transition:none}
+  .mine-completion.descending .completion-descent-dock{animation:none;display:none}
+}

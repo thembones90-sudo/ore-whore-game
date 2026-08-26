@@ -60,6 +60,7 @@ import "./v092.css";
 import "./v093.css";
 import "./v094.css";
 import "./v095.css";
+import "./v096.css";
 
 export const metadata: Metadata = { title: "ORE WHORE — Compulsive Geology", description: "Dig. Clank. Crack. Collect every ore and mineral combination." };
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) { return <html lang="en"><body>{children}</body></html>; }
