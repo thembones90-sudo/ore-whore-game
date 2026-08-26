@@ -1,5 +1,5 @@
 /* v0.7.6 — Generated Forbidden Tunnel architecture replaces CSS placeholders. */
-.first-passages button{
+.first-passages button,.second-passages button{
   --tunnel-art:none;
   background-color:#050604!important;
   background-image:linear-gradient(180deg,transparent 52%,#03040338 72%,#020302ee 100%),var(--tunnel-art)!important;
@@ -10,7 +10,7 @@
   isolation:isolate;
   transition:transform .34s cubic-bezier(.2,.7,.2,1),filter .34s,border-color .25s,opacity .3s,background-size .34s!important;
 }
-.first-passages button:before{
+.first-passages button:before,.second-passages button:before{
   inset:0!important;
   z-index:0!important;
   border:0!important;
@@ -19,24 +19,24 @@
   box-shadow:inset 0 -62px 76px #000b,inset 0 0 22px #0008!important;
   transform:none!important;
 }
-.first-passages button:after,.first-passages button i{display:none!important}
-.first-passages button strong,.first-passages button small{position:absolute!important;left:14px;right:14px;z-index:2}
-.first-passages button strong{bottom:42px;margin:0!important;text-shadow:0 2px 8px #000,0 0 16px #000}
-.first-passages button small{bottom:18px;height:14px;margin:0!important}
-.first-passages button:hover,.first-passages button:focus-visible{background-size:auto 103%!important;filter:brightness(1.12) contrast(1.03)!important}
-.first-passages button:hover:before,.first-passages button:focus-visible:before{filter:none!important;transform:none!important}
-.first-passages button.passage-crooked{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-crooked.webp')}
-.first-passages button.passage-rails{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-rails.webp')}
-.first-passages button.passage-collapsed{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-collapsed.webp')}
-.first-passages button.passage-bend{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-bend.webp')}
-.first-passages button.passage-reinforced{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-reinforced.webp')}
-.first-passages button.passage-wide{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-wide.webp')}
+.first-passages button:after,.first-passages button i,.second-passages button:after,.second-passages button i{display:none!important}
+.first-passages button strong,.first-passages button small,.second-passages button strong,.second-passages button small{position:absolute!important;left:14px;right:14px;z-index:2}
+.first-passages button strong,.second-passages button strong{bottom:42px;margin:0!important;text-shadow:0 2px 8px #000,0 0 16px #000}
+.first-passages button small,.second-passages button small{bottom:18px;height:14px;margin:0!important}
+.first-passages button:hover,.first-passages button:focus-visible,.second-passages button:hover,.second-passages button:focus-visible{background-size:auto 103%!important;filter:brightness(1.12) contrast(1.03)!important}
+.first-passages button:hover:before,.first-passages button:focus-visible:before,.second-passages button:hover:before,.second-passages button:focus-visible:before{filter:none!important;transform:none!important}
+.tunnel-passages button.passage-crooked{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-crooked.webp')}
+.tunnel-passages button.passage-rails{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-rails.webp')}
+.tunnel-passages button.passage-collapsed{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-collapsed.webp')}
+.tunnel-passages button.passage-bend{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-bend.webp')}
+.tunnel-passages button.passage-reinforced{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-reinforced.webp')}
+.tunnel-passages button.passage-wide{--tunnel-art:url('/assets/tunnels/forbidden-tunnel-wide.webp')}
 .passage-entering .selected-entry{background-size:auto 108%!important}
 .passage-entering .receding-entry{background-size:auto 98%!important}
 @media(max-width:700px){
-  .first-passages button{background-size:cover!important}
-  .first-passages button:hover,.first-passages button:focus-visible{background-size:cover!important}
-  .first-passages button strong{bottom:27px}
-  .first-passages button small{bottom:9px}
+  .first-passages button,.second-passages button{background-size:cover!important}
+  .first-passages button:hover,.first-passages button:focus-visible,.second-passages button:hover,.second-passages button:focus-visible{background-size:cover!important}
+  .first-passages button strong,.second-passages button strong{bottom:27px}
+  .first-passages button small,.second-passages button small{bottom:9px}
 }
-@media(prefers-reduced-motion:reduce){.first-passages button{transition:none!important}}
+@media(prefers-reduced-motion:reduce){.first-passages button,.second-passages button{transition:none!important}}
