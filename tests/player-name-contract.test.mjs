@@ -26,7 +26,7 @@ test("signed name persists, migrates, and survives New Game Plus",()=>{
 
 test("contract signature returns at welcome, records, progression, and termination",()=>{
   assert.match(page,/SIGNED: \{signedName\}/);
-  assert.match(page,/Welcome to ORE WHORE, <strong>\{signedName\}<\/strong>/);
+  assert.match(page,/Welcome to ORE WHORE, \$\{signedName\}/);
   assert.match(page,/EMPLOYEE <b>\{save\.playerName\}<\/b>/);
   assert.match(page,/Extraction quota satisfied, \$\{playerName\}/);
   assert.match(page,/className="termination-record"/);
