@@ -1,0 +1,21 @@
+.shadez-voice-avatar{width:52px;height:52px;flex:0 0 52px;border-radius:50%;object-fit:cover;border:1px solid rgba(197,72,84,.8);box-shadow:0 0 22px rgba(139,24,38,.38);background:#090707}
+.shadez-voiced,.shadez-peon-exchange{display:flex!important;align-items:center;gap:14px}
+.shadez-voiced>span,.shadez-peon-exchange>span{display:block}
+.shadez-voiced small{display:block;color:#bd6572;letter-spacing:.18em;margin-bottom:5px}
+.shadez-recruitment{background:radial-gradient(circle at 28% 42%,rgba(108,17,28,.26),transparent 38%),rgba(2,2,2,.96)}
+.shadez-recruitment>section{width:min(940px,92vw);display:grid;grid-template-columns:minmax(240px,42%) 1fr;align-items:center;gap:clamp(28px,5vw,72px);padding:clamp(28px,5vw,70px);border:1px solid rgba(152,54,68,.55);background:linear-gradient(135deg,rgba(24,8,11,.95),rgba(5,5,5,.98));box-shadow:0 30px 90px #000}
+.shadez-recruitment .shadez-voice-avatar{width:100%;height:auto;aspect-ratio:1;border-width:2px;box-shadow:0 0 55px rgba(153,25,43,.32)}
+.shadez-recruitment small,.shadez-signing small{color:#c56675;letter-spacing:.28em}
+.shadez-recruitment h2{font-size:clamp(36px,5vw,72px);line-height:.95;margin:12px 0 28px}
+.shadez-recruitment p{font-family:var(--font-serif,serif);font-size:clamp(20px,2vw,29px);margin:8px 0;color:#ddd7cf}
+.shadez-recruitment strong{display:block;color:#d88a96;font-size:clamp(24px,2.5vw,36px);margin:20px 0 32px}
+.shadez-recruitment button{min-width:250px}
+.shadez-signing section{display:flex;flex-direction:column;align-items:center}
+.shadez-signing .shadez-voice-avatar{width:128px;height:128px;flex-basis:128px;margin-bottom:22px}
+.tunnel-foreman{display:grid!important;grid-template-columns:76px 1fr;gap:22px;align-items:start}
+.tunnel-foreman .shadez-voice-avatar{width:76px;height:76px;flex-basis:76px}
+.tunnel-foreman h2,.tunnel-foreman p{grid-column:auto!important}
+.ghost-entry-closing .shadez-voiced{justify-content:flex-start}
+.shadez-peon-exchange{margin-top:18px!important}
+.endgame-termination .shadez-voiced{max-width:600px;margin:20px auto;text-align:left;padding:14px 18px;border-left:2px solid #a84858;background:rgba(0,0,0,.35)}
+@media(max-width:720px){.shadez-recruitment>section{grid-template-columns:1fr;text-align:center}.shadez-recruitment .shadez-voice-avatar{width:180px;margin:auto}.tunnel-foreman{grid-template-columns:54px 1fr;gap:12px}.tunnel-foreman .shadez-voice-avatar{width:54px;height:54px;flex-basis:54px}.shadez-peon-exchange{align-items:flex-start}}

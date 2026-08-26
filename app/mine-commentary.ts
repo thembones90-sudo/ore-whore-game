@@ -71,9 +71,9 @@ export const GHOST_ENTRY_SYSTEM_OPENING:string[]=[
   "Mine origin: unknown.",
 ];
 export const GHOST_ENTRY_REGISTER={headline:"UNKNOWN CAVITY NETWORK",subtitle:"NO AUTHORIZED DESIGNATION"};
-export const GHOST_ENTRY_CLOSING:{speaker:"SYSTEM"|"PEON";text:string}[]=[
-  {speaker:"SYSTEM",text:"Continued excavation is not recommended."},
-  {speaker:"SYSTEM",text:"Unfortunately, you requested indefinite excavation."},
+export const GHOST_ENTRY_CLOSING:{speaker:"SYSTEM"|"SHADEZ"|"PEON";text:string}[]=[
+  {speaker:"SHADEZ",text:"Continued excavation is not recommended."},
+  {speaker:"SHADEZ",text:"Unfortunately, you requested indefinite excavation."},
   {speaker:"SYSTEM",text:"Employment status: ACTIVE."},
   {speaker:"PEON",text:"Tunnel already dug? Good. Less work."},
 ];

@@ -64,7 +64,8 @@ test("server-renders the ORE WHORE game shell", async () => {
 
   // Sequential mine gating: Deep/Outland/Northrend start locked
   assert.match(html, /biome-card-deep\s+locked/);
-  assert.match(html, /🔒 DEEP MINE/);
+  assert.match(html, /🔒 \?\?\?\?\?/);
+  assert.doesNotMatch(html, /🔒 DEEP MINE/);
 });
 
 test("starter-preview scaffolding stays removed", async () => {

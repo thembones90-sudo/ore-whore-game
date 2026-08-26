@@ -77,8 +77,8 @@ test("Ghost Mines entrance sequence matches the specified script and fires only 
   ]);
   assert.deepEqual(GHOST_ENTRY_REGISTER, { headline: "UNKNOWN CAVITY NETWORK", subtitle: "NO AUTHORIZED DESIGNATION" });
   assert.deepEqual(GHOST_ENTRY_CLOSING, [
-    { speaker: "SYSTEM", text: "Continued excavation is not recommended." },
-    { speaker: "SYSTEM", text: "Unfortunately, you requested indefinite excavation." },
+    { speaker: "SHADEZ", text: "Continued excavation is not recommended." },
+    { speaker: "SHADEZ", text: "Unfortunately, you requested indefinite excavation." },
     { speaker: "SYSTEM", text: "Employment status: ACTIVE." },
     { speaker: "PEON", text: "Tunnel already dug? Good. Less work." },
   ]);
