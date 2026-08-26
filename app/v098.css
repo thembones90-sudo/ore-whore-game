@@ -1,0 +1,24 @@
+/* Forbidden Tunnel input buffer — real interaction state, not a cosmetic delay. */
+.tunnel-discovery-phase{background:rgba(2,5,3,.94);cursor:wait;pointer-events:all;user-select:none}
+.forbidden-tunnel-discovery{position:relative;width:min(1120px,90vw);min-height:620px;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;border:1px solid #667052;background:radial-gradient(circle at 50% 58%,rgba(80,91,52,.16),transparent 46%),linear-gradient(180deg,#0c110d 0%,#050806 100%);box-shadow:0 0 0 10px rgba(5,9,6,.8),0 28px 90px #000;padding:68px 70px;text-align:center}
+.forbidden-tunnel-discovery:before,.forbidden-tunnel-discovery:after{content:"";position:absolute;inset:12px;border:1px solid rgba(180,196,126,.13);pointer-events:none}
+.forbidden-tunnel-discovery:after{inset:0;background:repeating-linear-gradient(90deg,transparent 0 112px,rgba(172,190,119,.035) 113px 114px),linear-gradient(115deg,transparent 35%,rgba(194,208,143,.035) 50%,transparent 65%);animation:tunnelDiscoverySweep 2.5s ease-in-out both}
+.forbidden-tunnel-discovery .shadez-voice-avatar{width:84px;height:84px;margin:0 0 24px;border-color:#7e514f;filter:brightness(.72) saturate(.75);animation:tunnelForemanWake 2.5s ease-out both}
+.forbidden-tunnel-discovery>small{position:relative;z-index:2;color:#9da582;font:700 12px/1.2 var(--sans);letter-spacing:.42em}
+.forbidden-tunnel-discovery h2{position:relative;z-index:2;margin:17px 0 12px;color:#eeeade;font:800 clamp(42px,6vw,86px)/.92 var(--sans);letter-spacing:-.045em;text-shadow:0 5px 28px #000}
+.forbidden-tunnel-discovery h2 em{display:block;color:#c9de38;font-style:normal}
+.forbidden-tunnel-discovery p{position:relative;z-index:2;margin:0;color:#aeb29f;font:italic 24px/1.4 var(--serif)}
+.discovery-passages{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;width:min(760px,80vw);height:150px;margin:34px auto 18px;filter:blur(2px);opacity:.55}
+.discovery-passages i{position:relative;overflow:hidden;border:1px solid rgba(159,176,100,.23);background:linear-gradient(180deg,rgba(35,42,29,.75),#020302)}
+.discovery-passages i:before{content:"";position:absolute;left:50%;bottom:-18%;width:70%;height:110%;transform:translateX(-50%);border-radius:50% 50% 0 0;background:radial-gradient(ellipse at 50% 18%,rgba(224,173,72,.2),transparent 7%),radial-gradient(ellipse at 50% 95%,#060806 20%,#000 72%);box-shadow:inset 0 0 34px #000}
+.discovery-passages i:nth-child(1){transform:translateY(11px) rotate(-1.2deg)}
+.discovery-passages i:nth-child(3){transform:translateY(7px) rotate(1.1deg)}
+.tunnel-survey-progress{position:relative;z-index:2;width:min(560px,70vw);height:4px;overflow:hidden;background:#252b20}
+.tunnel-survey-progress span{display:block;width:100%;height:100%;transform-origin:left;background:linear-gradient(90deg,#747d52,#d0e436);animation:tunnelSurveyProgress 2.5s linear both}
+.forbidden-tunnel-discovery>b{position:relative;z-index:2;margin-top:15px;color:#6f7666;font:700 10px/1 var(--sans);letter-spacing:.28em}
+.tunnel-choice-command{margin:5px auto 20px;color:#cde33a!important;font:800 12px/1 var(--sans)!important;letter-spacing:.34em!important;text-align:center}
+@keyframes tunnelSurveyProgress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes tunnelDiscoverySweep{0%{opacity:0;transform:translateX(-12%)}40%{opacity:1}100%{opacity:.4;transform:translateX(12%)}}
+@keyframes tunnelForemanWake{0%{opacity:0;transform:scale(.82);filter:brightness(.2)}35%{opacity:.45}100%{opacity:1;transform:none;filter:brightness(.72) saturate(.75)}}
+@media(max-width:760px){.forbidden-tunnel-discovery{min-height:520px;padding:50px 20px}.forbidden-tunnel-discovery h2{font-size:42px}.forbidden-tunnel-discovery p{font-size:18px}.discovery-passages{gap:10px;height:115px;width:92%}}
+@media(prefers-reduced-motion:reduce){.forbidden-tunnel-discovery:after,.forbidden-tunnel-discovery .shadez-voice-avatar,.tunnel-survey-progress span{animation:none}.tunnel-survey-progress span{transform:scaleX(1)}}
