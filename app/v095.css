@@ -1,0 +1,18 @@
+.employee-declaration{display:grid;gap:12px;margin:24px 0 6px;padding:20px;border:1px solid rgba(177,77,105,.45);background:rgba(13,10,11,.76);box-shadow:inset 4px 0 #a94f6d}
+.employee-declaration>small{color:#cf7895;font-weight:900;letter-spacing:.22em}
+.employee-declaration>strong{font-family:Georgia,serif;font-size:18px;font-weight:500;color:#ded8ce}
+.employee-declaration label{display:grid;gap:8px;color:#aaa49c;font-size:11px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}
+.employee-declaration input{width:100%;box-sizing:border-box;border:1px solid rgba(196,151,83,.5);background:#090b09;color:#f4ead7;padding:14px 16px;font:700 20px/1.2 Georgia,serif;outline:none}
+.employee-declaration input:focus{border-color:#d6a655;box-shadow:0 0 0 2px rgba(214,166,85,.15),inset 0 -2px #a94f6d}
+.employment-contract button:disabled{opacity:.34;cursor:not-allowed;filter:grayscale(1)}
+.contract-signature{display:block;margin:8px auto 14px;color:#e6bc69;font:italic 30px/1.1 "Segoe Script","Brush Script MT",cursive;transform:rotate(-2deg);text-shadow:0 0 18px rgba(218,165,74,.35)}
+.signing-exchange{margin:22px auto;padding:14px 18px;max-width:430px;text-align:left;border-left:3px solid #a94f6d;background:rgba(8,8,8,.6);line-height:1.8}
+.signing-exchange b{display:inline-block;min-width:76px;color:#cf7895;font-size:11px;letter-spacing:.16em}
+.employee-record{display:flex;flex-wrap:wrap;margin:0 0 22px;border:1px solid #31352f;background:#0c100d}
+.employee-record span{flex:1 1 220px;padding:15px 18px;color:#858b83;font-size:10px;letter-spacing:.17em;border-right:1px solid #31352f}
+.employee-record b{display:block;margin-top:6px;color:#ebe5da;font-size:15px;letter-spacing:.06em}
+.termination-record{display:grid!important;grid-template-columns:minmax(130px,.55fr) minmax(240px,1fr);max-width:720px;margin:22px auto!important;text-align:left;border:1px solid rgba(216,170,82,.42);background:rgba(8,8,7,.75)}
+.termination-record span,.termination-record b{padding:12px 16px;border-bottom:1px solid rgba(216,170,82,.18)}
+.termination-record span{color:#b49a6a;font-size:10px;letter-spacing:.18em}
+.termination-record b{color:#f0dfb8;font-size:13px;letter-spacing:.07em}
+@media(max-width:700px){.employee-declaration{padding:14px}.employee-declaration>strong{font-size:15px}.employee-declaration input{font-size:17px}.contract-signature{font-size:24px}.termination-record{grid-template-columns:1fr}.termination-record span{padding-bottom:3px;border-bottom:0}.termination-record b{padding-top:3px}}

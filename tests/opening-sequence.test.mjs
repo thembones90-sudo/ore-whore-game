@@ -35,6 +35,6 @@ test("contract callbacks cover reassignment, forbidden tunnels, indefinite excav
 });
 
 test("New Game Plus preserves the hook without replaying an unapproved revised agreement",()=>{
-  assert.match(game,/\.\.\.blank,employmentAgreementSigned:true,employmentGreetingSeen:true/);
+  assert.match(game,/\.\.\.blank,playerName:s\.playerName,employmentAgreementSigned:true,employmentGreetingSeen:true/);
   assert.match(layout,/v091\.css/);
 });

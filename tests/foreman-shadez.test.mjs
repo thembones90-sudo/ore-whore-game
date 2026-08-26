@@ -9,7 +9,7 @@ const commentary=fs.readFileSync(new URL("../app/mine-commentary.ts",import.meta
 test("Foreman Shadez portrait and canonical recruitment copy are wired",()=>{
   assert.ok(fs.existsSync(new URL("../public/assets/characters/foreman-shadez.png",import.meta.url)));
   assert.match(page,/foreman-shadez\.png/);
-  for(const line of ["Children yearn for the mines.","Unfortunately, we are out of children.","So you will do.","Excellent.","Employment commenced."]) assert.ok(page.includes(line));
+  for(const line of ["Children yearn for the mines.","Unfortunately, we are out of children.","So you will do.","Agreement accepted.","Your employment has commenced."]) assert.ok(page.includes(line));
 });
 
 test("Shadez owns narrative management moments while SYSTEM remains mechanical",()=>{
