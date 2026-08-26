@@ -13,10 +13,16 @@ test("ASOC completes the run instead of entering the ordinary archive",()=>{
   assert.match(page,/archiveArtifacts=trueArtifactPool\.filter\(a=>a\.id!==ASOC_TICKET_ID\)/);
 });
 
-test("the archive visibly dossiers ASOC while keeping it outside the ordinary eight",()=>{
-  assert.match(page,/aria-label="Golden ASOC Ticket endgame status"/);
+test("the archive conceals ASOC identity until secured and keeps it outside the ordinary eight",()=>{
+  assert.match(page,/aria-label=\{asocKnown\?"Golden ASOC Ticket endgame status":"Classified endgame condition"\}/);
   assert.match(page,/renderArchiveCard\(asocTicket,save\.asocTickets,undefined,true\)/);
-  assert.match(page,/GOLDEN ASOC TICKET/);
+  assert.match(page,/<h3>\{count\?a\.name:"\?\?\?"\}<\/h3>/);
+  assert.match(page,/STATUS: CLASSIFIED/);
+  assert.match(page,/AUTHORIZATION WITHHELD/);
+  assert.match(page,/ELIGIBILITY: CLASSIFIED/);
+  assert.doesNotMatch(page,/count\?a\.name:asoc\?"GOLDEN ASOC TICKET"/);
+  assert.doesNotMatch(page,/MOUNTAIN FUCKER REQUIRED/);
+  assert.doesNotMatch(page,/0\.1% PER COMPLETED EXCAVATION WHEN ELIGIBLE/);
 });
 
 test("TRUE Artefact artwork is contained above a separate copy region",()=>{

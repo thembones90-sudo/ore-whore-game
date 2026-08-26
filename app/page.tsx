@@ -1006,24 +1006,24 @@ function TrueArchive({save}:{save:Save}){
   const archiveArtifacts=trueArtifactPool.filter(a=>a.id!==ASOC_TICKET_ID);
   const owned=archiveArtifacts.filter(a=>save.trueArtifacts[a.id]);
   const totalFound=Object.values(save.trueArtifacts).reduce((s,n)=>s+n,0);
-  const equipped=equippedMiningTool(save),effectiveChance=artifactChanceForDig(save.pendingArtifactModifier,equipped.trueArtifactChance),asocChance=asocTicketChanceForDig(save.equippedTool,save.gameCompleted);
+  const equipped=equippedMiningTool(save),effectiveChance=artifactChanceForDig(save.pendingArtifactModifier,equipped.trueArtifactChance),asocKnown=save.asocTickets>0;
   const renderArchiveCard=(a:TrueArtifact,count:number,first?:number,asoc=false)=><article key={a.id} className={`${count?"found inspectable":"locked"}${asoc?" ultimate asoc-dossier":""}`}>
     <div className="true-card-media"><TrueArtifactArt artifact={a} locked={!count}/></div>
     <div className="true-card-copy">
-      {asoc&&<strong className="true-ultimate-label">ENDGAME INVITATION</strong>}
-      <h3>{count?a.name:asoc?"GOLDEN ASOC TICKET":"???"}</h3>
-      <p>{count?a.lore:<em>&ldquo;{a.lockedClue}&rdquo;</em>}</p>
-      {asoc&&<div className="true-issued"><span>{count?"STATUS: SECURED":"STATUS: NOT ISSUED"}</span><strong>{count?"HOLDER: YOU":asocChance?"MOUNTAIN FUCKER QUALIFIED":"MOUNTAIN FUCKER REQUIRED"}</strong></div>}
+      {asoc&&<strong className="true-ultimate-label">{count?"ENDGAME INVITATION":"CLASSIFIED ENDGAME CONDITION"}</strong>}
+      <h3>{count?a.name:"???"}</h3>
+      <p>{count?a.lore:<em>&ldquo;{asoc?"Clearance insufficient. Identity withheld.":a.lockedClue}&rdquo;</em>}</p>
+      {asoc&&<div className="true-issued"><span>{count?"STATUS: SECURED":"STATUS: CLASSIFIED"}</span><strong>{count?"HOLDER: YOU":"AUTHORIZATION WITHHELD"}</strong></div>}
       {count&&a.instruction&&<p className="true-archive-instruction">{a.instruction}</p>}
-      <footer>{count?<><span>{asoc?"TICKET":"FOUND"} ×{count}</span>{first!==undefined&&<small>FOUND AFTER {first.toLocaleString()} DIGS</small>}</>:<span>{asoc?"0.1% PER COMPLETED EXCAVATION WHEN ELIGIBLE":"NOT DISCOVERED"}</span>}</footer>
+      <footer>{count?<><span>{asoc?"TICKET":"FOUND"} ×{count}</span>{first!==undefined&&<small>FOUND AFTER {first.toLocaleString()} DIGS</small>}</>:<span>{asoc?"ELIGIBILITY: CLASSIFIED":"NOT DISCOVERED"}</span>}</footer>
     </div>
     {count>0&&<button className="true-card-inspect" onClick={()=>setSelected(a)} aria-label={`View ${a.name}`}/>} 
   </article>;
   return <><section className="page true-archive-page">
     <div className="page-head"><div><p className="eyebrow">NOT GEOLOGY. SOMETHING ELSE.</p><h2>TRUE <i>ARTEFACTS</i></h2></div><div className="completion"><span>ARTEFACTS FOUND</span><strong>{owned.length}<small> / {archiveArtifacts.length}</small></strong></div></div>
-    <p className="true-archive-intro">Common through Legendary belongs to the mountain. These do not. Equipped tool: <strong>{equipped.name}</strong>. Current ordinary TRUE Artifact chance: <strong>{(effectiveChance*100).toFixed(2)}%</strong> · approximately 1 in {Math.round(1/effectiveChance).toLocaleString()}. Forbidden Tunnel modifiers apply only to the ordinary roll on the next completed dig. ASOC Tickets secured: <strong>{save.asocTickets}</strong>. The Ticket is an endgame condition, not an archive collectible. Current run: <strong>{save.gameCompleted?"SHIFT COMPLETE":asocChance?`${(ASOC_TICKET_CHANCE*100).toFixed(1)}% · MOUNTAIN FUCKER ACTIVE`:"INVITATION UNAVAILABLE"}</strong>. No pity system.{totalFound?` Total anomalies logged: ${totalFound}.`:""}</p>
+    <p className="true-archive-intro">Common through Legendary belongs to the mountain. These do not. Equipped tool: <strong>{equipped.name}</strong>. Current ordinary TRUE Artifact chance: <strong>{(effectiveChance*100).toFixed(2)}%</strong> · approximately 1 in {Math.round(1/effectiveChance).toLocaleString()}. Forbidden Tunnel modifiers apply only to the ordinary roll on the next completed dig. {asocKnown?<>Golden ASOC Tickets secured: <strong>{save.asocTickets}</strong>. Current run: <strong>{save.gameCompleted?"SHIFT COMPLETE":"INVITATION SECURED"}</strong>.</>:<>Endgame condition: <strong>CLASSIFIED</strong>. Current run: <strong>CLEARANCE INSUFFICIENT</strong>.</>} No pity system.{totalFound?` Total anomalies logged: ${totalFound}.`:""}</p>
     <div className="true-grid">{archiveArtifacts.map(a=>renderArchiveCard(a,save.trueArtifacts[a.id]||0,save.trueFirst[a.id]))}</div>
-    <section className="asoc-archive-section" aria-label="Golden ASOC Ticket endgame status"><header><small>SEPARATE ENDGAME CONDITION</small><h3>THE FINAL INVITATION</h3><p>Not part of the ordinary eight-piece archive. It is still real, visible, and waiting.</p></header>{renderArchiveCard(asocTicket,save.asocTickets,undefined,true)}</section>
+    <section className="asoc-archive-section" aria-label={asocKnown?"Golden ASOC Ticket endgame status":"Classified endgame condition"}><header><small>{asocKnown?"SEPARATE ENDGAME CONDITION":"RESTRICTED COMPANY RECORD"}</small><h3>{asocKnown?"THE FINAL INVITATION":"CLEARANCE REQUIRED"}</h3><p>{asocKnown?"Not part of the ordinary eight-piece archive. Secured under endgame authority.":"A separate endgame condition exists. Its identity, requirements, and probability are withheld."}</p></header>{renderArchiveCard(asocTicket,save.asocTickets,undefined,true)}</section>
   </section>{selected&&<TrueArtifactInspection artifact={selected} count={selected.id===ASOC_TICKET_ID?save.asocTickets:(save.trueArtifacts[selected.id]||0)} first={save.trueFirst[selected.id]} onClose={()=>setSelected(null)}/>}</>;
 }
 
