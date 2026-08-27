@@ -24,10 +24,14 @@ test("dialogue copy is contained and scales by line density",()=>{
   assert.match(css,/\.dialogue-onboarding \.dialogue-copy-dense \.dialogue-cloud p/);
 });
 
-test("dialogue uses a staged military transmission reveal",()=>{
-  assert.match(page,/revealedWords/);
+test("dialogue uses a character-by-character military transmission reveal",()=>{
+  assert.match(page,/revealedCharacters/);
   assert.match(page,/TRANSMISSION \/\/ /);
-  assert.match(page,/dialogue-word/);
-  assert.match(css,/@keyframes dialogue-word-decode/);
-  assert.match(css,/font-size:clamp\(24px,2\.45vw,38px\)/);
+  assert.match(page,/transmitted==="\\n"\?150:transmitted==="\."\?135:transmitted===":"\?95/);
+  assert.match(page,/dialogue-copy-revealed/);
+  assert.match(page,/dialogue-copy-pending/);
+  assert.doesNotMatch(css,/@keyframes dialogue-word-decode/);
+  assert.match(css,/font-size:clamp\(18px,1\.35vw,20px\)/);
+  assert.match(css,/font-family:"Courier New",Consolas,monospace/);
+  assert.match(css,/line-height:1\.55/);
 });

@@ -1065,19 +1065,25 @@ function Records({ save, onReset, session }: { save: Save; onReset: () => void; 
 type AvatarDialogueSpeaker="PEON"|"SHADEZ";
 type AvatarDialogueLine={speaker:AvatarDialogueSpeaker;text:string;pauseMs?:number};
 function AvatarDialogue({lines,onComplete,onLineChange,ariaLabel="Employment dialogue"}:{lines:AvatarDialogueLine[];onComplete:()=>void;onLineChange?:(line:AvatarDialogueLine,index:number)=>void;ariaLabel?:string}){
-  const [index,setIndex]=useState(0),[ready,setReady]=useState(true),[revealedWords,setRevealedWords]=useState(0);
+  const [index,setIndex]=useState(0),[ready,setReady]=useState(true),[revealedCharacters,setRevealedCharacters]=useState(0);
   const line=lines[index];
   const copyLength=line.text.replace(/\s+/g," ").trim().length;
   const copyDensity=copyLength>86?"dialogue-copy-dense":copyLength>48?"dialogue-copy-long":"dialogue-copy-short";
-  const copyTokens=line.text.split(/(\s+)/),wordCount=copyTokens.filter(token=>/\S/.test(token)).length;
+  const copyCharacters=Array.from(line.text),characterCount=copyCharacters.length;
   useEffect(()=>{if(ready||!line.pauseMs)return;const timer=window.setTimeout(()=>setReady(true),line.pauseMs);return()=>window.clearTimeout(timer)},[ready,line.pauseMs]);
-  useEffect(()=>{setRevealedWords(0);const timer=window.setInterval(()=>setRevealedWords(current=>{if(current>=wordCount){window.clearInterval(timer);return current}return current+1}),82);return()=>window.clearInterval(timer)},[index,wordCount]);
-  const copyComplete=revealedWords>=wordCount;
-  const advance=()=>{if(!copyComplete){setRevealedWords(wordCount);return}if(!ready)return;if(index>=lines.length-1){onComplete();return}const next=index+1;setRevealedWords(0);setIndex(next);onLineChange?.(lines[next],next);if(lines[next].pauseMs)setReady(false)};
+  useEffect(()=>{
+    if(revealedCharacters>=characterCount)return;
+    const transmitted=revealedCharacters?copyCharacters[revealedCharacters-1]:"";
+    const delay=revealedCharacters===0?120:transmitted==="\n"?150:transmitted==="."?135:transmitted===":"?95:transmitted===","?55:27;
+    const timer=window.setTimeout(()=>setRevealedCharacters(current=>Math.min(current+1,characterCount)),delay);
+    return()=>window.clearTimeout(timer);
+  },[index,line.text,characterCount,revealedCharacters]);
+  const copyComplete=revealedCharacters>=characterCount;
+  const advance=()=>{if(!copyComplete){setRevealedCharacters(characterCount);return}if(!ready)return;if(index>=lines.length-1){onComplete();return}const next=index+1;setRevealedCharacters(0);setIndex(next);onLineChange?.(lines[next],next);if(lines[next].pauseMs)setReady(false)};
   useEffect(()=>{const keydown=(event:KeyboardEvent)=>{if(event.code!=="Space"||event.repeat)return;event.preventDefault();advance()};window.addEventListener("keydown",keydown);return()=>window.removeEventListener("keydown",keydown)});
   return <div className={`avatar-dialogue speaker-${line.speaker.toLowerCase()} ${copyDensity}`} role="dialog" aria-modal="true" aria-label={ariaLabel}>
     <div className={`dialogue-avatar peon ${line.speaker==="PEON"?"active":"inactive"}`}><img src="/assets/characters/peon-avatar.png" alt="Peon"/><small>PEON</small></div>
-    <button className="dialogue-cloud" type="button" onClick={advance} aria-label={copyComplete&&ready?"Continue dialogue":"Reveal dialogue transmission"}><small>{line.speaker==="PEON"?"PEON · EMPLOYEE":"FOREMAN SHADEZ"}<b>TRANSMISSION // {String(index+1).padStart(2,"0")}</b></small><p aria-label={line.text}>{(()=>{let wordIndex=0;return copyTokens.map((token,tokenIndex)=>{if(!/\S/.test(token))return token;const visible=wordIndex++<revealedWords;return <span aria-hidden="true" className={`dialogue-word ${visible?"is-visible":""}`} key={`${index}-${tokenIndex}`}>{token}</span>})})()}<i className={`${copyComplete?"":"active"}`} aria-hidden="true"/></p><span>{copyComplete&&ready?"CLICK · TAP · SPACE":"RECEIVING…"}</span></button>
+    <button className="dialogue-cloud" type="button" onClick={advance} aria-label={copyComplete&&ready?"Continue dialogue":"Reveal dialogue transmission"}><small>{line.speaker==="PEON"?"PEON · EMPLOYEE":"FOREMAN SHADEZ"}<b>TRANSMISSION // {String(index+1).padStart(2,"0")}</b></small><p aria-label={line.text}><span className="dialogue-copy-revealed" aria-hidden="true">{copyCharacters.slice(0,revealedCharacters).join("")}</span><i className={`${copyComplete?"":"active"}`} aria-hidden="true"/><span className="dialogue-copy-pending" aria-hidden="true">{copyCharacters.slice(revealedCharacters).join("")}</span></p><span>{copyComplete&&ready?"CLICK · TAP · SPACE":"RECEIVING…"}</span></button>
     <div className={`dialogue-avatar shadez ${line.speaker==="SHADEZ"?"active":"inactive"}`}><ShadezAvatar/><small>SHADEZ</small></div>
   </div>;
 }
