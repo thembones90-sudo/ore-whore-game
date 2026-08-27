@@ -1097,6 +1097,28 @@ const PAPERWORK_DIALOGUE:AvatarDialogueLine[]=[
   {speaker:"SHADEZ",text:"Children yearn for the mines.\n\nUnfortunately, we are out of children.\n\nSo you will do."},{speaker:"SHADEZ",text:"Name. Signature. Then we begin."}
 ];
 
+function IntroTypewriter({text,delay=0,accentFrom,className=""}:{text:string;delay?:number;accentFrom?:number;className?:string}){
+  const [revealed,setRevealed]=useState(0);
+  useEffect(()=>{
+    setRevealed(0);
+    let cancelled=false,cursor=0,timer=0;
+    const transmit=()=>{
+      if(cancelled)return;
+      cursor=Math.min(cursor+1,text.length);
+      setRevealed(cursor);
+      if(cursor<text.length){
+        const character=text[cursor-1];
+        timer=window.setTimeout(transmit,character==="."?105:character===":"?75:26);
+      }
+    };
+    timer=window.setTimeout(transmit,delay);
+    return()=>{cancelled=true;window.clearTimeout(timer)};
+  },[text,delay]);
+  const split=accentFrom??text.length,visible=text.slice(0,revealed),pending=text.slice(revealed);
+  const styled=(copy:string,offset:number,hidden=false)=><>{copy.slice(0,Math.max(0,split-offset))}<span className="intro-type-accent">{copy.slice(Math.max(0,split-offset))}</span>{hidden&&null}</>;
+  return <span className={`intro-typewriter ${className}`} aria-label={text}><span aria-hidden="true">{styled(visible,0)}</span><i className={revealed<text.length?"active":""} aria-hidden="true"/><span className="intro-type-pending" aria-hidden="true">{styled(pending,revealed,true)}</span></span>;
+}
+
 function Onboarding({agreementRequired,onDone,existingName}:{agreementRequired:boolean;onDone:(signed:boolean,playerName?:string)=>void;existingName:string}){
   const [phase,setPhase]=useState<"title"|"recruitment"|"paperwork"|"contract"|"signing">("title"),[declined,setDeclined]=useState(false),[employeeName,setEmployeeName]=useState(existingName),[signedName,setSignedName]=useState("");
   const normalizedName=employeeName.trim().slice(0,28),canSign=normalizedName.length>0;
@@ -1105,7 +1127,8 @@ function Onboarding({agreementRequired,onDone,existingName}:{agreementRequired:b
   if(phase==="recruitment")return <div className="onboarding dialogue-onboarding"><AvatarDialogue ariaLabel="Peon recruitment dialogue" lines={RECRUITMENT_DIALOGUE} onComplete={()=>setPhase("paperwork")}/></div>;
   if(phase==="paperwork")return <div className="onboarding dialogue-onboarding paperwork-stage"><article className="contract-arrival-preview" aria-hidden="true"><small>DEPARTMENT COPY · FORM EX-∞</small><h2>INDEFINITE EXCAVATION AGREEMENT</h2><p>Employee acceptance is mandatory. Enthusiasm remains optional.</p><span>AWAITING NAME AND SIGNATURE</span></article><AvatarDialogue ariaLabel="Employment paperwork dialogue" lines={PAPERWORK_DIALOGUE} onComplete={()=>setPhase("contract")}/></div>;
   if(phase==="contract")return <div className="onboarding employment-overlay"><article className="employment-contract peon-contract"><header><img src="/assets/characters/peon-avatar.png" alt="Peon employee portrait"/><div><small>ORE WHORE</small><strong>MINERAL EXTRACTION &amp; ASSOCIATED SERVICES</strong><h2>INDEFINITE EXCAVATION AGREEMENT</h2></div></header><div className="contract-clauses"><section><b>1. YOUR JOB</b><p>You dig.<br/><strong>Then you dig more.</strong></p></section><section><b>2. THINGS YOU FIND</b><p>You find it, Boss owns it.<br/><strong>Even weird things.</strong></p></section><section><b>3. WHERE YOU WORK</b><p>Mine may be dark, deep, dangerous, or somewhere else.<br/><strong>You still dig.</strong></p></section><section><b>4. HOW LONG</b><p>You dig until Boss says stop.<br/><strong>Boss will not say stop.</strong></p></section></div><div className="employee-declaration"><small>EMPLOYEE PROMISE</small><strong>Me dig until end of time.</strong><label>EMPLOYEE NAME<input value={employeeName} maxLength={28} autoComplete="name" onChange={event=>setEmployeeName(event.target.value)} placeholder="Write name here"/></label>{signedName&&<em>SIGNED: {signedName}</em>}</div>{declined&&<p className="declaration-rejected" role="status">DECLARATION REJECTED.</p>}<footer><button className="decline" disabled={declined&&!canSign} onClick={()=>declined?signAgreement():setDeclined(true)}>{declined?"I HAVE RECONSIDERED":"I DECLINE"}</button><button disabled={!canSign} onClick={signAgreement}>ME AGREE</button></footer></article></div>;
-  return <div className="onboarding"><div><img className="onboarding-logo" src="/assets/brand/ore-whore-logo-primary.webp" alt="ORE WHORE — Property of the Department"/><p className="eyebrow">VOLUME I · CLASSIC → TBC → WOTLK</p><h1>DIG. CLANK. CRACK. <i>COLLECT.</i></h1><p>Fifteen ores. Fifteen minerals. 225 reasons not to stop.</p><button onClick={()=>agreementRequired?setPhase("recruitment"):onDone(false,existingName)}>{agreementRequired?"REPORT TO MANAGEMENT":"RETURN TO MINING"} <span>→</span></button><small>{agreementRequired?"One vacancy. No meaningful qualifications required.":"Click the rock or press Space. That is genuinely it."}</small></div></div>;
+  const introCommand="DIG. CLANK. CRACK. COLLECT.",introAccent=introCommand.indexOf("COLLECT.");
+  return <div className="onboarding"><div><img className="onboarding-logo" src="/assets/brand/ore-whore-logo-primary.webp" alt="ORE WHORE — Property of the Department"/><section className="onboarding-brief"><p className="eyebrow">SYSTEM / EMPLOYMENT INTAKE · VOLUME I</p><h1><IntroTypewriter text={introCommand} accentFrom={introAccent}/></h1><p><IntroTypewriter text="Fifteen ores. Fifteen minerals. 225 reasons not to stop." delay={760}/></p><button onClick={()=>agreementRequired?setPhase("recruitment"):onDone(false,existingName)}>{agreementRequired?"REPORT TO MANAGEMENT":"RETURN TO MINING"} <span>→</span></button><small>{agreementRequired?"One vacancy. No meaningful qualifications required.":"Personnel record located. Resume assigned excavation."}</small></section></div></div>;
 }
 
 function PeonDialogue({onContinue}:{onContinue:()=>void}){return <div className="peon-dialogue" role="dialog" aria-modal="true" aria-label="Peon introduction"><section><img src="/assets/characters/peon-avatar.png" alt="Peon"/><div><small>PEON · EMPLOYEE</small><p>Boss say dig.<br/><strong>Me dig.</strong></p><button onClick={onContinue}>BEGIN SHIFT →</button></div></section></div>}

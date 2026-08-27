@@ -1,0 +1,79 @@
+/* Landing intake terminal: intentionally scoped beneath the untouched brand mark. */
+.onboarding-brief {
+  width: min(760px, 92vw);
+  margin: 16px auto 0;
+  color: #d8d0b8;
+  font-family: "Bahnschrift Condensed", "Arial Narrow", "Barlow Condensed", Arial, sans-serif;
+  text-align: center;
+}
+.onboarding-brief .eyebrow {
+  margin: 0 0 16px;
+  color: #a88a4a;
+  font: 650 clamp(12px, 1vw, 14px)/1.4 "Bahnschrift Condensed", "Arial Narrow", Arial, sans-serif;
+  letter-spacing: .065em;
+}
+.onboarding-brief h1 {
+  min-height: 1.25em;
+  margin: 0;
+  color: #ded7c4;
+  font: 650 clamp(27px, 3vw, 38px)/1.2 "Bahnschrift Condensed", "Arial Narrow", "Barlow Condensed", Arial, sans-serif;
+  letter-spacing: .045em;
+  text-wrap: balance;
+}
+.onboarding-brief > p:not(.eyebrow) {
+  min-height: 1.55em;
+  margin: 18px 0 0;
+  color: #d8d0b8;
+  font: 600 clamp(18px, 1.35vw, 20px)/1.55 "Bahnschrift Condensed", "Arial Narrow", "Barlow Condensed", Arial, sans-serif;
+  letter-spacing: .04em;
+}
+.intro-typewriter { position: relative; white-space: pre-wrap; }
+.intro-type-accent { color: #b99a55; }
+.intro-type-pending { visibility: hidden; }
+.intro-typewriter > i {
+  display: inline-block;
+  width: .52em;
+  height: .82em;
+  margin: 0 0 -.05em .12em;
+  background: #a88a4a;
+  opacity: 0;
+  animation: intro-cursor-blink .76s steps(1,end) infinite;
+}
+.intro-typewriter > i.active { opacity: 1; }
+.onboarding-brief > button {
+  min-width: 292px;
+  margin: 30px auto 0;
+  padding: 16px 25px;
+  color: #ded7c4;
+  background: linear-gradient(180deg, rgba(71,57,30,.7), rgba(25,22,16,.92));
+  border: 1px solid #806b3d;
+  box-shadow: inset 0 1px rgba(222,205,157,.13), 0 8px 26px #0007;
+  font: 700 15px/1 "Bahnschrift Condensed", "Arial Narrow", Arial, sans-serif;
+  letter-spacing: .07em;
+}
+.onboarding-brief > button:hover,
+.onboarding-brief > button:focus-visible {
+  color: #f0e7ce;
+  border-color: #b39552;
+  background: linear-gradient(180deg, rgba(92,73,36,.82), rgba(34,28,18,.96));
+  transform: translateY(-1px);
+}
+.onboarding-brief > button:focus-visible { outline: 2px solid #c0a35e; outline-offset: 4px; }
+.onboarding-brief > button span { color: #b99a55; }
+.onboarding-brief > small {
+  display: block;
+  margin-top: 16px;
+  color: #8e8878;
+  font: 600 13px/1.45 "Bahnschrift Condensed", "Arial Narrow", Arial, sans-serif;
+  letter-spacing: .055em;
+}
+@keyframes intro-cursor-blink { 0%,48% { opacity:1 } 49%,100% { opacity:0 } }
+@media (max-width: 640px) {
+  .onboarding-brief { margin-top: 10px; }
+  .onboarding-brief h1 { font-size: clamp(24px, 8vw, 31px); }
+  .onboarding-brief > p:not(.eyebrow) { font-size: 17px; }
+  .onboarding-brief > button { min-width: min(292px, 86vw); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro-typewriter > i { animation: none; }
+}
