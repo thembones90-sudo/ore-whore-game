@@ -1052,10 +1052,12 @@ type AvatarDialogueLine={speaker:AvatarDialogueSpeaker;text:string;pauseMs?:numb
 function AvatarDialogue({lines,onComplete,onLineChange,ariaLabel="Employment dialogue"}:{lines:AvatarDialogueLine[];onComplete:()=>void;onLineChange?:(line:AvatarDialogueLine,index:number)=>void;ariaLabel?:string}){
   const [index,setIndex]=useState(0),[ready,setReady]=useState(true);
   const line=lines[index];
+  const copyLength=line.text.replace(/\s+/g," ").trim().length;
+  const copyDensity=copyLength>86?"dialogue-copy-dense":copyLength>48?"dialogue-copy-long":"dialogue-copy-short";
   useEffect(()=>{if(ready||!line.pauseMs)return;const timer=window.setTimeout(()=>setReady(true),line.pauseMs);return()=>window.clearTimeout(timer)},[ready,line.pauseMs]);
   const advance=()=>{if(!ready)return;if(index>=lines.length-1){onComplete();return}const next=index+1;setIndex(next);onLineChange?.(lines[next],next);if(lines[next].pauseMs)setReady(false)};
   useEffect(()=>{const keydown=(event:KeyboardEvent)=>{if(event.code!=="Space"||event.repeat)return;event.preventDefault();advance()};window.addEventListener("keydown",keydown);return()=>window.removeEventListener("keydown",keydown)});
-  return <div className={`avatar-dialogue speaker-${line.speaker.toLowerCase()}`} role="dialog" aria-modal="true" aria-label={ariaLabel}>
+  return <div className={`avatar-dialogue speaker-${line.speaker.toLowerCase()} ${copyDensity}`} role="dialog" aria-modal="true" aria-label={ariaLabel}>
     <div className={`dialogue-avatar peon ${line.speaker==="PEON"?"active":"inactive"}`}><img src="/assets/characters/peon-avatar.png" alt="Peon"/><small>PEON</small></div>
     <button className="dialogue-cloud" type="button" onClick={advance} aria-label={ready?"Continue dialogue":"Dialogue pause"}><small>{line.speaker==="PEON"?"PEON · EMPLOYEE":"FOREMAN SHADEZ"}</small><p>{line.text}</p><span>{ready?"CLICK · TAP · SPACE":"…"}</span></button>
     <div className={`dialogue-avatar shadez ${line.speaker==="SHADEZ"?"active":"inactive"}`}><ShadezAvatar/><small>SHADEZ</small></div>
