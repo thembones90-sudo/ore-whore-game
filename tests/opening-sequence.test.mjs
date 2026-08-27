@@ -15,7 +15,7 @@ test("fresh saves require the employment agreement while migrated saves are not 
 
 test("employment agreement contains the canonical declaration and refusal joke",()=>{
   assert.match(game,/INDEFINITE EXCAVATION AGREEMENT/);
-  assert.match(game,/I hereby confirm that I wish to dig mindlessly until the end of time\./);
+  assert.match(game,/EMPLOYEE PROMISE<\/small><strong>Me dig until end of time\.<\/strong>/);
   assert.match(game,/DECLARATION REJECTED\./);
   assert.match(game,/I HAVE RECONSIDERED/);
 });
@@ -27,7 +27,7 @@ test("canonical Peon portrait and first line are wired",()=>{
 });
 
 test("contract callbacks cover reassignment, forbidden tunnels, indefinite excavation and termination",()=>{
-  assert.match(game,/Pursuant to Section 4, deeper excavation duties are now authorized\./);
+  assert.match(game,/Deeper excavation duties are now authorized\./);
   assert.match(game,/Fortunately, you waived this objection\./);
   assert.match(game,/Your employment agreement remains in effect\./);
   assert.match(game,/EMPLOYMENT STATUS<br\/><strong>TERMINATED<\/strong>/);
