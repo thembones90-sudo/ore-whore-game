@@ -35,3 +35,11 @@ test("dialogue uses a character-by-character military transmission reveal",()=>{
   assert.match(css,/font-family:"Courier New",Consolas,monospace/);
   assert.match(css,/line-height:1\.55/);
 });
+
+test("dialogue uses restrained ornamental corners without an instruction prompt",()=>{
+  assert.doesNotMatch(page,/CLICK · TAP · SPACE/);
+  assert.doesNotMatch(page,/RECEIVING…/);
+  assert.match(css,/\.dialogue-onboarding \.dialogue-cloud\{[\s\S]*?border:0;/);
+  assert.match(css,/\.dialogue-onboarding \.dialogue-cloud:after\{[\s\S]*?linear-gradient\(90deg,var\(--dialogue-frame\)/);
+  assert.match(css,/\.dialogue-onboarding \.dialogue-cloud \.dialogue-copy-revealed,[\s\S]*?padding:0;[\s\S]*?border:0;/);
+});
