@@ -14,6 +14,9 @@ import { activeBerserkMode, activateBerserk, berserkMode, berserkRemainingMs, BE
 import { CREDITS, LAST_FIND_PAGES, type CompletionRecord } from "./endgame";
 
 type Rarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Mythic";
+type AchievementTier = "steel" | "gold" | "silver";
+type AchievementDefinition = { id:string; name:string; text:string; tier:AchievementTier; icon:string };
+type ToastData = { name:string; text:string; tier?:AchievementTier; icon?:string; label?:string };
 type Item = { id: string; name: string; rarity: Rarity; weight: number; color: string; note: string; toughness?: number };
 type Biome = "old" | "deep" | "outland" | "northrend" | "ghost";
 type Settings = { master:number;musicVolume:number;sfx:number;musicEnabled:boolean;pickaxeSfxEnabled:boolean;reducedShake:boolean;reducedMotion:boolean;vibration:boolean;highContrast:boolean;helpSeen:boolean };
@@ -63,23 +66,23 @@ const minerals: Item[] = [
   { id: "arcane", name: "Arcane Crystal", rarity: "Mythic", weight: .2, color: "#ff75df", note: "A geological clerical error." },
 ];
 
-const achievements = [
-  { id: "first", name: "FIRST VEIN", text: "Discover your first ore." },
-  { id: "prospector", name: "PROSPECTOR", text: "Discover 5 ore types." },
-  { id: "master", name: "MASTER PROSPECTOR", text: "Discover all 15 ore types." },
-  { id: "mineralogist", name: "MINERALOGIST", text: "Discover 10 minerals." },
-  { id: "fullset", name: "FULL SET", text: "Discover all 15 minerals." },
-  { id: "again", name: "THIS SHIT AGAIN?", text: "Mine your first Dark Iron Ore." },
-  { id: "seriously", name: "SERIOUSLY?", text: "Mine 25 Dark Iron Ore." },
-  { id: "brd", name: "I'M NOT GOING BACK TO BRD", text: "Mine 100 Dark Iron Ore." },
-  { id: "darkwhore", name: "DARK IRON WHORE", text: "Complete the Dark Iron page. You did this to yourself." },
-  { id: "problem", name: "I HAVE A PROBLEM", text: "Complete 25 digs." },
-  { id: "vein", name: "FULL VEIN", text: "Complete all minerals for one ore." },
-  { id: "unhinged", name: "GEOLOGICALLY UNHINGED", text: "Find a Mythic mineral." },
-  { id: "half", name: "HALF THE MOUNTAIN", text: "Complete half of Volume I." },
-  { id: "thousand", name: "ONE IN A THOUSAND", text: "Find a combination rarer than 1 in 1,000." },
-  { id: "titanium", name: "TITANIUM FINALLY", text: "Discover Titanium Ore." },
-  { id: "orewhore", name: "THE ORE WHORE", text: "Complete all 225 combinations." },
+const achievements:AchievementDefinition[] = [
+  { id:"first", name:"FIRST VEIN", text:"Discover your first ore.", tier:"steel", icon:"⛏" },
+  { id:"prospector", name:"PROSPECTOR", text:"Discover 5 ore types.", tier:"steel", icon:"◆" },
+  { id:"master", name:"MASTER PROSPECTOR", text:"Discover all 15 ore types.", tier:"gold", icon:"✦" },
+  { id:"mineralogist", name:"MINERALOGIST", text:"Discover 10 minerals.", tier:"steel", icon:"⬢" },
+  { id:"fullset", name:"FULL SET", text:"Discover all 15 minerals.", tier:"gold", icon:"✥" },
+  { id:"again", name:"THIS SHIT AGAIN?", text:"Mine your first Dark Iron Ore.", tier:"steel", icon:"◈" },
+  { id:"seriously", name:"SERIOUSLY?", text:"Mine 25 Dark Iron Ore.", tier:"gold", icon:"⚒" },
+  { id:"brd", name:"I'M NOT GOING BACK TO BRD", text:"Mine 100 Dark Iron Ore.", tier:"silver", icon:"☠" },
+  { id:"darkwhore", name:"DARK IRON WHORE", text:"Complete the Dark Iron page. You did this to yourself.", tier:"silver", icon:"♠" },
+  { id:"problem", name:"I HAVE A PROBLEM", text:"Complete 25 digs.", tier:"steel", icon:"↯" },
+  { id:"vein", name:"FULL VEIN", text:"Complete all minerals for one ore.", tier:"gold", icon:"✣" },
+  { id:"unhinged", name:"GEOLOGICALLY UNHINGED", text:"Find a Mythic mineral.", tier:"silver", icon:"✧" },
+  { id:"half", name:"HALF THE MOUNTAIN", text:"Complete half of Volume I.", tier:"gold", icon:"◐" },
+  { id:"thousand", name:"ONE IN A THOUSAND", text:"Find a combination rarer than 1 in 1,000.", tier:"silver", icon:"✶" },
+  { id:"titanium", name:"TITANIUM FINALLY", text:"Discover Titanium Ore.", tier:"gold", icon:"❄" },
+  { id:"orewhore", name:"THE ORE WHORE", text:"Complete all 225 combinations.", tier:"silver", icon:"♛" },
 ];
 
 const defaultSettings:Settings={master:.7,musicVolume:.65,sfx:.8,musicEnabled:true,pickaxeSfxEnabled:true,reducedShake:false,reducedMotion:false,vibration:true,highContrast:false,helpSeen:false};
@@ -309,6 +312,17 @@ function CommentaryHeadline({text,accentFirst}:{text:string;accentFirst:boolean}
   return <>{words.map((word,index)=><span key={`${word}-${index}`}>{index>0?" ":null}{index===accentIndex?<i>{word}</i>:word}</span>)}</>;
 }
 
+function AchievementToast({toast,onDismiss}:{toast:ToastData;onDismiss:()=>void}){
+  const tier=toast.tier||"steel";
+  const label=toast.label||(toast.name.includes("MINE UNLOCKED")?"NEW MINE UNLOCKED":toast.tier?"ACHIEVEMENT UNLOCKED":"SYSTEM NOTICE");
+  return <div className={`achievement achievement-${tier}`} role="button" tabIndex={0} aria-label={`${label}: ${toast.name}. ${toast.text}`} onClick={onDismiss} onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();onDismiss()}}}>
+    <i className="achievement-glint" aria-hidden="true"/>
+    <div className="achievement-medallion" aria-hidden="true"><span>{toast.icon||"◆"}</span></div>
+    <div className="achievement-copy"><span>{label}</span><strong>{toast.name}</strong><p>{toast.text}</p></div>
+    <b className="achievement-dismiss" aria-hidden="true">×</b>
+  </div>;
+}
+
 export default function Home() {
   const [save, setSave] = useState<Save>(blank);
   const [loaded, setLoaded] = useState(false);
@@ -332,7 +346,7 @@ export default function Home() {
   const [ghostEntry,setGhostEntry]=useState(false);
   const [pendingTrue,setPendingTrue]=useState<{artifact:TrueArtifact;trigger:"empty"|"ore"}|null>(null);
   const [duplicateNotice,setDuplicateNotice]=useState<{id:number;ore:Item;mineral:Item;count:number;dust:number}|null>(null);
-  const [toast, setToast] = useState<{ name: string; text: string } | null>(null);
+  const [toast, setToast] = useState<ToastData | null>(null);
   const [savePulse,setSavePulse]=useState(false);
   const [milestone, setMilestone] = useState<{ore:Item;level:number;missing?:Item;attempts:number} | null>(null);
   const [mineCompletion,setMineCompletion]=useState<{completed:Biome;next?:Biome}|null>(null);
@@ -353,6 +367,7 @@ export default function Home() {
   const previousBiome=useRef<Biome>("old");
   const seed = typeof window !== "undefined" ? Number(new URLSearchParams(location.search).get("seed")) : 0;
   const rng = useState<{current:()=>number}>(() => ({current: makeRng(seed || Date.now())}))[0];
+  useEffect(()=>{if(!toast)return;const duration=toast.tier==="silver"?7600:toast.tier==="gold"?6500:5200;const dismiss=window.setTimeout(()=>setToast(null),duration);if(toast.tier&&save.settings.pickaxeSfxEnabled){const soundIndex=toast.tier==="silver"?5:toast.tier==="gold"?3:1;const clank=new Audio(PICKAXE_HIT_SOUNDS[soundIndex]);clank.volume=Math.min(1,save.settings.master*save.settings.sfx*(toast.tier==="silver"?1:.72));void clank.play().catch(()=>{})}return()=>window.clearTimeout(dismiss)},[toast]);
   const rollMineCommentary=(pool:MineCommentary[])=>setMineCommentary(selectMineCommentary(pool,commentaryHistory.current,rng.current));
   // Perfect Strike phase reference — a fixed continuous metronome so the
   // timing window is learnable, not randomized per-strike. Lazy useState
@@ -800,7 +815,7 @@ export default function Home() {
     {onboarding&&<Onboarding agreementRequired={!save.employmentAgreementSigned} existingName={save.playerName} onDone={(signed,playerName)=>{setOnboarding(false);setSave(s=>({...s,playerName:playerName?.trim().slice(0,28)||s.playerName||"PEON",employmentAgreementSigned:s.employmentAgreementSigned||signed,settings:{...s.settings,helpSeen:true}}));if(signed&&!save.employmentGreetingSeen)window.setTimeout(()=>setFirstPeonMoment(true),450);track("mine_started",{attempt:save.digs+1,biome:save.biome,employment_agreement:signed})}}/>}
     {firstPeonMoment&&<PeonDialogue onContinue={()=>{setFirstPeonMoment(false);setSave(s=>({...s,employmentGreetingSeen:true}))}}/>}
     {mineCompletion&&<MineCompletion data={mineCompletion} digs={save.digs} playerName={save.playerName} onContinue={()=>{if(mineCompletion.next)setSave(s=>({...s,biome:mineCompletion.next!}));setMineCompletion(null);setTab("mine");continueMine();}}/>}
-    {toast && <div className="achievement" role="button" tabIndex={0} onClick={() => setToast(null)} onKeyDown={(e)=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setToast(null)}}}><span>{toast.name.includes("MINE UNLOCKED")?"NEW MINE UNLOCKED":"ACHIEVEMENT UNLOCKED"}</span><strong>{toast.name}</strong><p>{toast.text}</p></div>}
+    {toast&&<AchievementToast toast={toast} onDismiss={()=>setToast(null)}/>}
     {savePulse&&<div className="local-save-pulse" role="status" aria-live="polite"><i>✓</i><span>PROGRESS SAVED LOCALLY</span></div>}
   </main>;
 }
@@ -1045,7 +1060,7 @@ function Records({ save, onReset, session }: { save: Save; onReset: () => void; 
   const leastOre=Object.entries(save.ores).filter(x=>x[1]>0).sort((a,b)=>a[1]-b[1])[0];
   return <section className="page records-page"><div className="page-head"><div><p className="eyebrow">VOLUME I · HARD EVIDENCE OF POOR PRIORITIES</p><h2>YOUR <i>RECORDS</i></h2></div></div><div className="employee-record"><span>EMPLOYEE <b>{save.playerName}</b></span><span>POSITION <b>MINER</b></span><span>EMPLOYMENT STATUS <b>ACTIVE</b></span></div>
     <div className="today-summary"><span>TODAY</span><strong>{session.digs} DIGS · {session.newSpecimens} NEW · {session.veins} VEIN{session.veins===1?"":"S"} · {session.misses} MISS{session.misses===1?"":"ES"} · LONGEST DROUGHT {session.longestDrought}{session.drought>0?` · CURRENT DROUGHT ${session.drought}`:""}</strong></div>
-    <div className="record-grid"><article><span>TOTAL STRIKES</span><strong>{save.strikes}</strong><p>{save.distance.toFixed(1)}m of entirely necessary depth.</p></article><article><span>DEPOSITS / UNIQUE</span><strong>{save.digs} / {Object.keys(save.combos).length}</strong><p>{(Object.keys(save.combos).length/225*100).toFixed(1)}% of Volume I.</p></article><article><span>DUPLICATES / WORST DROUGHT</span><strong>{dupes} / {save.longestStreak}</strong><p>Character-building, allegedly.</p></article><article><span>TOTAL ROCKS ASSAULTED</span><strong>{save.strikes.toLocaleString()}</strong><p>{save.misses} whiffed entirely. Geology remembers.</p></article><article><span>TOTAL DARK IRON SUFFERED</span><strong>{save.ores.dark||0}</strong><p>Dignity already left.</p></article><article><span>TITANIUM MINED</span><strong>{save.ores.titanium||0}</strong><p>Try to act normal.</p></article><article><span>COMPLETED PAGES</span><strong>{complete} / 15</strong><p>Actual evidence of progress.</p></article><article><span>DUST EARNED / SPENT</span><strong>{save.dustEarned} / {save.dustSpent}</strong><p>Duplicates, ground into fashion.</p></article><article><span>MOST DUPLICATED</span><strong>{most?most[1]:0}×</strong><p>{most?most[0].replace("-"," + "):"Nothing yet"}</p></article><article><span>MOST MINED ORE</span><strong>{mostOre?mostOre[1]:0}×</strong><p>{mostOre?ores.find(o=>o.id===mostOre[0])?.name:"Nothing yet"}</p></article><article><span>LEAST MINED DISCOVERED ORE</span><strong>{leastOre?leastOre[1]:0}×</strong><p>{leastOre?ores.find(o=>o.id===leastOre[0])?.name:"Nothing yet"}</p></article></div><h3 className="ach-title">ACHIEVEMENTS <span>{save.achievements.length}/{achievements.length}</span></h3><div className="ach-list">{achievements.map(a=><article className={save.achievements.includes(a.id)?"earned":""} key={a.id}><span>◆</span><div><strong>{save.achievements.includes(a.id)?a.name:"LOCKED"}</strong><p>{a.text}</p></div></article>)}</div><button className="reset" onClick={onReset}>ERASE SAVE DATA</button></section>;
+    <div className="record-grid"><article><span>TOTAL STRIKES</span><strong>{save.strikes}</strong><p>{save.distance.toFixed(1)}m of entirely necessary depth.</p></article><article><span>DEPOSITS / UNIQUE</span><strong>{save.digs} / {Object.keys(save.combos).length}</strong><p>{(Object.keys(save.combos).length/225*100).toFixed(1)}% of Volume I.</p></article><article><span>DUPLICATES / WORST DROUGHT</span><strong>{dupes} / {save.longestStreak}</strong><p>Character-building, allegedly.</p></article><article><span>TOTAL ROCKS ASSAULTED</span><strong>{save.strikes.toLocaleString()}</strong><p>{save.misses} whiffed entirely. Geology remembers.</p></article><article><span>TOTAL DARK IRON SUFFERED</span><strong>{save.ores.dark||0}</strong><p>Dignity already left.</p></article><article><span>TITANIUM MINED</span><strong>{save.ores.titanium||0}</strong><p>Try to act normal.</p></article><article><span>COMPLETED PAGES</span><strong>{complete} / 15</strong><p>Actual evidence of progress.</p></article><article><span>DUST EARNED / SPENT</span><strong>{save.dustEarned} / {save.dustSpent}</strong><p>Duplicates, ground into fashion.</p></article><article><span>MOST DUPLICATED</span><strong>{most?most[1]:0}×</strong><p>{most?most[0].replace("-"," + "):"Nothing yet"}</p></article><article><span>MOST MINED ORE</span><strong>{mostOre?mostOre[1]:0}×</strong><p>{mostOre?ores.find(o=>o.id===mostOre[0])?.name:"Nothing yet"}</p></article><article><span>LEAST MINED DISCOVERED ORE</span><strong>{leastOre?leastOre[1]:0}×</strong><p>{leastOre?ores.find(o=>o.id===leastOre[0])?.name:"Nothing yet"}</p></article></div><h3 className="ach-title">ACHIEVEMENTS <span>{save.achievements.length}/{achievements.length}</span></h3><div className="ach-list">{achievements.map(a=><article className={`${save.achievements.includes(a.id)?"earned":""} achievement-record-${a.tier}`} key={a.id}><span>{save.achievements.includes(a.id)?a.icon:"?"}</span><div><strong>{save.achievements.includes(a.id)?a.name:"LOCKED"}</strong><p>{a.text}</p></div></article>)}</div><button className="reset" onClick={onReset}>ERASE SAVE DATA</button></section>;
 }
 type AvatarDialogueSpeaker="PEON"|"SHADEZ";
 type AvatarDialogueLine={speaker:AvatarDialogueSpeaker;text:string;pauseMs?:number};

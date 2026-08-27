@@ -1,0 +1,133 @@
+/* v1.03 — physical achievement frames. Tier is presentation metadata only. */
+.achievement {
+  --metal: #87908e;
+  --metal-dark: #303735;
+  --metal-light: #c3cbc7;
+  --recess: #111513;
+  --accent: #aab4af;
+  position: fixed;
+  z-index: 130;
+  right: clamp(16px, 3vw, 48px);
+  bottom: clamp(18px, 4vh, 52px);
+  width: min(560px, calc(100vw - 32px));
+  min-height: 148px;
+  padding: 25px 54px 24px 154px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  cursor: pointer;
+  isolation: isolate;
+  overflow: hidden;
+  color: #eeeae0;
+  border: 1px solid var(--metal);
+  border-radius: 8px 20px 8px 20px;
+  background:
+    linear-gradient(100deg, rgba(255,255,255,.035), transparent 32%),
+    repeating-linear-gradient(116deg, transparent 0 22px, rgba(255,255,255,.018) 23px, transparent 25px),
+    linear-gradient(180deg, #181d1a 0%, var(--recess) 52%, #0b0e0c 100%);
+  box-shadow: 0 18px 50px #000c, inset 0 0 0 4px #070908, inset 0 0 0 6px var(--metal-dark), inset 0 1px 0 var(--metal-light);
+  animation: achievement-clank .42s cubic-bezier(.16,.84,.28,1.2) both, achievement-retract .42s ease-in 4.78s forwards;
+}
+.achievement::before,
+.achievement::after { content: ""; position: absolute; z-index: -1; pointer-events: none; }
+.achievement::before {
+  inset: 8px;
+  border: 1px solid color-mix(in srgb, var(--metal), transparent 45%);
+  border-radius: 4px 15px 4px 15px;
+  clip-path: polygon(0 0,40% 0,44% 5px,56% 5px,60% 0,100% 0,100% 100%,62% 100%,58% calc(100% - 5px),42% calc(100% - 5px),38% 100%,0 100%);
+}
+.achievement::after {
+  left: 117px;
+  top: 18px;
+  bottom: 18px;
+  width: 2px;
+  background: linear-gradient(transparent, var(--metal), transparent);
+  box-shadow: 4px 0 0 #0008;
+}
+.achievement-medallion {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  width: 112px;
+  height: 112px;
+  transform: translateY(-50%) scale(.76);
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--metal-light);
+  background: radial-gradient(circle at 38% 32%, #29302d 0 10%, #111513 38%, #050706 70%);
+  border: 5px solid var(--metal-dark);
+  box-shadow: 0 0 0 2px var(--metal), 0 0 0 7px #0a0c0b, 0 0 0 8px var(--metal), inset 0 0 18px #000, 0 6px 14px #000b;
+  animation: achievement-medallion .55s .14s cubic-bezier(.15,.88,.2,1.2) forwards;
+}
+.achievement-medallion::before,
+.achievement-medallion::after {
+  content: "";
+  position: absolute;
+  inset: -15px;
+  border: 2px solid var(--metal);
+  border-radius: 50%;
+  clip-path: polygon(0 36%,18% 36%,18% 0,82% 0,82% 36%,100% 36%,100% 64%,82% 64%,82% 100%,18% 100%,18% 64%,0 64%);
+}
+.achievement-medallion::after { inset: 9px; border-width: 1px; opacity: .55; clip-path: none; }
+.achievement-medallion span { font: 800 43px/1 Georgia, serif; text-shadow: 0 2px 0 #000, 0 0 12px color-mix(in srgb, var(--metal-light), transparent 55%); }
+.achievement-copy { min-width: 0; opacity: 0; transform: translateX(12px); animation: achievement-copy .36s .24s ease-out forwards; }
+.achievement-copy > span { display: block; margin-bottom: 7px; color: var(--accent); font: 800 11px/1.2 Arial,sans-serif; letter-spacing: .28em; text-transform: uppercase; }
+.achievement-copy > strong { display: block; max-width: 100%; color: #f2eee5; font: 900 clamp(23px,3vw,34px)/.98 Arial,sans-serif; letter-spacing: -.035em; text-wrap: balance; overflow-wrap: anywhere; }
+.achievement-copy > p { margin: 9px 0 0; max-width: 36ch; color: #a9aaa4; font: italic 16px/1.35 Georgia,serif; }
+.achievement-dismiss { position: absolute; right: 18px; top: 13px; color: var(--metal); font: 400 18px/1 Arial,sans-serif; opacity: .58; }
+.achievement-glint { position: absolute; z-index: 4; top: -40%; bottom: -40%; left: -45%; width: 24%; pointer-events: none; transform: skewX(-18deg); background: linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent); animation: achievement-glint .72s .62s ease-out both; }
+.achievement:hover { filter: brightness(1.08); }
+.achievement:focus-visible { outline: 2px solid var(--metal-light); outline-offset: 5px; }
+
+.achievement-gold {
+  --metal: #a8792e;
+  --metal-dark: #4e3518;
+  --metal-light: #efd18b;
+  --recess: #181208;
+  --accent: #cfa64f;
+  box-shadow: 0 18px 54px #000d, 0 0 24px #9a6b1524, inset 0 0 0 4px #090704, inset 0 0 0 6px var(--metal-dark), inset 0 1px 0 var(--metal-light);
+  animation: achievement-clank .48s cubic-bezier(.16,.84,.28,1.2) both, achievement-retract .46s ease-in 6.04s forwards;
+}
+.achievement-gold .achievement-medallion { background: radial-gradient(circle at 38% 32%,#503919 0 10%,#1b140a 40%,#080603 72%); }
+.achievement-silver {
+  --metal: #adb9be;
+  --metal-dark: #3d474b;
+  --metal-light: #edf7f8;
+  --recess: #0d1113;
+  --accent: #cad9dd;
+  border-radius: 24px 8px 24px 8px;
+  box-shadow: 0 22px 62px #000e,0 0 28px #cceaf025,inset 0 0 0 4px #050708,inset 0 0 0 7px var(--metal-dark),inset 0 1px 0 #fff;
+  animation: achievement-clank-silver .58s cubic-bezier(.12,.86,.23,1.16) both, achievement-retract .5s ease-in 7.1s forwards;
+}
+.achievement-silver::before { inset: 7px; border-width: 2px; }
+.achievement-silver .achievement-medallion { width: 118px; height: 118px; background: radial-gradient(circle at 38% 30%,#445158 0 9%,#141a1d 38%,#050708 72%); box-shadow: 0 0 0 2px var(--metal-light),0 0 0 8px #080b0d,0 0 0 10px var(--metal),inset 0 0 22px #000,0 6px 18px #000c; }
+.achievement-silver .achievement-copy > strong { text-shadow: 0 0 14px #d9f5ff20; }
+
+.ach-list article > span { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; font-family: Georgia,serif; background: #121512; border: 1px solid #3f4743; color: #737b77; }
+.ach-list article.earned.achievement-record-steel > span { border-color: #7e8985; color: #bdc7c2; box-shadow: inset 0 0 0 3px #202622; }
+.ach-list article.earned.achievement-record-gold > span { border-color: #a8792e; color: #e5c36f; box-shadow: inset 0 0 0 3px #322511; }
+.ach-list article.earned.achievement-record-silver > span { border-color: #bdc9cd; color: #f1fafb; box-shadow: 0 0 12px #dff7ff22,inset 0 0 0 3px #283035; }
+
+@keyframes achievement-clank { 0% { opacity:0; transform:translateX(120%) rotate(.7deg) } 64% { opacity:1; transform:translateX(-8px) rotate(-.25deg) } 82% { transform:translateX(3px) } 100% { opacity:1; transform:none } }
+@keyframes achievement-clank-silver { 0% { opacity:0; transform:translateX(120%) scale(.96) } 58% { opacity:1; transform:translateX(-13px) scale(1.015) } 78% { transform:translateX(4px) scale(.997) } 100% { opacity:1; transform:none } }
+@keyframes achievement-medallion { to { transform:translateY(-50%) scale(1) } }
+@keyframes achievement-copy { to { opacity:1; transform:none } }
+@keyframes achievement-glint { 0% { left:-45%; opacity:0 } 15% { opacity:1 } 100% { left:130%; opacity:0 } }
+@keyframes achievement-retract { to { opacity:0; transform:translateX(115%) scale(.98) } }
+
+@media (max-width:640px) {
+  .achievement { right:12px; bottom:12px; width:calc(100vw - 24px); min-height:126px; padding:20px 42px 19px 119px; }
+  .achievement::after { left:92px; }
+  .achievement-medallion { left:14px; width:82px; height:82px; }
+  .achievement-silver .achievement-medallion { width:88px; height:88px; }
+  .achievement-medallion span { font-size:32px; }
+  .achievement-copy > strong { font-size:22px; }
+  .achievement-copy > p { font-size:14px; }
+  .achievement-copy > span { font-size:9px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .achievement,.achievement-medallion,.achievement-copy,.achievement-glint { animation:none!important; }
+  .achievement-medallion { transform:translateY(-50%); }
+  .achievement-copy { opacity:1; transform:none; }
+}
