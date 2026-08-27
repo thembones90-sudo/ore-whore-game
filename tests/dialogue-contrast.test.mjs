@@ -14,7 +14,7 @@ test("dialogue contrast layer loads after legacy onboarding styles",()=>{
 test("both speakers receive explicit readable dialogue colors",()=>{
   assert.match(css,/--dialogue-peon:#9fca38/);
   assert.match(css,/--dialogue-shadez:#8f1725/);
-  assert.match(css,/speaker-shadez \.dialogue-cloud small\s*\{\s*color:var\(--dialogue-shadez-hot\)/);
+  assert.match(css,/\.dialogue-onboarding \.speaker-shadez \.dialogue-cloud small\s*\{\s*color:var\(--dialogue-shadez-hot\)/);
   assert.match(css,/\.dialogue-onboarding \.dialogue-cloud small\s*\{[\s\S]*?color:var\(--dialogue-peon-hot\)/);
 });
 
@@ -22,4 +22,12 @@ test("dialogue copy is contained and scales by line density",()=>{
   assert.match(page,/copyDensity=copyLength>86\?"dialogue-copy-dense":copyLength>48\?"dialogue-copy-long":"dialogue-copy-short"/);
   assert.match(css,/overflow-wrap:anywhere/);
   assert.match(css,/\.dialogue-onboarding \.dialogue-copy-dense \.dialogue-cloud p/);
+});
+
+test("dialogue uses a staged military transmission reveal",()=>{
+  assert.match(page,/revealedWords/);
+  assert.match(page,/TRANSMISSION \/\/ /);
+  assert.match(page,/dialogue-word/);
+  assert.match(css,/@keyframes dialogue-word-decode/);
+  assert.match(css,/font-size:clamp\(24px,2\.45vw,38px\)/);
 });
