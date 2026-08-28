@@ -3,6 +3,9 @@ import assert from "node:assert/strict";
 import {
   EMPTY_MEMORY_STATE,
   EMPTY_TUNNEL_HISTORY,
+  MEMORY_COMMENTARY_DIG_GAP,
+  MEMORY_COMMENTARY_ROLL_CHANCE,
+  MEMORY_COMMENTARY_TIME_GAP_MS,
   sanitizeMemoryState,
   sanitizeTunnelHistory,
   selectSaveAwareCommentary,
@@ -23,9 +26,12 @@ test("high-priority personal history is selected and persisted once",()=>{
 });
 
 test("global dig cooldown and rarity gate prevent commentary spam",()=>{
-  const state={seen:{},lastShownAtDig:580,lastShownAt:1};
-  assert.equal(selectSaveAwareCommentary(context({ores:{copper:500}}),state,{event:"dig",random:0}),null);
-  assert.equal(selectSaveAwareCommentary(context({digs:700,ores:{copper:500}}),EMPTY_MEMORY_STATE,{event:"dig",random:.9}),null);
+  const now=500_000;
+  const state={seen:{},lastShownAtDig:600-MEMORY_COMMENTARY_DIG_GAP+1,lastShownAt:now-MEMORY_COMMENTARY_TIME_GAP_MS-1};
+  assert.equal(selectSaveAwareCommentary(context({ores:{copper:500}}),state,{event:"dig",random:0,now}),null);
+  const recent={seen:{},lastShownAtDig:600-MEMORY_COMMENTARY_DIG_GAP,lastShownAt:now-MEMORY_COMMENTARY_TIME_GAP_MS+1};
+  assert.equal(selectSaveAwareCommentary(context({ores:{copper:500}}),recent,{event:"dig",random:0,now}),null);
+  assert.equal(selectSaveAwareCommentary(context({digs:700,ores:{copper:500}}),EMPTY_MEMORY_STATE,{event:"dig",random:MEMORY_COMMENTARY_ROLL_CHANCE+.01,now}),null);
 });
 
 test("repeated tunnel behavior is recognized without exposing counts",()=>{

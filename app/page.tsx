@@ -365,6 +365,9 @@ export default function Home() {
   const [berserkOpen,setBerserkOpen]=useState(false);
   const [perfectReady,setPerfectReady]=useState(false);
   const [lastHitKind,setLastHitKind]=useState<"normal"|"perfect"|"crit"|"perfectCrit"|"miss"|null>(null);
+  const [specialHitNotice,setSpecialHitNotice]=useState<"vein"|"artifact"|null>(null);
+  const specialHitTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
+  useEffect(()=>{if(stage!=="artifact")return;if(specialHitTimer.current)clearTimeout(specialHitTimer.current);setSpecialHitNotice("artifact");specialHitTimer.current=setTimeout(()=>setSpecialHitNotice(null),1650);return()=>{if(specialHitTimer.current)clearTimeout(specialHitTimer.current)}},[stage]);
   const [tunnelInputPhase,setTunnelInputPhase]=useState<"mining"|"discovery"|"select">("mining");
   const previousBiome=useRef<Biome>("old");
   const seed = typeof window !== "undefined" ? Number(new URLSearchParams(location.search).get("seed")) : 0;
@@ -674,7 +677,7 @@ export default function Home() {
       const veinDigsRemaining=Math.max(0,s.veinDigsRemaining-1),veinExpiredOld=s.veinDigsRemaining>0&&veinDigsRemaining===0;
       const veinTriggered=veinRoll;
       if(veinExpiredOld&&!veinTriggered)emitGameplayEvent("VEIN_EXPIRED",{ore:s.veinOre});
-      if(veinTriggered){setSessionVeins(v=>v+1);emitGameplayEvent("VEIN_EXPOSED",{ore:ore.id});}
+      if(veinTriggered){setSessionVeins(v=>v+1);setSpecialHitNotice("vein");if(specialHitTimer.current)clearTimeout(specialHitTimer.current);specialHitTimer.current=setTimeout(()=>setSpecialHitNotice(null),1650);emitGameplayEvent("VEIN_EXPOSED",{ore:ore.id});}
       const milestoneDigs=(after===14&&s.milestoneDigs[ore.id]===undefined)?{...s.milestoneDigs,[ore.id]:s.digs+1}:s.milestoneDigs;
       const next: Save = { ...s, digs: s.digs + 1, dust:s.dust+dustGain,dustEarned:s.dustEarned+dustGain, combos: { ...s.combos, [key]: (s.combos[key] || 0) + 1 }, ores: { ...s.ores, [ore.id]: (s.ores[ore.id] || 0) + 1 }, oreResources:{...s.oreResources,[ore.id]:(s.oreResources[ore.id]||0)+1}, minerals: { ...s.minerals, [mineral.id]: (s.minerals[mineral.id] || 0) + 1 }, mineralResources:{...s.mineralResources,[mineral.id]:(s.mineralResources[mineral.id]||0)+1}, first: isNew ? { ...s.first, [key]: s.digs + 1 } : s.first, streak:newStreak,longestStreak:Math.max(s.longestStreak,newStreak),newStreak:newDiscoveryStreak,longestNewStreak:Math.max(s.longestNewStreak,newDiscoveryStreak), lastDigAt:Date.now(),huntTarget:targetHit?null:s.huntTarget,longestHunt:targetHit?Math.max(s.longestHunt,s.digs+1-s.huntStartedAtDig):s.longestHunt, milestones:{...s.milestones,...(after>=5?{[ore.id]:Math.max(s.milestones[ore.id]||0,after)}:{})}, milestoneDigs, veinDigsRemaining:veinTriggered?VEIN_DURATION:veinDigsRemaining, veinOre:veinTriggered?ore.id:(veinExpiredOld?null:s.veinOre),pendingArtifactModifier:null,forbiddenTunnel:tunnel||s.forbiddenTunnel };
       track("resource_earned",{resource_kind:"ore",resource_id:ore.id,quantity:1,stock:next.oreResources[ore.id]});track("resource_earned",{resource_kind:"mineral",resource_id:mineral.id,quantity:1,stock:next.mineralResources[mineral.id]});
@@ -811,8 +814,8 @@ export default function Home() {
         {impact && <span className="impact-flash" aria-hidden="true"/>}
         {impact&&<span className="material-impact" aria-hidden="true"><i/><i/><i/><i/><i/><i/></span>}
         {collapseBurst&&<span key={collapseBurst.id} className="collapse-rift" style={{"--collapse-x":`${collapseBurst.x}%`,"--collapse-y":`${collapseBurst.y}%`} as React.CSSProperties} aria-hidden="true"><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/></span>}
-        {lastHitKind&&lastHitKind!=="miss"&&<span className="hit-callout" aria-hidden="true">{lastHitKind==="perfectCrit"?"PERFECT CRIT":lastHitKind==="perfect"?"PERFECT":lastHitKind==="crit"?"CRITICAL":"SOLID HIT"}</span>}
-        {missFlash && <span className="miss-bark" role="status">{missFlash}</span>}
+        {(specialHitNotice||(lastHitKind&&lastHitKind!=="miss"))&&<span className={`hit-callout hit-callout-${specialHitNotice||lastHitKind}`} role="status">{specialHitNotice==="artifact"?"TRUE ARTEFACT":specialHitNotice==="vein"?"VEIN":lastHitKind==="perfectCrit"?"PERFECT CRITICAL":lastHitKind==="perfect"?"PERFECT":lastHitKind==="crit"?"CRITICAL":"HIT"}</span>}
+        {missFlash && <span className="miss-bark" role="status"><b>MISS</b><small>{missFlash}</small></span>}
       </button>
       <div className="biomes volume-biomes" aria-label="Mine location">{biomeOrder.map((b,i)=>{const unlocked=save.unlockedBiomes.includes(b),open=mineAccessible(save,b),done=biomeQuotaProgress(save,b),v=biomeVisuals[b],required=mineRequiredShaftRating[b],rating=equippedShaftRating(save);return <button key={b} disabled={!open} style={{"--card-accent":unlocked?v.accent:"#555","--card-secondary":unlocked?v.secondary:"#333","--card-bg":unlocked?v.card:"#0c0e0c"} as React.CSSProperties} className={`mine-card biome-card-${b} ${save.biome===b?"chosen":""} ${open?"":"locked"} ${unlocked?"identified":"classified"}`} onClick={()=>{setSave(s=>({...s,biome:b}));track("biome_selected",{biome:b})}}><span>{unlocked?biomeNames[b]:"🔒 ?????"}</span><small>{open?`${done}/${biomeQuotaTotal(b)} EXTRACTED${required?` · SHAFT TIER ${required}`:""} · ${distributionLabel(b,save)}`:unlocked&&required?`ACCESS SUSPENDED · EQUIP TIER ${required} TOOL · CURRENT ${rating}`:"CLASSIFIED · COMPLETE CURRENT SHAFT REQUIREMENTS"}</small></button>})}</div>
       <div className={`dig-panel ${stage==="artifact"?"artifact-dig-panel":""} ${stage==="ore"?`ore-integrity-panel shell-damage-${Math.floor((1-rockHp/maxHp)*4)}`:""} ${showStrikeInstruction?"":"instruction-collapsed"}`}>{showStrikeInstruction&&<div className="strike-instruction"><span className="mouse-icon">↙</span><strong>{stage === "artifact" ? "KEEP HITTING IT" : "CLICK TO STRIKE"}</strong><small>or press SPACE</small></div>}<div className="integrity">{stage === "artifact" ? <div className="artifact-integrity-head"><span><small>ANOMALOUS INTEGRITY</small><strong>{Math.ceil(rockHp)} <em>/ {maxHp}</em></strong></span><b className="artifact-multiplier">20×<small>RESISTANCE</small></b></div> : stage === "ore" ? <div className="ore-integrity-head"><span><small>DEPARTMENT SPECIMEN CASING</small><strong>{pendingOre?discoveryOreName(pendingOre):"ORE DEPOSIT"}</strong></span><b><small>SHELL INTEGRITY</small><strong>{Math.max(0,Math.ceil(rockHp))}<em> / {maxHp}</em></strong></b><i>{rockHp<=Math.max(1,maxHp*.25)?"BREACH IMMINENT":rockHp<=maxHp*.5?"CASING FRACTURED":"CASING RESISTING"}</i></div> : <span>TUNNEL PROGRESS · {Math.round((1-rockHp/maxHp)*100)}% · <b className={`depth-band depth-${depthBand(maxHp)}`}>{depthBand(maxHp).toUpperCase()}</b></span>}<i className={stage==="ore"?"ore-shell-segments":""}>{Array.from({length: 12},(_,i)=><b key={i} style={stage==="ore"?{"--segment-index":i} as React.CSSProperties:undefined} className={i < Math.ceil((rockHp/maxHp)*12) ? "full" : ""}/>)}</i></div></div>
@@ -933,12 +936,11 @@ function MineCompletion({data,digs,playerName,onContinue}:{data:{completed:Biome
 
 function TrueArtifactArt({artifact,locked=false}:{artifact:TrueArtifact;locked?:boolean}){
   const [missing,setMissing]=useState(false);
-  return <span className={`true-art-slot${locked?" locked-art":""}${artifact.id==="asoc"?" asoc-art":""}`} role={locked?"img":undefined} aria-label={locked?"Undiscovered TRUE Artifact silhouette":undefined}>
+  return <span className={`true-art-slot${locked?" locked-art":""}${artifact.id==="asoc"?" asoc-art":""}`} role={locked?"img":undefined} aria-label={locked?"Classified undiscovered TRUE Artefact":undefined}>
     <span className="true-art-crop">
-      {locked&&!missing&&<span className="true-art-silhouette" style={{"--artifact-mask":`url(${artifact.image})`} as React.CSSProperties}/>}
+      {locked&&<span className="true-art-classified" aria-hidden="true"><i>◆</i><small>SEALED</small></span>}
       {!locked&&!missing&&<img className="true-art-img" src={artifact.image} alt="" onError={()=>setMissing(true)}/>}
-      {missing && <span className={`true-art-placeholder${locked?" locked-placeholder":""}`} aria-hidden="true">◆{!locked&&<small>ARTWORK PENDING</small>}</span>}
-      {locked&&<img className="true-mask-probe" src={artifact.image} alt="" onError={()=>setMissing(true)}/>}
+      {!locked&&missing && <span className="true-art-placeholder" aria-hidden="true">◆<small>ARTWORK PENDING</small></span>}
     </span>
   </span>;
 }
@@ -1062,7 +1064,7 @@ function TrueArchive({save}:{save:Save}){
     <div className="true-card-copy">
       {asoc&&<strong className="true-ultimate-label">{count?"ENDGAME INVITATION":"CLASSIFIED ENDGAME CONDITION"}</strong>}
       <h3>{count?a.name:"???"}</h3>
-      <p>{count?a.lore:<em>&ldquo;{asoc?"Clearance insufficient. Identity withheld.":a.lockedClue}&rdquo;</em>}</p>
+      <p>{count?a.lore:<em>&ldquo;{asoc?"Clearance insufficient. Identity withheld.":"Identity and contents withheld pending discovery."}&rdquo;</em>}</p>
       {asoc&&<div className="true-issued"><span>{count?"STATUS: SECURED":"STATUS: CLASSIFIED"}</span><strong>{count?"HOLDER: YOU":"AUTHORIZATION WITHHELD"}</strong></div>}
       {count>0&&a.instruction&&<p className="true-archive-instruction">{a.instruction}</p>}
       <footer>{count?<><span>{asoc?"TICKET":"FOUND"} ×{count}</span>{first!==undefined&&<small>FOUND AFTER {first.toLocaleString()} DIGS</small>}</>:<span>{asoc?"ELIGIBILITY: CLASSIFIED":"NOT DISCOVERED"}</span>}</footer>

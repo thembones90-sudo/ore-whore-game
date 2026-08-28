@@ -16,6 +16,9 @@ type MemoryTrigger={
 
 export const EMPTY_MEMORY_STATE:MemoryCommentaryState={seen:{},lastShownAtDig:-10000,lastShownAt:0};
 export const EMPTY_TUNNEL_HISTORY:TunnelChoiceHistory={left:0,middle:0,right:0};
+export const MEMORY_COMMENTARY_DIG_GAP=90;
+export const MEMORY_COMMENTARY_TIME_GAP_MS=120_000;
+export const MEMORY_COMMENTARY_ROLL_CHANCE=.10;
 const DAY=86_400_000;
 const sum=(values:Record<string,number>)=>Object.values(values).reduce((total,value)=>total+(Number(value)||0),0);
 
@@ -46,7 +49,7 @@ export function sanitizeTunnelHistory(value:unknown):TunnelChoiceHistory{
 
 export function selectSaveAwareCommentary(context:MemoryContext,state:MemoryCommentaryState,options:{event?:MemoryEvent;now?:number;random?:number}={}):{line:MemoryLine;state:MemoryCommentaryState}|null{
   const event=options.event||"dig",now=options.now||Date.now(),random=options.random??Math.random();
-  if(event==="dig"&&(context.digs-state.lastShownAtDig<60||random>.14))return null;
+  if(event==="dig"&&(context.digs-state.lastShownAtDig<MEMORY_COMMENTARY_DIG_GAP||(state.lastShownAt>0&&now-state.lastShownAt<MEMORY_COMMENTARY_TIME_GAP_MS)||random>MEMORY_COMMENTARY_ROLL_CHANCE))return null;
   const eligible=triggers.filter(trigger=>trigger.event===event&&trigger.condition(context)&&(!trigger.oneTime||!state.seen[trigger.id])&&(!trigger.cooldownDigs||context.digs-(state.seen[trigger.id]||-10000)>=trigger.cooldownDigs)&&(!trigger.cooldownMs||now-(state.seen[trigger.id]||0)>=trigger.cooldownMs)).sort((a,b)=>b.priority-a.priority);
   const trigger=eligible[0];if(!trigger)return null;
   const copy=trigger.copy(context);
