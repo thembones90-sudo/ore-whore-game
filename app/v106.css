@@ -1,0 +1,91 @@
+/* v0.10.6 — carry the classified intro language into the Begin Shift handoff. */
+.peon-dialogue{
+  --handoff-brass:#a88a4a;
+  --handoff-brass-hot:#d3b76f;
+  --handoff-paper:#d8d0b8;
+  place-items:center;
+  padding:clamp(18px,4vw,52px);
+  background:
+    radial-gradient(circle at 24% 50%,rgba(111,128,61,.11),transparent 34%),
+    linear-gradient(180deg,rgba(4,7,5,.34),rgba(2,3,2,.86));
+  backdrop-filter:blur(3px);
+}
+.peon-dialogue section{
+  width:min(1040px,94vw);
+  min-height:420px;
+  grid-template-columns:minmax(250px,38%) minmax(0,1fr);
+  overflow:hidden;
+  border:1px solid rgba(168,138,74,.7);
+  background:
+    linear-gradient(90deg,rgba(168,138,74,.05) 1px,transparent 1px) 0 0/76px 100%,
+    linear-gradient(145deg,rgba(18,20,15,.98),rgba(8,10,8,.99));
+  box-shadow:0 28px 90px #000,inset 0 1px rgba(216,208,184,.08);
+}
+.peon-dialogue section:before{
+  content:"SHIFT AUTHORIZATION // EMPLOYEE DEPLOYMENT";
+  position:absolute;
+  top:18px;
+  right:24px;
+  color:rgba(168,138,74,.62);
+  font:700 11px/1 "Arial Narrow",Bahnschrift,"Barlow Condensed",Arial,sans-serif;
+  letter-spacing:.16em;
+}
+.peon-dialogue section{position:relative}
+.peon-dialogue img{
+  width:100%;
+  height:100%;
+  min-height:420px;
+  aspect-ratio:auto;
+  object-fit:cover;
+  border:0;
+  border-right:1px solid rgba(168,138,74,.52);
+  filter:saturate(.88) contrast(1.04);
+  box-shadow:inset -18px 0 35px #000;
+}
+.peon-dialogue section>div{
+  min-width:0;
+  padding:clamp(54px,6vw,82px) clamp(34px,6vw,76px) clamp(36px,5vw,64px);
+}
+.peon-dialogue small{
+  display:block;
+  color:var(--handoff-brass);
+  font:700 clamp(12px,1vw,14px)/1.3 "Arial Narrow",Bahnschrift,"Barlow Condensed",Arial,sans-serif;
+  letter-spacing:.15em;
+}
+.peon-dialogue p{
+  margin:clamp(24px,4vh,40px) 0 clamp(28px,5vh,48px);
+  color:var(--handoff-paper);
+  font:600 clamp(32px,4.2vw,54px)/1.08 "Arial Narrow",Bahnschrift,"Barlow Condensed",Arial,sans-serif;
+  letter-spacing:.015em;
+  text-wrap:balance;
+}
+.peon-dialogue p strong{
+  color:var(--handoff-brass-hot);
+  font-weight:800;
+}
+.peon-dialogue button{
+  min-width:220px;
+  padding:16px 24px;
+  border:1px solid var(--handoff-brass);
+  background:linear-gradient(180deg,#bea055,#8e7034);
+  color:#100e09;
+  box-shadow:0 10px 28px #0008,inset 0 1px rgba(255,244,201,.34);
+  font:800 13px/1 "Arial Narrow",Bahnschrift,"Barlow Condensed",Arial,sans-serif;
+  letter-spacing:.13em;
+  cursor:pointer;
+  transition:transform .16s ease,filter .16s ease,box-shadow .16s ease;
+}
+.peon-dialogue button:hover{transform:translateY(-2px);filter:brightness(1.12);box-shadow:0 14px 34px #000b,0 0 20px rgba(168,138,74,.16)}
+.peon-dialogue button:focus-visible{outline:2px solid var(--handoff-paper);outline-offset:4px}
+
+@media(max-width:700px){
+  .peon-dialogue{padding:12px}
+  .peon-dialogue section{grid-template-columns:1fr;min-height:0}
+  .peon-dialogue section:before{top:12px;right:14px;font-size:8px}
+  .peon-dialogue img{height:230px;min-height:0;border-right:0;border-bottom:1px solid rgba(168,138,74,.52);object-position:center 29%}
+  .peon-dialogue section>div{padding:28px 24px 30px}
+  .peon-dialogue p{font-size:clamp(30px,10vw,43px);margin:18px 0 24px}
+  .peon-dialogue button{width:100%;min-width:0}
+}
+
+@media(prefers-reduced-motion:reduce){.peon-dialogue button{transition:none}}
