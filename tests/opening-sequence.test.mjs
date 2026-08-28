@@ -9,7 +9,7 @@ const avatar=new URL("../public/assets/characters/peon-avatar.png",import.meta.u
 test("fresh saves require the employment agreement while migrated saves are not interrupted",()=>{
   assert.match(game,/employmentAgreementSigned:false/);
   assert.match(game,/employmentGreetingSeen:false/);
-  assert.match(game,/schema: 20/);
+  assert.match(game,/schema: 21/);
   assert.match(game,/employmentAgreementSigned:old\.employmentAgreementSigned===true\|\|old\.employmentAgreementSigned===undefined/);
 });
 

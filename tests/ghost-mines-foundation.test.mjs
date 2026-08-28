@@ -105,8 +105,8 @@ test("ambient commentary selection respects anti-repeat history for the Ghost po
 });
 
 test("save schema migration preserves Ghost entrance and inefficiency feedback state", () => {
-  assert.match(game, /schema: 20,settings:defaultSettings/);
-  assert.match(game, /schema:20,employmentAgreementSigned:/);
+  assert.match(game, /schema: 21,settings:defaultSettings/);
+  assert.match(game, /schema:21,employmentAgreementSigned:/);
 });
 
 test("mine-completion descent ceremony has Ghost Mines diagnostics in its own clinical voice", () => {

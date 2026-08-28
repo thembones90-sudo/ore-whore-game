@@ -84,7 +84,7 @@ test("UI separates lifetime history from stock, confirms transactions, and prese
 
 test("migration is schema-versioned and idempotent by construction",()=>{
   assert.match(game,/old\.oreResources[\s\S]*?old\.rawResources/);assert.match(game,/old\.mineralResources[\s\S]*?mineralCounts/);assert.match(game,/old\.processedResources[\s\S]*?old\.processedMaterials/);
-  assert.match(game,/toolTier=Math\.max/);assert.match(game,/schema:20/);
+  assert.match(game,/toolTier=Math\.max/);assert.match(game,/schema:21/);
 });
 
 test("Titanium discoveries use the canonical IDE TITTY callout without renaming the ore ID",()=>{
