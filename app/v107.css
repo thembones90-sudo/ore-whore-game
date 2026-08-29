@@ -1,0 +1,46 @@
+/* v0.10.7 — the NG+ wormhole: a short, violent, unexplained visual
+   transition between confirming New Game+ and the reset actually landing.
+   No text, no lore, nothing named on-screen. Duration here (1.4s) is kept
+   in sync with enterWormhole's setTimeout in page.tsx — if one changes,
+   the other must too. */
+.wormhole-transition{
+  position:fixed;
+  inset:0;
+  z-index:300;
+  background:#000;
+  animation:wormhole-collapse 1.4s cubic-bezier(.65,0,.35,1) forwards;
+}
+@keyframes wormhole-collapse{
+  0%{
+    background:radial-gradient(circle at 50% 50%,rgba(12,10,6,0) 0%,rgba(4,3,2,.55) 100%);
+    filter:brightness(1) blur(0);
+    transform:scale(1) rotate(0deg);
+  }
+  50%{
+    background:radial-gradient(circle at 50% 50%,rgba(24,16,6,.35) 0%,#000 88%);
+    filter:brightness(.32) blur(3px);
+    transform:scale(1.16) rotate(-2deg);
+  }
+  76%{
+    background:radial-gradient(circle at 50% 50%,rgba(52,36,10,.6) 0%,#000 62%);
+    filter:brightness(.18) blur(6px);
+    transform:scale(1.45) rotate(3deg);
+  }
+  85%{
+    background:#fff8e6;
+    filter:brightness(3.4) blur(0);
+    transform:scale(1.06) rotate(-1deg);
+  }
+  100%{
+    background:#000;
+    filter:brightness(1);
+    transform:scale(1) rotate(0deg);
+    opacity:0;
+  }
+}
+/* Both the in-game "reduced motion" setting and the OS-level preference
+   collapse this to a brief, near-instant beat rather than removing it
+   outright — the transition is the proof of time travel, so it should
+   still register, just without the swing/blur/rotation doing the work. */
+.reduced-motion .wormhole-transition{animation-duration:.26s}
+@media(prefers-reduced-motion:reduce){.wormhole-transition{animation-duration:.26s}}

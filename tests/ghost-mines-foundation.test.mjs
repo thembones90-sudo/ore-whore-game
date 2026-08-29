@@ -6,7 +6,7 @@ import { GHOST_ENTRY_CLOSING, GHOST_ENTRY_REGISTER, GHOST_ENTRY_SYSTEM_OPENING, 
 const game = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
 
 test("Ghost Mines is the fifth mine, after Northrend, with exactly four native ores", () => {
-  assert.match(game, /biomeOrder:Biome\[\]=\["old","deep","outland","northrend","ghost"\]/);
+  assert.match(game, /biomeOrder:Biome\[\]=\["old","deep","outland","northrend","ghost","moon"\]/);
   assert.match(game, /ghost:\["gravesilver","stillwater","hushstone","revenantseye"\]/);
 });
 
@@ -33,8 +33,8 @@ test("existing mine spawn tables gained trailing zero weight for the four new or
     const m = game.match(new RegExp(`${biome}:\\[([\\d,]+)\\]`));
     assert.ok(m, `${biome} weight array not found`);
     const weights = m[1].split(",").map(Number);
-    assert.equal(weights.length, 19, `${biome} should have 19 entries (15 original + 4 ghost)`);
-    assert.deepEqual(weights.slice(15), [0, 0, 0, 0], `${biome} must not spawn any Ghost ore`);
+    assert.equal(weights.length, 23, `${biome} should have 23 entries (15 original + 4 ghost + 4 moon)`);
+    assert.deepEqual(weights.slice(15), [0, 0, 0, 0, 0, 0, 0, 0], `${biome} must not spawn any Ghost or Moon ore`);
   }
 });
 
@@ -42,19 +42,20 @@ test("Ghost Mines spawn table only spawns its own four native ores", () => {
   const m = game.match(/ghost:\[([\d,]+)\]/);
   assert.ok(m, "ghost weight array not found");
   const weights = m[1].split(",").map(Number);
-  assert.equal(weights.length, 19);
+  assert.equal(weights.length, 23);
   assert.deepEqual(weights.slice(0, 15), new Array(15).fill(0), "Ghost Mines must not spawn any of the original 15 ores");
-  assert.ok(weights.slice(15).every(w => w > 0), "all four Ghost ores must have nonzero weight in their own mine");
+  assert.ok(weights.slice(15, 19).every(w => w > 0), "all four Ghost ores must have nonzero weight in their own mine");
+  assert.deepEqual(weights.slice(19), [0, 0, 0, 0], "Ghost Mines must not spawn any Moon ore");
 });
 
-test("Ghost Mines quota can diverge from the global rarity table via an explicit override map", () => {
-  assert.match(game, /const oreQuotaOverrides:Partial<Record<string,number>>=\{gravesilver:30,stillwater:20,hushstone:8,revenantseye:3\}/);
-  assert.match(game, /const oreQuota=\(id:string\)=>progressionQuotaOverrides\[id\]\?\?oreQuotaOverrides\[id\]\?\?rarityQuota\[/);
-  // Global rarity-table numbers (10/7/3/1) would total 21 — the whole point
-  // of the override was to avoid inheriting that. Confirm the actual
-  // provisional total is meaningfully larger.
-  const total = 30 + 20 + 8 + 3;
-  assert.ok(total > 21, "Ghost Mines quota total should exceed the un-overridden rarity-table total");
+test("Ghost Mines quota diverges from the global rarity table via progressionQuotaOverrides, strictly decreasing by rarity", () => {
+  assert.match(game, /gravesilver:90,stillwater:55,hushstone:30,revenantseye:15/);
+  assert.match(game, /const oreQuota=\(id:string\)=>progressionQuotaOverrides\[id\]\?\?rarityQuota\[/);
+  const [gravesilver, stillwater, hushstone, revenantseye] = [90, 55, 30, 15];
+  assert.ok(gravesilver > stillwater && stillwater > hushstone && hushstone > revenantseye,
+    "Ghost Mines quota must strictly decrease Common → Uncommon → Rare → Legendary");
+  const total = gravesilver + stillwater + hushstone + revenantseye;
+  assert.equal(total, 190, "Ghost Mines total should match the finalized design target");
 });
 
 test("undiscovered Ghost ore identity is concealed via a single reusable helper, not duplicated per-surface logic", () => {

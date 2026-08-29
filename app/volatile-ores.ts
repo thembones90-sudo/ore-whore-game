@@ -1,10 +1,14 @@
-export type VolatileMine="old"|"deep"|"outland"|"northrend"|"ghost";
+export type VolatileMine="old"|"deep"|"outland"|"northrend"|"ghost"|"moon";
 export type VolatileEncounter={oreId:string;mine:VolatileMine;startedAtDig:number};
 export type VolatileStats={encountered:number;left:number;attempted:number;succeeded:number;detonated:number};
 export type VolatileDetonationLoss={oreId:string;quantity:number};
 
 export const EMPTY_VOLATILE_STATS:VolatileStats={encountered:0,left:0,attempted:0,succeeded:0,detonated:0};
-export const VOLATILE_TRIGGER_RATES:Record<VolatileMine,number>={old:.0004,deep:.0006,outland:.0008,northrend:.001,ghost:.0015};
+// Moon Base foundation only: 0 means Volatile Ore events simply don't fire
+// there yet — this is not a real balancing decision, just keeping the type
+// consistent with every other biome already having an entry. A later pass
+// can pick a real rate if Volatile Ore is ever extended to the Moon at all.
+export const VOLATILE_TRIGGER_RATES:Record<VolatileMine,number>={old:.0004,deep:.0006,outland:.0008,northrend:.001,ghost:.0015,moon:0};
 export const VOLATILE_RARE_MINERAL_POOL=["arcane","emerald","diamond","sapphire","largeopal"] as const;
 
 // PROVISIONAL BALANCE ONLY. These values are deliberately isolated because the

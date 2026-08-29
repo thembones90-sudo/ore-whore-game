@@ -21,18 +21,29 @@ export const MEMORY_COMMENTARY_TIME_GAP_MS=120_000;
 export const MEMORY_COMMENTARY_ROLL_CHANCE=.10;
 const DAY=86_400_000;
 const sum=(values:Record<string,number>)=>Object.values(values).reduce((total,value)=>total+(Number(value)||0),0);
+// Obsession is a RELATIVE signal, not a raw threshold: an ore only qualifies
+// once it dominates the player's overall mining history (60%+ of everything
+// mined), with `floor` as a secondary sanity check so this can't fire after
+// a handful of digs when one ore just happens to be the only thing found
+// yet. Shared by every ore-obsession trigger so the relative-preference
+// logic lives in exactly one place.
+const obsessionCondition=(id:string,floor:number)=>(c:MemoryContext)=>{const total=sum(c.ores);return (c.ores[id]||0)>=floor&&total>0&&(c.ores[id]||0)/total>=.6};
 
 const triggers:MemoryTrigger[]=[
   {id:"return-long",event:"return",priority:100,oneTime:false,cooldownMs:30*DAY,speaker:"SHADEZ",condition:c=>(c.returnAfterMs||0)>=14*DAY,copy:()=>({headline:"ATTENDANCE RESTORED.",dialogue:"Your absence was recorded. Productivity improved."})},
   {id:"ronaldo-remains",event:"dig",priority:95,oneTime:true,speaker:"PEON",condition:c=>(c.trueArtifacts.ronaldo||0)>0&&c.digs>=50,copy:()=>({headline:"PEON REMEMBERS.",dialogue:"Peon still have hat off."})},
   {id:"artifact-file-growing",event:"dig",priority:80,oneTime:true,speaker:"SYSTEM",condition:c=>Object.values(c.trueArtifacts).filter(Boolean).length>=4,copy:()=>({headline:"ANOMALY FILE EXPANDING.",dialogue:"Multiple prohibited objects remain assigned to the same employee."})},
-  {id:"copper-medical",event:"dig",priority:90,oneTime:true,speaker:"SHADEZ",condition:c=>(c.ores.copper||0)>=500,copy:()=>({headline:"COPPER EXPOSURE REVIEW.",dialogue:"Your commitment to copper is becoming medically relevant."})},
+  {id:"copper-obsession-shadez",event:"dig",priority:90,oneTime:true,speaker:"SHADEZ",condition:obsessionCondition("copper",40),copy:()=>({headline:"COPPER EXPOSURE REVIEW.",dialogue:"Your commitment to copper is becoming medically relevant."})},
+  {id:"copper-obsession-peon",event:"dig",priority:89,oneTime:true,speaker:"PEON",condition:obsessionCondition("copper",40),copy:()=>({headline:"PEON HAS OPINION.",dialogue:"Boss... copper like Peon."})},
+  {id:"gravesilver-obsession-shadez",event:"dig",priority:90,oneTime:true,speaker:"SHADEZ",condition:obsessionCondition("gravesilver",90),copy:()=>({headline:"GRAVESILVER EXPOSURE REVIEW.",dialogue:"Gravesilver appears to be more than a professional interest at this point."})},
+  {id:"gravesilver-obsession-peon",event:"dig",priority:89,oneTime:true,speaker:"PEON",condition:obsessionCondition("gravesilver",90),copy:()=>({headline:"PEON HAS OPINION.",dialogue:"Boss... gravesilver make Peon happy."})},
   {id:"ore-neglect",event:"dig",priority:65,oneTime:true,speaker:"SYSTEM",condition:c=>{const values=Object.values(c.ores).filter(v=>v>0);return c.digs>=750&&values.length>=8&&Math.max(...values)>=200&&Math.min(...values)<=2},copy:()=>({headline:"EXTRACTION BIAS CONFIRMED.",dialogue:"Several registered materials appear to have been avoided with remarkable consistency."})},
   {id:"empty-wall-hates",event:"dig",priority:75,oneTime:true,speaker:"PEON",condition:c=>c.emptyDigs>=150,copy:()=>({headline:"PEON HAS THEORY.",dialogue:"Wall know Peon. Wall hate Peon."})},
   {id:"misses-industrial",event:"dig",priority:70,oneTime:true,speaker:"SHADEZ",condition:c=>c.misses>=250&&c.misses/Math.max(1,c.strikes)>=.2,copy:()=>({headline:"ACCURACY REVIEW COMPLETE.",dialogue:"You have industrialized the act of missing."})},
   {id:"crit-history",event:"dig",priority:68,oneTime:true,speaker:"SYSTEM",condition:c=>c.criticalStrikes>=250&&c.criticalStrikes/Math.max(1,c.strikes)>=.12,copy:()=>({headline:"IMPACT PATTERN ABNORMAL.",dialogue:"Repeated structural overperformance has been added to your personnel file."})},
-  {id:"same-tunnel",event:"dig",priority:85,oneTime:true,speaker:"SHADEZ",condition:c=>{const total=sum(c.tunnelChoices),largest=Math.max(...Object.values(c.tunnelChoices));return total>=8&&largest/total>=.75},copy:()=>({headline:"ROUTE SELECTION REVIEW.",dialogue:"Superstition has replaced geological judgment."})},
+  {id:"same-tunnel",event:"dig",priority:85,oneTime:true,speaker:"SHADEZ",condition:c=>{const total=sum(c.tunnelChoices),largest=Math.max(...Object.values(c.tunnelChoices));return total>=8&&largest/total>=.75},copy:c=>{const [direction]=(Object.entries(c.tunnelChoices) as [string,number][]).sort((a,b)=>b[1]-a[1]);return {headline:"ROUTE SELECTION REVIEW.",dialogue:`Your geological methodology appears to be "${direction[0]}."`}}},
   {id:"post-completion-digging",event:"dig",priority:78,oneTime:true,speaker:"SHADEZ",condition:c=>c.completedBiomes.length>0&&c.excessAfterCompletion>=250,copy:()=>({headline:"CERTIFICATION WAS ALREADY ISSUED.",dialogue:"You continued digging anyway. Management is concerned by this enthusiasm."})},
+  {id:"post-completion-digging-peon",event:"dig",priority:77,oneTime:true,speaker:"PEON",condition:c=>c.completedBiomes.length>0&&c.excessAfterCompletion>=250,copy:()=>({headline:"PEON CONFUSED.",dialogue:"Boss... why we still here? Mine done."})},
   {id:"no-perfect-thousand",event:"dig",priority:60,oneTime:true,speaker:"SYSTEM",condition:c=>c.digs>=1000&&c.perfectStrikes===0,copy:()=>({headline:"PRECISION SAMPLE INCONCLUSIVE.",dialogue:"One thousand excavations have produced no evidence of deliberate accuracy."})},
 ];
 
