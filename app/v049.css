@@ -22,17 +22,11 @@
 /* ---- Strike-result callouts on the rock: text pop at the hit point,
    reusing the --hit-x/--hit-y custom properties already driving
    impact-scar/impact-flash/pickaxe. ---- */
-.hit-callout{position:absolute;left:var(--hit-x);top:var(--hit-y);translate:-50% -140%;z-index:16;font-size:11px;font-weight:900;letter-spacing:2px;white-space:nowrap;pointer-events:none;animation:calloutPop .45s cubic-bezier(.2,1.8,.4,1) both}
-.rock.hit-perfect .hit-callout{color:var(--acid);text-shadow:0 0 10px #d9ff45aa}
-.rock.hit-crit .hit-callout{color:#f0ba52;text-shadow:0 0 10px #f0ba5299}
-.rock.hit-perfect-crit .hit-callout{color:#ff8fd6;text-shadow:0 0 14px #ff8fd6bb;font-size:12px}
+.hit-callout{position:absolute;left:var(--hit-x);top:var(--hit-y);translate:-50% -140%;z-index:16;font-size:11px;font-weight:900;letter-spacing:2px;white-space:nowrap;pointer-events:none}
 .rock.hit-perfect{box-shadow:0 0 0 3px #d9ff4555 inset,0 28px 22px #000}
 .rock.hit-crit{box-shadow:0 0 0 3px #f0ba5255 inset,0 28px 22px #000}
 .rock.hit-perfect-crit{box-shadow:0 0 0 3px #ff8fd670 inset,0 28px 22px #000}
 
-/* ---- Miss feedback: dismissive, low-key, deliberately unglamorous —
-   failure gets muted gray-red, never the same visual weight as a hit. ---- */
-.miss-bark{position:absolute;left:50%;top:12%;translate:-50% 0;z-index:16;max-width:80%;text-align:center;font-size:11px;font-weight:800;letter-spacing:.5px;color:#c98d8d;background:#1a1414ee;border:1px solid #4a3232;padding:8px 14px;pointer-events:none;animation:missIn .25s ease both,missOut .25s ease .45s both}
 .rock.hit-miss{filter:saturate(.4)}
 
 /* ---- Session summary (Records "TODAY" line). ---- */
@@ -58,9 +52,6 @@
 .depth-deep{color:#e0a23f}
 .depth-bedrock{color:#ff8a3d;text-shadow:0 0 8px #ff8a3d55}
 
-@keyframes calloutPop{from{opacity:0;transform:translateY(6px) scale(.85)}30%{opacity:1;transform:translateY(0) scale(1.08)}to{opacity:0;transform:translateY(-10px) scale(1)}}
-@keyframes missIn{from{opacity:0;transform:translate(-50%,-6px)}to{opacity:1;transform:translate(-50%,0)}}
-@keyframes missOut{to{opacity:0}}
 
 /* Reduced-motion collapses all of the above via the existing global rule
    (`.reduced-motion *{animation-duration:.001ms!important}`); reduced-shake
@@ -76,5 +67,4 @@
 }
 @media(max-width:450px){
   .vein-banner strong{font-size:9px}
-  .miss-bark{font-size:10px;padding:7px 11px}
 }

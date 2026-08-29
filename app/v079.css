@@ -41,7 +41,6 @@
 .rock .impact-flash{width:var(--impact-flash-size,92px)!important}
 .rock .debris{scale:var(--impact-scale,1)}
 .rock .debris i:nth-child(n+9){width:6px;height:6px;animation-duration:.46s;filter:brightness(1.14)}
-.persistent-fracture{scale:var(--fracture-scale,1)}
 .technology-tier-5.hit,.technology-tier-6.hit{box-shadow:inset 0 0 45px #0008,0 0 var(--impact-glow,20px) color-mix(in srgb,var(--biome-light) 16%,transparent)}
 .technology-tier-7.hit,.technology-tier-8.hit,.technology-tier-9.hit,.technology-tier-10.hit{box-shadow:inset 0 0 55px #0009,0 0 var(--impact-glow,28px) color-mix(in srgb,var(--biome-light) 24%,transparent)}
 .technology-tier-7.hit .impact-scar,.technology-tier-8.hit .impact-scar,.technology-tier-9.hit .impact-scar,.technology-tier-10.hit .impact-scar{scale:1.22;filter:drop-shadow(0 0 8px #000)}

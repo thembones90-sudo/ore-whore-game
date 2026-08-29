@@ -25,8 +25,6 @@
 .impact-flash::before{animation:impactRing .43s ease-out .18s both}.impact-flash::after{animation:impactRing .43s ease-out .23s both}
 @keyframes contactFlash{0%,38%{opacity:0;scale:.2}48%{opacity:1;scale:1}68%,100%{opacity:0;scale:1.45}}
 @keyframes impactRing{0%{width:10px;height:10px;opacity:.9}100%{width:150px;height:150px;opacity:0}}
-.hit-callout{translate:-50% -170%!important;padding:5px 8px;background:#080a08c9;border-left:3px solid currentColor;animation:strikeReadout 1.35s ease both!important}
-.rock.hit-normal .hit-callout{color:#d8d5cb;text-shadow:0 2px 4px #000;font-size:9px;letter-spacing:1.6px}
-@keyframes strikeReadout{0%{opacity:0;transform:translateY(8px) scale(.7)}12%{opacity:1;transform:translateY(0) scale(1.12)}22%{transform:scale(1)}72%{opacity:1}100%{opacity:0;transform:translate(24px,-13px)}}
+.hit-callout{translate:-50% -170%!important;padding:5px 8px;background:#080a08c9;border-left:3px solid currentColor}
 .reduced-shake .rock.hit{animation:none!important}.reduced-shake .rock.hit .pickaxe{animation:peonSwingSoft .18s ease-out!important}
 .reduced-motion .impact-flash::before,.reduced-motion .impact-flash::after{animation:none!important}

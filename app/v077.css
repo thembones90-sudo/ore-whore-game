@@ -32,7 +32,7 @@
 .artifact-rock.damage-3,.artifact-rock.final-hit{--anomaly:#ffd76a;filter:brightness(1.08) drop-shadow(0 0 72px #ffcb4d99)!important}
 .artifact-rock.damage-2 .artifact-mass:before,.artifact-rock.damage-2 .artifact-mass:after{border-width:2px;animation-duration:3.2s}
 .artifact-rock.damage-3 .artifact-mass,.artifact-rock.final-hit .artifact-mass{border-color:#ffe48f;background:radial-gradient(circle,#3b270c 0 28%,#210c26 62%,#070508 78%);box-shadow:inset 0 0 64px #ffca45aa,0 0 62px #ffd04b88;animation-duration:.58s}
-.artifact-rock.damage-3 .persistent-fracture,.artifact-rock.final-hit .persistent-fracture{filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 11px #ffd34f);opacity:1}
+.artifact-rock.damage-3 .crack-fracture,.artifact-rock.final-hit .crack-fracture{filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 11px #ffd34f);opacity:1}
 .artifact-rock.final-hit{animation:artifact-final-panic .09s steps(2,end) infinite!important}
 @keyframes artifact-final-panic{50%{translate:3px -2px;filter:brightness(1.35) drop-shadow(0 0 90px #ffd94f)}}
 

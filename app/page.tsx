@@ -13,6 +13,7 @@ import { eligibleOreCommentary, GHOST_ENTRY_CLOSING, GHOST_ENTRY_REGISTER, GHOST
 import { activeBerserkMode, activateBerserk, berserkMode, berserkRemainingMs, BERSERK_MODES, sanitizeActiveBerserk, type ActiveBerserk, type BerserkModeId } from "./berserk";
 import { CREDITS, LAST_FIND_PAGES, type CompletionRecord } from "./endgame";
 import { EMPTY_MEMORY_STATE, EMPTY_TUNNEL_HISTORY, sanitizeMemoryState, sanitizeTunnelHistory, selectSaveAwareCommentary, type MemoryCommentaryState, type MemoryContext, type MemoryLine, type TunnelChoiceHistory } from "./save-aware-commentary";
+import { FRACTURE_VARIANTS, fractureVariantsForTier, type FractureTier } from "./fracture-variants";
 import { createVolatileDetonationLosses, createVolatileSuccessReward, EMPTY_VOLATILE_STATS, sanitizeVolatileEncounter, sanitizeVolatileStats, shouldTriggerVolatile, volatileExtractionSucceeds, VOLATILE_TRIGGER_RATES, type VolatileDetonationLoss, type VolatileEncounter, type VolatileStats } from "./volatile-ores";
 
 type Rarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Mythic";
@@ -359,7 +360,7 @@ export default function Home() {
   const [miningEngaged,setMiningEngaged]=useState(false);
   const [quotaExpanded,setQuotaExpanded]=useState(false);
   const [hitPoint, setHitPoint] = useState({x:50,y:48});
-  const [fractures,setFractures]=useState<{id:number;x:number;y:number;power:number}[]>([]);
+  const [fractures,setFractures]=useState<{id:number;x:number;y:number;power:number;variantId:string;rotation:number;scale:number;flipX:boolean;opacity:number}[]>([]);
   const [collapseBurst,setCollapseBurst]=useState<{id:number;x:number;y:number}|null>(null);
   const [found, setFound] = useState<{ ore: Item; mineral: Item; isNew: boolean; count: number } | null>(null);
   const [assayTransfer,setAssayTransfer]=useState<{ore:Item;mineral:Item}|null>(null);
@@ -378,7 +379,6 @@ export default function Home() {
   const [wormholeTransition,setWormholeTransition]=useState(false);
   const [wormholeArrival,setWormholeArrival]=useState(false);
   const [mineTransition,setMineTransition]=useState<Biome|null>(null);
-  const [missFlash,setMissFlash]=useState<string|null>(null);
   const [deepWayFailure,setDeepWayFailure]=useState(false);
   const [endingActive,setEndingActive]=useState(false);
   const [completedBrowsing,setCompletedBrowsing]=useState(false);
@@ -388,6 +388,28 @@ export default function Home() {
   const [berserkOpen,setBerserkOpen]=useState(false);
   const [perfectReady,setPerfectReady]=useState(false);
   const [lastHitKind,setLastHitKind]=useState<"normal"|"perfect"|"crit"|"perfectCrit"|"miss"|null>(null);
+  // Warcraft-style floating combat text. Deliberately a separate array from
+  // lastHitKind above — lastHitKind still drives the rock's own hit-* glow
+  // class unchanged; this only feeds the floating text layer, so multiple
+  // strikes in quick succession can each show their own independently
+  // positioned, independently animated text instead of one shared slot
+  // being silently overwritten. Capped and self-removing, same shape as
+  // the existing fractures array.
+  const [impactTexts,setImpactTexts]=useState<{id:number;x:number;y:number;kind:"miss"|"normal"|"perfect"|"crit"|"perfectCrit";label:string;sublabel?:string;rise:number;drift:number}[]>([]);
+  const impactTextId=useRef(0);
+  const spawnImpactText=(kind:"miss"|"normal"|"perfect"|"crit"|"perfectCrit",label:string,sublabel:string|undefined,x:number,y:number)=>{
+    const id=++impactTextId.current;
+    // Small randomized spawn offset so repeated hits at the same click point
+    // don't stack in mechanically identical positions.
+    const jitterX=Math.max(6,Math.min(94,x+(Math.random()*14-7)));
+    const jitterY=Math.max(6,Math.min(94,y+(Math.random()*8-4)));
+    // Rise (40–70px) and horizontal drift are rolled once per spawn, not
+    // per-render, so the float path stays stable across re-renders.
+    const rise=40+Math.random()*30;
+    const drift=Math.random()*40-20;
+    setImpactTexts(list=>[...list.slice(-9),{id,x:jitterX,y:jitterY,kind,label,sublabel,rise,drift}]);
+    setTimeout(()=>setImpactTexts(list=>list.filter(t=>t.id!==id)),1500);
+  };
   const [specialHitNotice,setSpecialHitNotice]=useState<"vein"|"artifact"|null>(null);
   const specialHitTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
   useEffect(()=>{if(stage!=="artifact")return;if(specialHitTimer.current)clearTimeout(specialHitTimer.current);setSpecialHitNotice("artifact");specialHitTimer.current=setTimeout(()=>setSpecialHitNotice(null),1650);return()=>{if(specialHitTimer.current)clearTimeout(specialHitTimer.current)}},[stage]);
@@ -632,14 +654,14 @@ export default function Home() {
       setSave(s => ({ ...s, strikes: s.strikes + 1, misses: s.misses + 1 }));
       setSessionMisses(m=>m+1);
       const line = MISS_LINES[Math.floor(Math.random() * MISS_LINES.length)];
-      setMissFlash(line);
       setLastHitKind("miss");
+      spawnImpactText("miss","MISS",line,strikePoint.x,strikePoint.y);
       // A miss is still a visible swing: it glances off the selected point
       // instead of silently updating the counters.
       setImpact(Date.now());
       setTimeout(() => setImpact(null), 430);
       if(hitFeedbackTimer.current)clearTimeout(hitFeedbackTimer.current);
-      hitFeedbackTimer.current=setTimeout(() => { setMissFlash(null); setLastHitKind(null); }, 1700);
+      hitFeedbackTimer.current=setTimeout(() => { setLastHitKind(null); }, 1700);
       playImpact("miss");
       emitGameplayEvent("MISS", { stage, consecutive: consecutiveMisses.current });
       if (consecutiveMisses.current === 2) emitGameplayEvent("DOUBLE_MISS", { stage });
@@ -660,16 +682,23 @@ export default function Home() {
       else if (hitKind === "perfect") emitGameplayEvent("PERFECT_STRIKE", { stage });
       else emitGameplayEvent("CRITICAL_STRIKE", { stage });
       setLastHitKind(hitKind);
+      spawnImpactText(hitKind,hitKind==="perfectCrit"?"PERFECT CRITICAL":hitKind==="perfect"?"PERFECT":"CRITICAL",undefined,strikePoint.x,strikePoint.y);
       if(hitFeedbackTimer.current)clearTimeout(hitFeedbackTimer.current);
       hitFeedbackTimer.current=setTimeout(() => setLastHitKind(null), 1500);
     } else {
       setLastHitKind("normal");
+      spawnImpactText("normal","HIT",undefined,strikePoint.x,strikePoint.y);
       if(hitFeedbackTimer.current)clearTimeout(hitFeedbackTimer.current);
       hitFeedbackTimer.current=setTimeout(() => setLastHitKind(null), 1500);
     }
 
     const hit = rockHp - damage;
-    setFractures(current=>[...current.slice(-11),{id:++fractureId.current,x:strikePoint.x,y:strikePoint.y,power:damage}]);
+    // hitKind is "normal"|"perfect"|"crit"|"perfectCrit" here (miss already
+    // returned earlier) — maps 1:1 onto FractureTier except normal->hit.
+    const fractureTier:FractureTier=hitKind==="normal"?"hit":hitKind;
+    const fracturePool=fractureVariantsForTier(fractureTier);
+    const fractureVariant=fracturePool[Math.floor(Math.random()*fracturePool.length)];
+    setFractures(current=>[...current.slice(-11),{id:++fractureId.current,x:strikePoint.x,y:strikePoint.y,power:damage,variantId:fractureVariant.id,rotation:Math.random()*360,scale:.85+Math.random()*.3,flipX:Math.random()<.5,opacity:.72+Math.random()*.2}]);
     if(hit<=0){setCollapseBurst({id:fractureId.current,x:strikePoint.x,y:strikePoint.y});if(collapseTimer.current)clearTimeout(collapseTimer.current);collapseTimer.current=setTimeout(()=>setCollapseBurst(null),460)}
     setImpact(Date.now());
     setTimeout(() => setImpact(null), 430);
@@ -857,7 +886,7 @@ export default function Home() {
           {Array.from({length:12},(_,i)=><i key={i}/>) }
         </span>
         <span className="damage-reveal" style={{"--subsurface":stage==="ore"&&pendingOre?pendingOre.color:biomeVisuals[save.biome].accent} as React.CSSProperties} aria-hidden="true"/>
-        <span className="fracture-field" aria-hidden="true">{fractures.map(f=><i key={f.id} className={`persistent-fracture fracture-power-${f.power}`} style={{"--fracture-x":`${f.x}%`,"--fracture-y":`${f.y}%`,"--fracture-turn":`${(f.id*47)%360}deg`,"--fracture-strength":Math.min(4,f.power),"--fracture-scale":.84+Math.min(4,f.power)*.13} as React.CSSProperties}/>)}</span>
+        <span className="fracture-field" aria-hidden="true">{fractures.map(f=>{const variant=FRACTURE_VARIANTS.find(v=>v.id===f.variantId);if(!variant)return null;return <svg key={f.id} className={`crack-fracture crack-fracture-${variant.tier}`} viewBox="-50 -50 100 100" style={{"--fracture-x":`${f.x}%`,"--fracture-y":`${f.y}%`,"--fracture-rotation":`${f.rotation}deg`,"--fracture-scale":f.flipX?-f.scale:f.scale,"--fracture-scale-y":f.scale,"--fracture-opacity":f.opacity} as React.CSSProperties}>{variant.branches.map((d,i)=><path key={i} d={d} fill="none"/>)}{variant.chips?.map((c,i)=><circle key={i} cx={c.cx} cy={c.cy} r={c.r}/>)}</svg>})}</span>
         <span className="impact-scar" aria-hidden="true"/>
         <span className="crack c1"/><span className="crack c2"/><span className="crack c3"/>
         <span className={`perfect-ring ${perfectReady?"ready":""}`} aria-hidden="true"/>
@@ -870,8 +899,14 @@ export default function Home() {
         {impact && <span className="impact-flash" aria-hidden="true"/>}
         {impact&&<span className="material-impact" aria-hidden="true"><i/><i/><i/><i/><i/><i/></span>}
         {collapseBurst&&<span key={collapseBurst.id} className="collapse-rift" style={{"--collapse-x":`${collapseBurst.x}%`,"--collapse-y":`${collapseBurst.y}%`} as React.CSSProperties} aria-hidden="true"><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/></span>}
-        {(specialHitNotice||(lastHitKind&&lastHitKind!=="miss"))&&<span className={`hit-callout hit-callout-${specialHitNotice||lastHitKind}`} role="status">{specialHitNotice==="artifact"?"TRUE ARTEFACT":specialHitNotice==="vein"?"VEIN":lastHitKind==="perfectCrit"?"PERFECT CRITICAL":lastHitKind==="perfect"?"PERFECT":lastHitKind==="crit"?"CRITICAL":"HIT"}</span>}
-        {missFlash && <span className="miss-bark" role="status"><b>MISS</b><small>{missFlash}</small></span>}
+        {specialHitNotice&&<span className={`hit-callout hit-callout-${specialHitNotice}`} role="status">{specialHitNotice==="artifact"?"TRUE ARTEFACT":"VEIN"}</span>}
+        {/* Floating combat text — Warcraft-style, frameless. Each entry carries
+            its own spawn position and self-removes after its animation; see
+            v108.css for the actual motion/typography. */}
+        {impactTexts.map(t=><span key={t.id} className={`impact-text impact-text-${t.kind}`} role="status" style={{"--impact-text-x":`${t.x}%`,"--impact-text-y":`${t.y}%`,"--impact-text-rise":`${t.rise}px`,"--impact-text-drift":`${t.drift}px`} as React.CSSProperties}>
+          {t.kind==="perfectCrit"?<><b className="impact-text-perfect-word">PERFECT</b> <b className="impact-text-crit-word">CRITICAL</b></>:t.label}
+          {t.sublabel&&<small>{t.sublabel}</small>}
+        </span>)}
       </button>
       <div className="biomes volume-biomes" aria-label="Mine location">{biomeOrder.map((b,i)=>{const unlocked=save.unlockedBiomes.includes(b),open=mineAccessible(save,b),done=biomeQuotaProgress(save,b),v=biomeVisuals[b],required=mineRequiredShaftRating[b],rating=equippedShaftRating(save);return <button key={b} disabled={!open} style={{"--card-accent":unlocked?v.accent:"#555","--card-secondary":unlocked?v.secondary:"#333","--card-bg":unlocked?v.card:"#0c0e0c"} as React.CSSProperties} className={`mine-card biome-card-${b} ${save.biome===b?"chosen":""} ${open?"":"locked"} ${unlocked?"identified":"classified"}`} onClick={()=>{setSave(s=>({...s,biome:b}));track("biome_selected",{biome:b})}}><span>{unlocked?biomeNames[b]:"🔒 ?????"}</span><small>{open?`${done}/${biomeQuotaTotal(b)} EXTRACTED${required?` · SHAFT TIER ${required}`:""} · ${distributionLabel(b,save)}`:unlocked&&required?`ACCESS SUSPENDED · EQUIP TIER ${required} TOOL · CURRENT ${rating}`:"CLASSIFIED · COMPLETE CURRENT SHAFT REQUIREMENTS"}</small></button>})}</div>
       <div className={`dig-panel ${stage==="artifact"?"artifact-dig-panel":""} ${stage==="ore"?`ore-integrity-panel shell-damage-${Math.floor((1-rockHp/maxHp)*4)}`:""} ${showStrikeInstruction?"":"instruction-collapsed"}`}>{showStrikeInstruction&&<div className="strike-instruction"><span className="mouse-icon">↙</span><strong>{stage === "artifact" ? "KEEP HITTING IT" : "CLICK TO STRIKE"}</strong><small>or press SPACE</small></div>}<div className="integrity">{stage === "artifact" ? <div className="artifact-integrity-head"><span><small>ANOMALOUS INTEGRITY</small><strong>{Math.ceil(rockHp)} <em>/ {maxHp}</em></strong></span><b className="artifact-multiplier">20×<small>RESISTANCE</small></b></div> : stage === "ore" ? <div className="ore-integrity-head"><span><small>DEPARTMENT SPECIMEN CASING</small><strong>{pendingOre?discoveryOreName(pendingOre):"ORE DEPOSIT"}</strong></span><b><small>SHELL INTEGRITY</small><strong>{Math.max(0,Math.ceil(rockHp))}<em> / {maxHp}</em></strong></b><i>{rockHp<=Math.max(1,maxHp*.25)?"BREACH IMMINENT":rockHp<=maxHp*.5?"CASING FRACTURED":"CASING RESISTING"}</i></div> : <span>TUNNEL PROGRESS · {Math.round((1-rockHp/maxHp)*100)}% · <b className={`depth-band depth-${depthBand(maxHp)}`}>{depthBand(maxHp).toUpperCase()}</b></span>}<i className={stage==="ore"?"ore-shell-segments":""}>{Array.from({length: 12},(_,i)=><b key={i} style={stage==="ore"?{"--segment-index":i} as React.CSSProperties:undefined} className={i < Math.ceil((rockHp/maxHp)*12) ? "full" : ""}/>)}</i></div></div>

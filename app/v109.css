@@ -1,0 +1,49 @@
+/* v0.10.9 — randomized fracture-variant system. Replaces the old two-branch
+   "always the same shape, just rotated" crack with a pool of genuinely
+   different topologies (see app/fracture-variants.ts), each rendered as
+   inline SVG so branch geometry can actually differ, not just spin.
+
+   Positioning is unchanged in spirit from the old system: the impact
+   coordinate (--fracture-x/--fracture-y) places the SVG's own local (0,0)
+   — which every variant's branches originate at or near — exactly on the
+   true strike point, via the same translate(-50%,-50%) technique already
+   used elsewhere in this file (collapse-rift, etc). */
+
+.crack-fracture{
+  position:absolute;
+  left:var(--fracture-x);
+  top:var(--fracture-y);
+  width:74px;
+  height:74px;
+  translate:-50% -50%;
+  rotate:var(--fracture-rotation,0deg);
+  scale:var(--fracture-scale,1) var(--fracture-scale-y,1);
+  opacity:var(--fracture-opacity,.85);
+  overflow:visible;
+  filter:drop-shadow(0 1px 1px #000);
+  animation:crackAppear .18s ease-out both;
+}
+.crack-fracture path{
+  fill:none;
+  stroke:var(--biome-cavity);
+  stroke-width:2.4px;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.crack-fracture circle{fill:var(--biome-cavity)}
+
+/* Severity tiers scale up in both size and visual weight — HIT stays
+   small and quiet, PERFECT CRITICAL is the only tier that gets a glow,
+   and even that stays subtle rather than turning into a firework. */
+.crack-fracture-hit{width:64px;height:64px}
+.crack-fracture-perfect{width:78px;height:78px}
+.crack-fracture-perfect path{stroke-width:2.2px}
+.crack-fracture-crit{width:92px;height:92px}
+.crack-fracture-crit path{stroke-width:2.8px;filter:drop-shadow(0 0 3px color-mix(in srgb,var(--biome-accent) 30%,transparent))}
+.crack-fracture-perfectCrit{width:108px;height:108px}
+.crack-fracture-perfectCrit path{stroke-width:3px}
+.crack-fracture-perfectCrit{filter:drop-shadow(0 0 6px color-mix(in srgb,var(--biome-accent) 40%,transparent))}
+
+@keyframes crackAppear{0%{opacity:0;scale:calc(var(--fracture-scale,1)*.4) calc(var(--fracture-scale-y,1)*.4)}100%{opacity:var(--fracture-opacity,.85);scale:var(--fracture-scale,1) var(--fracture-scale-y,1)}}
+
+@media(prefers-reduced-motion:reduce){.crack-fracture{animation:none}}
