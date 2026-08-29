@@ -13,6 +13,7 @@ import { eligibleOreCommentary, GHOST_ENTRY_CLOSING, GHOST_ENTRY_REGISTER, GHOST
 import { activeBerserkMode, activateBerserk, berserkMode, berserkRemainingMs, BERSERK_MODES, sanitizeActiveBerserk, type ActiveBerserk, type BerserkModeId } from "./berserk";
 import { CREDITS, LAST_FIND_PAGES, type CompletionRecord } from "./endgame";
 import { EMPTY_MEMORY_STATE, EMPTY_TUNNEL_HISTORY, sanitizeMemoryState, sanitizeTunnelHistory, selectSaveAwareCommentary, type MemoryCommentaryState, type MemoryContext, type MemoryLine, type TunnelChoiceHistory } from "./save-aware-commentary";
+import { createVolatileDetonationLosses, createVolatileSuccessReward, EMPTY_VOLATILE_STATS, sanitizeVolatileEncounter, sanitizeVolatileStats, shouldTriggerVolatile, volatileExtractionSucceeds, VOLATILE_TRIGGER_RATES, type VolatileDetonationLoss, type VolatileEncounter, type VolatileStats } from "./volatile-ores";
 
 type Rarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Mythic";
 type AchievementTier = "steel" | "gold" | "silver";
@@ -22,7 +23,8 @@ type Item = { id: string; name: string; rarity: Rarity; weight: number; color: s
 type Biome = "old" | "deep" | "outland" | "northrend" | "ghost";
 type Settings = { master:number;musicVolume:number;sfx:number;musicEnabled:boolean;pickaxeSfxEnabled:boolean;reducedShake:boolean;reducedMotion:boolean;vibration:boolean;highContrast:boolean;helpSeen:boolean };
 type ActiveTrueEncounter={artifactId:string;trigger:"empty"|"ore";hp:number;maxHp:number;startedAtDig:number};
-type Save = { playerName:string;employmentAgreementSigned:boolean;employmentGreetingSeen:boolean;forbiddenContractSeen:boolean; digs: number; emptyDigs:number; strikes: number; distance: number; combos: Record<string, number>; ores: Record<string, number>; oreResources:Record<string,number>;mineralResources:Record<string,number>;processedResources:Record<string,number>;ownedTools:string[];equippedTool:string;toolTier:number;toolSkinId:string; minerals: Record<string, number>; first: Record<string, number>; achievements: string[]; streak: number; longestStreak:number;newStreak:number;longestNewStreak:number; dust: number; dustEarned:number;dustSpent:number;activeBerserk:ActiveBerserk|null; biome: Biome; unlockedBiomes:Biome[]; completedBiomes:Biome[]; milestones: Record<string, number>; lastDigAt: number; schema: number; settings:Settings;unlocks:string[];equipped:string;huntTarget:string|null;huntCounts:Record<string,number>;huntStartedAtDig:number;longestHunt:number;trueArtifacts:Record<string,number>;trueFirst:Record<string,number>;activeTrueEncounter:ActiveTrueEncounter|null;forbiddenTunnel:ForbiddenTunnelState|null;pendingArtifactModifier:ArtifactModifier|null;misses:number;perfectStrikes:number;criticalStrikes:number;veinsDiscovered:number;forbiddenTunnelsEntered:number;toolUse:Record<string,number>;runStartedAt:number;gameCompleted:boolean;endingSeen:boolean;completionCount:number;asocTickets:number;newGamePlusLevel:number;firstCompletionDate?:string;latestCompletionDate?:string;completionHistory:CompletionRecord[];veinOre:string|null;veinDigsRemaining:number;milestoneDigs:Record<string,number>;ghostEntrySeen:boolean;ghostInefficiencySeen:boolean;memoryCommentary:MemoryCommentaryState;tunnelChoices:TunnelChoiceHistory };
+type Save = { playerName:string;employmentAgreementSigned:boolean;employmentGreetingSeen:boolean;forbiddenContractSeen:boolean; digs: number; emptyDigs:number; strikes: number; distance: number; combos: Record<string, number>; ores: Record<string, number>; oreResources:Record<string,number>;mineralResources:Record<string,number>;processedResources:Record<string,number>;ownedTools:string[];equippedTool:string;toolTier:number;toolSkinId:string; minerals: Record<string, number>; first: Record<string, number>; achievements: string[]; streak: number; longestStreak:number;newStreak:number;longestNewStreak:number; dust: number; dustEarned:number;dustSpent:number;activeBerserk:ActiveBerserk|null; biome: Biome; unlockedBiomes:Biome[]; completedBiomes:Biome[]; milestones: Record<string, number>; lastDigAt: number; schema: number; settings:Settings;unlocks:string[];equipped:string;huntTarget:string|null;huntCounts:Record<string,number>;huntStartedAtDig:number;longestHunt:number;trueArtifacts:Record<string,number>;trueFirst:Record<string,number>;activeTrueEncounter:ActiveTrueEncounter|null;forbiddenTunnel:ForbiddenTunnelState|null;pendingArtifactModifier:ArtifactModifier|null;volatileEncounter:VolatileEncounter|null;volatileStats:VolatileStats;misses:number;perfectStrikes:number;criticalStrikes:number;veinsDiscovered:number;forbiddenTunnelsEntered:number;toolUse:Record<string,number>;runStartedAt:number;gameCompleted:boolean;endingSeen:boolean;completionCount:number;asocTickets:number;newGamePlusLevel:number;firstCompletionDate?:string;latestCompletionDate?:string;completionHistory:CompletionRecord[];veinOre:string|null;veinDigsRemaining:number;milestoneDigs:Record<string,number>;ghostEntrySeen:boolean;ghostInefficiencySeen:boolean;memoryCommentary:MemoryCommentaryState;tunnelChoices:TunnelChoiceHistory };
+type VolatileResolution = {kind:"success";oreId:string;oreQuantity:number;mineralIds:string[]} | {kind:"detonation";oreId:string;losses:VolatileDetonationLoss[]};
 
 const ores: Item[] = [
   { id: "copper", name: "Copper Ore", rarity: "Common", weight: 48, color: "#d88156", note: "Honest rock for dishonest amounts of time.", toughness: 1.00 },
@@ -88,7 +90,7 @@ const achievements:AchievementDefinition[] = [
 
 const defaultSettings:Settings={master:.7,musicVolume:.65,sfx:.8,musicEnabled:true,pickaxeSfxEnabled:true,reducedShake:false,reducedMotion:false,vibration:true,highContrast:false,helpSeen:false};
 const PICKAXE_HIT_SOUNDS=[1,2,3,4,5,6].map(n=>`/assets/audio/pickaxe-hits/pick${n}.wav`);
-const blank: Save = { playerName:"",employmentAgreementSigned:false,employmentGreetingSeen:false,forbiddenContractSeen:false,digs: 0, emptyDigs:0, strikes: 0, distance: 0, combos: {}, ores: {}, oreResources:{},mineralResources:{},processedResources:{},ownedTools:["rusty-pickaxe"],equippedTool:"rusty-pickaxe",toolTier:0,toolSkinId:DEFAULT_TOOL_SKIN_ID, minerals: {}, first: {}, achievements: [], streak: 0,longestStreak:0,newStreak:0,longestNewStreak:0, dust: 0,dustEarned:0,dustSpent:0,activeBerserk:null, biome: "old", unlockedBiomes:["old"], completedBiomes:[], milestones: {}, lastDigAt: 0, schema: 21,settings:defaultSettings,unlocks:[],equipped:"standard",huntTarget:null,huntCounts:{},huntStartedAtDig:0,longestHunt:0,trueArtifacts:{},trueFirst:{},activeTrueEncounter:null,forbiddenTunnel:null,pendingArtifactModifier:null,misses:0,perfectStrikes:0,criticalStrikes:0,veinsDiscovered:0,forbiddenTunnelsEntered:0,toolUse:{},runStartedAt:Date.now(),gameCompleted:false,endingSeen:false,completionCount:0,asocTickets:0,newGamePlusLevel:0,completionHistory:[],veinOre:null,veinDigsRemaining:0,milestoneDigs:{},ghostEntrySeen:false,ghostInefficiencySeen:false,memoryCommentary:EMPTY_MEMORY_STATE,tunnelChoices:EMPTY_TUNNEL_HISTORY };
+const blank: Save = { playerName:"",employmentAgreementSigned:false,employmentGreetingSeen:false,forbiddenContractSeen:false,digs: 0, emptyDigs:0, strikes: 0, distance: 0, combos: {}, ores: {}, oreResources:{},mineralResources:{},processedResources:{},ownedTools:["rusty-pickaxe"],equippedTool:"rusty-pickaxe",toolTier:0,toolSkinId:DEFAULT_TOOL_SKIN_ID, minerals: {}, first: {}, achievements: [], streak: 0,longestStreak:0,newStreak:0,longestNewStreak:0, dust: 0,dustEarned:0,dustSpent:0,activeBerserk:null, biome: "old", unlockedBiomes:["old"], completedBiomes:[], milestones: {}, lastDigAt: 0, schema: 22,settings:defaultSettings,unlocks:[],equipped:"standard",huntTarget:null,huntCounts:{},huntStartedAtDig:0,longestHunt:0,trueArtifacts:{},trueFirst:{},activeTrueEncounter:null,forbiddenTunnel:null,pendingArtifactModifier:null,volatileEncounter:null,volatileStats:EMPTY_VOLATILE_STATS,misses:0,perfectStrikes:0,criticalStrikes:0,veinsDiscovered:0,forbiddenTunnelsEntered:0,toolUse:{},runStartedAt:Date.now(),gameCompleted:false,endingSeen:false,completionCount:0,asocTickets:0,newGamePlusLevel:0,completionHistory:[],veinOre:null,veinDigsRemaining:0,milestoneDigs:{},ghostEntrySeen:false,ghostInefficiencySeen:false,memoryCommentary:EMPTY_MEMORY_STATE,tunnelChoices:EMPTY_TUNNEL_HISTORY };
 const equippedMiningTool=(save:Save)=>forgedItems.find(t=>t.id===save.equippedTool)||forgedItems[0];
 const cosmetics=[{id:"rust",name:"Rustbite Pick",cost:15,kind:"PICKAXE"},{id:"neon",name:"Toxic Impact",cost:30,kind:"IMPACT"},{id:"gilded",name:"Gilded Album",cost:45,kind:"ALBUM"},{id:"deepframe",name:"Deep-Mine Frame",cost:60,kind:"ALBUM"},{id:"menace",name:"Geological Menace",cost:75,kind:"TITLE"},{id:"void",name:"Void Pick",cost:100,kind:"PICKAXE"},{id:"fel",name:"Fel Dust",cost:35,kind:"IMPACT"},{id:"frost",name:"Frostbite Pick",cost:55,kind:"PICKAXE"},{id:"saroniteframe",name:"Saronite Whisper",cost:70,kind:"ALBUM"},{id:"prospector",name:"Master Prospector",cost:80,kind:"TITLE"},{id:"khoriumframe",name:"Khorium Prestige",cost:110,kind:"REVEAL"},{id:"titan",name:"Titanium Crown",cost:140,kind:"PICKAXE"},{id:"brdtitle",name:"Not Going Back",cost:95,kind:"TITLE"},{id:"arcaneimpact",name:"Arcane Fracture",cost:125,kind:"IMPACT"},{id:"volumeone",name:"Volume I Victor",cost:180,kind:"ALBUM"},{id:"orewhoretitle",name:"THE ORE WHORE",cost:999,kind:"TITLE"},{id:"orewhorepick",name:"The Final Pick",cost:999,kind:"PICKAXE"},{id:"orewhorealbum",name:"225 Stamp",cost:999,kind:"ALBUM"},{id:"centerpiece",name:"Mountain's Regret",cost:999,kind:"TROPHY"}];
 const biomeWeights: Record<Biome, number[]> = {
@@ -302,8 +304,10 @@ const migrate=(old:any):Save=>{
   const forbiddenTunnel=sanitizeForbiddenTunnel(old.forbiddenTunnel),pendingArtifactModifier=sanitizeArtifactModifier(old.pendingArtifactModifier);
   const activeBerserk=sanitizeActiveBerserk(old.activeBerserk);
   const memoryCommentary=sanitizeMemoryState(old.memoryCommentary),tunnelChoices=sanitizeTunnelHistory(old.tunnelChoices);
+  const volatileEncounter=sanitizeVolatileEncounter(old.volatileEncounter,ores.map(ore=>ore.id),biomeOrder);
+  const volatileStats=sanitizeVolatileStats(old.volatileStats);
   const playerName=typeof old.playerName==="string"&&old.playerName.trim()?old.playerName.trim().slice(0,28):"PEON";
-  let provisional={...blank,...safeOld,playerName,combos,ores:oreCounts,oreResources,mineralResources,processedResources,ownedTools,equippedTool,toolTier,toolSkinId,unlocks,first,minerals:mineralCounts,trueArtifacts,activeTrueEncounter:validEncounter,forbiddenTunnel,pendingArtifactModifier,activeBerserk,memoryCommentary,tunnelChoices,settings:{...defaultSettings,...old.settings},schema:21,employmentAgreementSigned:old.employmentAgreementSigned===true||old.employmentAgreementSigned===undefined,employmentGreetingSeen:old.employmentGreetingSeen===true||old.employmentGreetingSeen===undefined,forbiddenContractSeen:old.forbiddenContractSeen===true,ghostInefficiencySeen:old.ghostInefficiencySeen===true,runStartedAt:Number(old.runStartedAt)||Date.now(),completionHistory:Array.isArray(old.completionHistory)?old.completionHistory:[]} as Save;
+  let provisional={...blank,...safeOld,playerName,combos,ores:oreCounts,oreResources,mineralResources,processedResources,ownedTools,equippedTool,toolTier,toolSkinId,unlocks,first,minerals:mineralCounts,trueArtifacts,activeTrueEncounter:validEncounter,forbiddenTunnel,pendingArtifactModifier,volatileEncounter,volatileStats,activeBerserk,memoryCommentary,tunnelChoices,settings:{...defaultSettings,...old.settings},schema:22,employmentAgreementSigned:old.employmentAgreementSigned===true||old.employmentAgreementSigned===undefined,employmentGreetingSeen:old.employmentGreetingSeen===true||old.employmentGreetingSeen===undefined,forbiddenContractSeen:old.forbiddenContractSeen===true,ghostInefficiencySeen:old.ghostInefficiencySeen===true,runStartedAt:Number(old.runStartedAt)||Date.now(),completionHistory:Array.isArray(old.completionHistory)?old.completionHistory:[]} as Save;
   if(legacyAsoc&&!provisional.gameCompleted){const completedAt=String(old.latestCompletionDate||new Date().toISOString()),record=completionRecord(provisional,completedAt);provisional={...provisional,gameCompleted:true,endingSeen:true,completionCount:Math.max(1,Number(old.completionCount)||1),asocTickets:Math.max(1,Number(old.asocTickets)||1),firstCompletionDate:String(old.firstCompletionDate||completedAt),latestCompletionDate:completedAt,completionHistory:provisional.completionHistory.length?provisional.completionHistory:[record],activeTrueEncounter:null};}
   const completedBiomes=biomeOrder.filter(b=>biomeQuotaComplete(provisional,b)),unlockedBiomes:Biome[]=["old"];for(let i=0;i<biomeOrder.length-1;i++){if(!mineDescentAuthorized(provisional,biomeOrder[i]))break;unlockedBiomes.push(biomeOrder[i+1])}
   const requested:Biome=biomeOrder.includes(old.biome)?old.biome:"old",accessibleBiomes=unlockedBiomes.filter(b=>!mineRequiredShaftRating[b]||equippedShaftRating(provisional)>=mineRequiredShaftRating[b]!),biome=accessibleBiomes.includes(requested)?requested:accessibleBiomes[accessibleBiomes.length-1]||"old";return {...provisional,biome,unlockedBiomes,completedBiomes};
@@ -329,7 +333,7 @@ export default function Home() {
   const [save, setSave] = useState<Save>(blank);
   const [loaded, setLoaded] = useState(false);
   const [tab, setTab] = useState<"mine" | "forge" | "album" | "wanted" | "records" | "more" | "true">("mine");
-  const [stage, setStage] = useState<"tunnel" | "ore" | "artifact">("tunnel");
+  const [stage, setStage] = useState<"tunnel" | "ore" | "artifact" | "volatile">("tunnel");
   const [maxHp, setMaxHp] = useState(12);
   const [rockHp, setRockHp] = useState(12);
   const [pendingOre, setPendingOre] = useState<Item | null>(null);
@@ -345,6 +349,7 @@ export default function Home() {
   const [assayTransfer,setAssayTransfer]=useState<{ore:Item;mineral:Item}|null>(null);
   const [emptyNotice,setEmptyNotice]=useState<{id:number;result:string;insult:string}|null>(null);
   const [trueFind,setTrueFind]=useState<{artifact:TrueArtifact;digNumber:number}|null>(null);
+  const [volatileResolution,setVolatileResolution]=useState<VolatileResolution|null>(null);
   const [ghostEntry,setGhostEntry]=useState(false);
   const [pendingTrue,setPendingTrue]=useState<{artifact:TrueArtifact;trigger:"empty"|"ore"}|null>(null);
   const [duplicateNotice,setDuplicateNotice]=useState<{id:number;ore:Item;mineral:Item;count:number;dust:number}|null>(null);
@@ -426,6 +431,8 @@ export default function Home() {
       if(restored.activeTrueEncounter){
         const encounter=restored.activeTrueEncounter,artifact=trueArtifactPool.find(a=>a.id===encounter.artifactId);
         if(artifact){setMineCommentary(TRUE_ARTIFACT_COMMENTARY);setPendingTrue({artifact,trigger:encounter.trigger});setStage("artifact");setMaxHp(encounter.maxHp);setRockHp(encounter.hp);}
+      }else if(restored.volatileEncounter){
+        setPendingOre(null);setVolatileResolution(null);setStage("volatile");
       }else{
         const remembered=last?selectSaveAwareCommentary(memoryContextFor(restored,Date.now()-last),restored.memoryCommentary,{event:"return"}):null;
         if(remembered){restored={...restored,memoryCommentary:remembered.state};setMineCommentary(memoryLineToMine(remembered.line));}
@@ -535,8 +542,11 @@ export default function Home() {
     return ids.filter(id => !next.achievements.includes(id));
   };
 
-  const continueMine = () => { const hp=10+Math.floor(rng.current()*6); rollMineCommentary(ambientCommentaryFor(save.biome)); setFound(null); setPendingOre(null); setPendingTrue(null); setFractures([]); setStage("tunnel"); setMaxHp(hp); setRockHp(hp); track("mine_started",{attempt:save.digs+1,biome:save.biome}); };
+  const continueMine = () => { const hp=10+Math.floor(rng.current()*6); rollMineCommentary(ambientCommentaryFor(save.biome)); setFound(null); setPendingOre(null); setPendingTrue(null); setVolatileResolution(null); setFractures([]); setStage("tunnel"); setMaxHp(hp); setRockHp(hp); track("mine_started",{attempt:save.digs+1,biome:save.biome}); };
   const snortDust=(id:BerserkModeId)=>{if(currentBerserk)return setToast({name:"PEON ALREADY CHEMICALLY MOTIVATED",text:"Wait for the current workplace incident to subside."});const result=activateBerserk(save.dust,id);if(!result)return setToast({name:"INSUFFICIENT SPECIMEN DUST",text:"Produce more duplicates. Grind them finer."});const mode=berserkMode(id)!;setSave(s=>{const live=activateBerserk(s.dust,id);return live?{...s,dust:live.dust,dustSpent:s.dustSpent+live.dustSpent,activeBerserk:live.active}:s});setBerserkNow(Date.now());setToast({name:`${mode.name} ENGAGED`,text:`PEON: “${mode.activationLine}”`});track("berserk_activated",{mode:id,cost:mode.cost,duration_ms:mode.durationMs,dust_before:save.dust})};
+
+  const leaveVolatile=()=>{const encounter=save.volatileEncounter;if(!encounter)return;setSave(s=>{if(!s.volatileEncounter)return s;const veinDigsRemaining=Math.max(0,s.veinDigsRemaining-1),veinExpired=s.veinDigsRemaining>0&&veinDigsRemaining===0;return {...s,digs:s.digs+1,lastDigAt:Date.now(),volatileEncounter:null,volatileStats:{...s.volatileStats,left:s.volatileStats.left+1},pendingArtifactModifier:null,veinDigsRemaining,veinOre:veinExpired?null:s.veinOre}});sessionDigs.current++;setSessionDigsCount(c=>c+1);setSessionDrought(0);track("volatile_ore_left",{ore_id:encounter.oreId,biome:encounter.mine,attempt:encounter.startedAtDig});continueMine()};
+  const digVolatile=()=>{const encounter=save.volatileEncounter;if(!encounter)return;const success=volatileExtractionSucceeds(rng.current);if(success){const reward=createVolatileSuccessReward(encounter.oreId,rng.current);setSave(s=>{if(!s.volatileEncounter)return s;const mineralResources={...s.mineralResources},mineralCounts={...s.minerals};reward.mineralIds.forEach(id=>{mineralResources[id]=(mineralResources[id]||0)+1;mineralCounts[id]=(mineralCounts[id]||0)+1});const veinDigsRemaining=Math.max(0,s.veinDigsRemaining-1),veinExpired=s.veinDigsRemaining>0&&veinDigsRemaining===0;return {...s,digs:s.digs+1,lastDigAt:Date.now(),ores:{...s.ores,[reward.oreId]:(s.ores[reward.oreId]||0)+reward.oreQuantity},oreResources:{...s.oreResources,[reward.oreId]:(s.oreResources[reward.oreId]||0)+reward.oreQuantity},minerals:mineralCounts,mineralResources,volatileEncounter:null,volatileStats:{...s.volatileStats,attempted:s.volatileStats.attempted+1,succeeded:s.volatileStats.succeeded+1},pendingArtifactModifier:null,veinDigsRemaining,veinOre:veinExpired?null:s.veinOre}});setVolatileResolution({kind:"success",oreId:reward.oreId,oreQuantity:reward.oreQuantity,mineralIds:[...reward.mineralIds]});track("volatile_ore_success",{ore_id:reward.oreId,biome:encounter.mine,quantity:reward.oreQuantity,mineral_ids:reward.mineralIds})}else{const losses=createVolatileDetonationLosses(save.oreResources,ores.map(ore=>ore.id),rng.current);setSave(s=>{if(!s.volatileEncounter)return s;const oreResources={...s.oreResources};losses.forEach(loss=>{oreResources[loss.oreId]=Math.max(0,(oreResources[loss.oreId]||0)-loss.quantity)});const veinDigsRemaining=Math.max(0,s.veinDigsRemaining-1),veinExpired=s.veinDigsRemaining>0&&veinDigsRemaining===0;return {...s,digs:s.digs+1,lastDigAt:Date.now(),oreResources,volatileEncounter:null,volatileStats:{...s.volatileStats,attempted:s.volatileStats.attempted+1,detonated:s.volatileStats.detonated+1},pendingArtifactModifier:null,veinDigsRemaining,veinOre:veinExpired?null:s.veinOre}});setVolatileResolution({kind:"detonation",oreId:encounter.oreId,losses});playImpact("crit");track("volatile_ore_detonated",{ore_id:encounter.oreId,biome:encounter.mine,losses})}sessionDigs.current++;setSessionDigsCount(c=>c+1);setSessionDrought(0)};
 
   const selectForbiddenFirst=(direction:FirstDirection)=>{if(tunnelInputPhase!=="select"||Date.now()<tunnelReadyAt.current||tunnelInputLocked.current)return;tunnelInputLocked.current=true;const current=save.forbiddenTunnel;if(!current||current.chamber!=="first"){tunnelInputLocked.current=false;return}const result=selectFirstPath(current,direction,rng.current);setSave(s=>s.forbiddenTunnel?.id===current.id&&s.forbiddenTunnel.chamber==="first"?{...s,forbiddenTunnel:result.tunnel,pendingArtifactModifier:result.modifier||s.pendingArtifactModifier,forbiddenContractSeen:true,tunnelChoices:{...s.tunnelChoices,[direction]:s.tunnelChoices[direction]+1}}:s);const outcome=current.firstAssignments[direction];track("forbidden_tunnel_first_path_selected",{biome:save.biome,direction,assigned_outcome:outcome,session_dig:sessionDigs.current,seeded_test:!!seed});track("forbidden_tunnel_first_outcome",{outcome});if(outcome==="x5")track("forbidden_tunnel_second_chamber_reached",{biome:save.biome});else if(result.modifier)track("artifact_modifier_activated",{modifier:result.modifier.chance,source:result.modifier.source});setTimeout(()=>{tunnelInputLocked.current=false},0)};
   const selectForbiddenSecond=(direction:SecondDirection)=>{if(tunnelInputPhase!=="select"||Date.now()<tunnelReadyAt.current||tunnelInputLocked.current)return;tunnelInputLocked.current=true;const current=save.forbiddenTunnel;if(!current||current.chamber!=="second"){tunnelInputLocked.current=false;return}const result=selectSecondPath(current,direction);setSave(s=>s.forbiddenTunnel?.id===current.id&&s.forbiddenTunnel.chamber==="second"?{...s,forbiddenTunnel:result.tunnel,pendingArtifactModifier:result.modifier}:s);const outcome=current.secondAssignments?.[direction];track("forbidden_tunnel_second_path_selected",{biome:save.biome,direction,assigned_outcome:outcome,session_dig:sessionDigs.current,seeded_test:!!seed});track(outcome==="deep"?"forbidden_tunnel_deep_way":"forbidden_tunnel_sealed_passage",{modifier:result.modifier?.chance});if(result.modifier)track("artifact_modifier_activated",{modifier:result.modifier.chance,source:result.modifier.source});setTimeout(()=>{tunnelInputLocked.current=false},0)};
@@ -566,7 +576,7 @@ export default function Home() {
   }
 
   const strike = (point?:{x:number;y:number}) => {
-    if (found||assayTransfer||trueFind||save.gameCompleted||save.forbiddenTunnel||tunnelInputPhase!=="mining") return;
+    if (found||assayTransfer||trueFind||save.gameCompleted||save.forbiddenTunnel||save.volatileEncounter||stage==="volatile"||tunnelInputPhase!=="mining") return;
     const strikePoint=point||{x:50,y:48};
     setHitPoint(strikePoint);
 
@@ -644,6 +654,9 @@ export default function Home() {
       const band = depthBand(maxHp);
       const weights = applyVein(depthWeights(save.biome, band), save.veinOre);
       const ore = pick(ores,rng.current,weights);
+      if(shouldTriggerVolatile(save.biome,rng.current)){
+        const volatileEncounter:VolatileEncounter={oreId:ore.id,mine:save.biome,startedAtDig:save.digs+1};emptyDigStreak.current=0;setPendingOre(null);setFractures([]);setVolatileResolution(null);setStage("volatile");setSave(s=>({...s,volatileEncounter,volatileStats:{...s.volatileStats,encountered:s.volatileStats.encountered+1}}));playImpact("clank");track("volatile_ore_triggered",{ore_id:ore.id,biome:save.biome,chance:VOLATILE_TRIGGER_RATES[save.biome],attempt:save.digs+1});return;
+      }
       emptyDigStreak.current=0;
       playImpact(impactKind??"clank");
       setFractures([]);
@@ -722,7 +735,7 @@ export default function Home() {
       if(tab==="mine")event.preventDefault();
       if(event.repeat||spaceHeld.current)return;
       spaceHeld.current=true;
-      if(tab === "mine" && !found && !trueFind && !save.forbiddenTunnel && tunnelInputPhase==="mining"){
+      if(tab === "mine" && !found && !trueFind && !save.forbiddenTunnel && !save.volatileEncounter && stage!=="volatile" && tunnelInputPhase==="mining"){
         strikeRef.current();
         const tool=forgedItems.find(t=>t.id===save.equippedTool);
         if(tool?.holdToMine&&tool.continuousMining){const frenzy=activeBerserkMode(save.activeBerserk);setMiningEngaged(true);autoMineTimer.current=setInterval(()=>strikeRef.current(),Math.max(36,Math.round((tool.intervalMs||tool.actionDurationMs)*(frenzy?.intervalMultiplier||1))));}
@@ -735,7 +748,7 @@ export default function Home() {
     window.addEventListener("blur",releaseSpace);
     return () => {window.removeEventListener("keydown", onKey);window.removeEventListener("keyup",onKeyUp);window.removeEventListener("blur",releaseSpace);if(autoMineTimer.current)clearInterval(autoMineTimer.current)};
   // eslint-disable-next-line react-hooks/exhaustive-deps -- same activeBerserk transition guarantee as the expiry-countdown effect above (activateBerserk() always returns a fresh object; snortDust()'s guard prevents overlapping activations), so `.expiresAt` is a complete proxy for the object identity change that would actually need to re-arm this listener.
-  },[tab,save.equippedTool,save.activeBerserk?.expiresAt,save.forbiddenTunnel,found,trueFind,tunnelInputPhase]);
+  },[tab,save.equippedTool,save.activeBerserk?.expiresAt,save.forbiddenTunnel,save.volatileEncounter,stage,found,trueFind,tunnelInputPhase]);
 
   const unique = Object.keys(save.combos).length;
   const activeSkin=toolSkin(save.toolSkinId,save.unlocks);
@@ -833,6 +846,7 @@ export default function Home() {
     {trueFind && <TrueReveal data={trueFind} reducedMotion={save.settings.reducedMotion} onContinue={()=>{setTrueFind(null);continueMine();}} />}
     {ghostEntry && <GhostEntry reducedMotion={save.settings.reducedMotion} onContinue={()=>{setGhostEntry(false);setSave(s=>({...s,ghostEntrySeen:true}));rollMineCommentary(GHOST_MINE_AMBIENT_COMMENTARY);}} />}
     {save.forbiddenTunnel&&<ForbiddenTunnelEncounter state={save.forbiddenTunnel} inputPhase={tunnelInputPhase} contractCallback={!save.forbiddenContractSeen} reducedMotion={save.settings.reducedMotion} onFirst={selectForbiddenFirst} onSecond={selectForbiddenSecond} onContinue={()=>{setSave(s=>({...s,forbiddenTunnel:null}));setTab("mine");continueMine()}}/>}
+    {stage==="volatile"&&(save.volatileEncounter||volatileResolution)&&<VolatileOreEncounter encounter={save.volatileEncounter} resolution={volatileResolution} onLeave={leaveVolatile} onDig={digVolatile} onContinue={continueMine}/>}
     {deepWayFailure&&!found&&<div className="deep-way-failure" role="dialog" aria-modal="true"><section><small>SYSTEM / FOREMAN</small><h2>THE DEEP WAY HAS RETURNED NOTHING.</h2><p>Statistically survivable. Spiritually ruinous.</p><blockquote><b>PEON</b> “Peon saw fifteen percent. Peon trusted fifteen percent.”</blockquote><button onClick={()=>{setDeepWayFailure(false);continueMine()}}>KEEP DIGGING</button></section></div>}
     {found && <Reveal found={found} total={unique} attempt={save.digs} biome={save.biome} onContinue={continueMine} />}
       {duplicateNotice&&<div key={duplicateNotice.id} className="duplicate-float" role="status" aria-live="polite"><span>DUPLICATE ×{duplicateNotice.count}</span><strong>{discoveryOreName(duplicateNotice.ore)} + {duplicateNotice.mineral.name}</strong><small>+{duplicateNotice.dust} SPECIMEN DUST</small></div>}
@@ -844,6 +858,33 @@ export default function Home() {
     {toast&&<AchievementToast toast={toast} onDismiss={()=>setToast(null)}/>}
     {savePulse&&<div className="local-save-pulse" role="status" aria-live="polite"><i>✓</i><span>PROGRESS SAVED LOCALLY</span></div>}
   </main>;
+}
+
+function VolatileOreEncounter({encounter,resolution,onLeave,onDig,onContinue}:{encounter:VolatileEncounter|null;resolution:VolatileResolution|null;onLeave:()=>void;onDig:()=>void;onContinue:()=>void}){
+  const oreId=encounter?.oreId||resolution?.oreId||"";
+  const ore=ores.find(candidate=>candidate.id===oreId);
+  const mineralName=(id:string)=>minerals.find(candidate=>candidate.id===id)?.name||id;
+  if(!ore)return null;
+  return <div className={`volatile-overlay ${resolution?`resolved ${resolution.kind}`:"decision"}`} role="dialog" aria-modal="true" aria-labelledby="volatile-title">
+    <section className="volatile-card">
+      {!resolution?<>
+        <div className="volatile-alert"><small>SYSTEM / GEOLOGICAL HAZARD</small><h2 id="volatile-title">VOLATILE DEPOSIT DETECTED.</h2><p>UNSTABLE MATERIAL SIGNATURE · {ore.name.toUpperCase()}</p></div>
+        <div className="volatile-body">
+          <div className="volatile-specimen"><i/><img src={oreAsset(ore.id)} alt={ore.name}/><strong>VOLATILE {ore.name.toUpperCase()}</strong><span>DO NOT JOSTLE · DO NOT LICK</span></div>
+          <div className="volatile-transcript"><blockquote><b>PEON</b> “Boss... rock shaking.”</blockquote><p><b>SYSTEM</b> Extraction may produce an abnormal yield.<br/><strong>Failure may decimate current stock.</strong></p><blockquote><b>PEON</b> “More rock... or boom?”</blockquote></div>
+        </div>
+        <div className="volatile-actions"><button onClick={onLeave}>LEAVE IT</button><button className="danger" onClick={onDig}>DIG IT</button></div>
+      </>:resolution.kind==="success"?<>
+        <div className="volatile-alert success"><small>UNSTABLE EXTRACTION REPORT</small><h2 id="volatile-title">VOLATILE EXTRACTION SUCCESSFUL</h2><p>GREED HAS BEEN TEMPORARILY VALIDATED.</p></div>
+        <div className="volatile-result"><img src={oreAsset(ore.id)} alt=""/><strong>{ore.name} ×{resolution.oreQuantity}</strong><div>{resolution.mineralIds.map(id=><span key={id}>{mineralName(id)} <b>×1</b></span>)}</div></div>
+        <div className="volatile-actions single"><button onClick={onContinue}>RESUME MINING →</button></div>
+      </>:<>
+        <div className="volatile-alert detonation"><small>BLAST RADIUS INVENTORY REPORT</small><h2 id="volatile-title">DETONATION</h2><p>VOLUNTARY GEOLOGICAL NEGLIGENCE CONFIRMED.</p></div>
+        <div className="volatile-result losses"><strong>{ore.name.toUpperCase()} LOST</strong>{resolution.losses.length?<div>{resolution.losses.map(loss=><span key={loss.oreId}>{ores.find(candidate=>candidate.id===loss.oreId)?.name||loss.oreId} <b>−{loss.quantity}</b></span>)}</div>:<p>BLAST RADIUS CONTAINED — NO ORDINARY ORE STOCK AVAILABLE.</p>}</div>
+        <div className="volatile-actions single"><button onClick={onContinue}>INSPECT REMAINING LIMBS →</button></div>
+      </>}
+    </section>
+  </div>;
 }
 
 function EndgameExperience({save,startAtCompletion,onFinished,onView,onNewGame}:{save:Save;startAtCompletion:boolean;onFinished:()=>void;onView:()=>void;onNewGame:()=>void}){

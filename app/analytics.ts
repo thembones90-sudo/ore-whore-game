@@ -13,7 +13,9 @@ export type AnalyticsEvent =
   | "artifact_modifier_consumed" | "artifact_modifier_roll_failed"
   | "artifact_won_from_modified_dig" | "true_artifact_encounter_started"
   | "asoc_ticket_triggered" | "resource_earned" | "resource_processed"
-  | "tool_forged" | "tool_auto_forged" | "recipe_viewed" | "recipe_blocked";
+  | "tool_forged" | "tool_auto_forged" | "recipe_viewed" | "recipe_blocked"
+  | "volatile_ore_triggered" | "volatile_ore_left" | "volatile_ore_success"
+  | "volatile_ore_detonated";
 
 const started = Date.now();
 export function track(event: AnalyticsEvent, context: Record<string, unknown> = {}) {

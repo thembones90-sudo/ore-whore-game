@@ -14,8 +14,8 @@ test("Forbidden Tunnel uses an explicit 2.5 second discovery input phase",()=>{
 });
 
 test("mining and both tunnel selectors reject input outside TUNNEL_SELECT",()=>{
-  assert.match(page,/save\.forbiddenTunnel\|\|tunnelInputPhase!=="mining"/);
-  assert.match(page,/!save\.forbiddenTunnel && tunnelInputPhase==="mining"/);
+  assert.match(page,/save\.forbiddenTunnel\|\|save\.volatileEncounter\|\|stage==="volatile"\|\|tunnelInputPhase!=="mining"/);
+  assert.match(page,/!save\.forbiddenTunnel && !save\.volatileEncounter && stage!=="volatile" && tunnelInputPhase==="mining"/);
   assert.equal((page.match(/tunnelInputPhase!=="select"\|\|Date\.now\(\)<tunnelReadyAt\.current/g)||[]).length,2);
 });
 
