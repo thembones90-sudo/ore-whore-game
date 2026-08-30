@@ -14,6 +14,8 @@ import { activeBerserkMode, activateBerserk, berserkMode, berserkRemainingMs, BE
 import { CREDITS, LAST_FIND_PAGES, type CompletionRecord } from "./endgame";
 import { EMPTY_MEMORY_STATE, EMPTY_TUNNEL_HISTORY, sanitizeMemoryState, sanitizeTunnelHistory, selectSaveAwareCommentary, type MemoryCommentaryState, type MemoryContext, type MemoryLine, type TunnelChoiceHistory } from "./save-aware-commentary";
 import { createVolatileDetonationLosses, createVolatileSuccessReward, EMPTY_VOLATILE_STATS, sanitizeVolatileEncounter, sanitizeVolatileStats, shouldTriggerVolatile, volatileExtractionSucceeds, VOLATILE_TRIGGER_RATES, type VolatileDetonationLoss, type VolatileEncounter, type VolatileStats } from "./volatile-ores";
+import { addWallDamageMark, type WallDamageMark, type WallHitKind } from "./wall-damage";
+import { ORE_OF_WISDOM_AFTERTHOUGHT, ORE_OF_WISDOM_CHANCE, ORE_OF_WISDOM_INVOCATION, rollOreOfWisdom, type OreOfWisdomEncounter } from "./ore-of-wisdom";
 
 type Rarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Mythic";
 type AchievementTier = "steel" | "gold" | "silver";
@@ -359,13 +361,18 @@ export default function Home() {
   const [miningEngaged,setMiningEngaged]=useState(false);
   const [quotaExpanded,setQuotaExpanded]=useState(false);
   const [hitPoint, setHitPoint] = useState({x:50,y:48});
-  const [fractures,setFractures]=useState<{id:number;x:number;y:number;power:number}[]>([]);
+  const wallDegradationStage=mineDepletionLevel(save,save.biome);
+  const wallDamageScope=`${save.biome}:${wallDegradationStage}`;
+  const [wallDamage,setWallDamage]=useState<{scope:string;marks:WallDamageMark[]}>({scope:wallDamageScope,marks:[]});
+  const clearWallDamage=()=>setWallDamage({scope:wallDamageScope,marks:[]});
   const [collapseBurst,setCollapseBurst]=useState<{id:number;x:number;y:number}|null>(null);
   const [found, setFound] = useState<{ ore: Item; mineral: Item; isNew: boolean; count: number } | null>(null);
   const [assayTransfer,setAssayTransfer]=useState<{ore:Item;mineral:Item}|null>(null);
   const [emptyNotice,setEmptyNotice]=useState<{id:number;result:string;insult:string}|null>(null);
   const [trueFind,setTrueFind]=useState<{artifact:TrueArtifact;digNumber:number}|null>(null);
   const [volatileResolution,setVolatileResolution]=useState<VolatileResolution|null>(null);
+  const [wisdomEncounter,setWisdomEncounter]=useState<OreOfWisdomEncounter|null>(null);
+  const [pendingWisdomEncounter,setPendingWisdomEncounter]=useState<OreOfWisdomEncounter|null>(null);
   const [ghostEntry,setGhostEntry]=useState(false);
   const [pendingTrue,setPendingTrue]=useState<{artifact:TrueArtifact;trigger:"empty"|"ore"}|null>(null);
   const [duplicateNotice,setDuplicateNotice]=useState<{id:number;ore:Item;mineral:Item;count:number;dust:number}|null>(null);
@@ -568,7 +575,14 @@ export default function Home() {
     return ids.filter(id => !next.achievements.includes(id));
   };
 
-  const continueMine = () => { const hp=10+Math.floor(rng.current()*6); rollMineCommentary(ambientCommentaryFor(save.biome)); setFound(null); setPendingOre(null); setPendingTrue(null); setVolatileResolution(null); setFractures([]); setStage("tunnel"); setMaxHp(hp); setRockHp(hp); track("mine_started",{attempt:save.digs+1,biome:save.biome}); };
+  const continueMine = () => { const hp=10+Math.floor(rng.current()*6); rollMineCommentary(ambientCommentaryFor(save.biome)); setFound(null); setPendingOre(null); setPendingTrue(null); setVolatileResolution(null); setWisdomEncounter(null); setPendingWisdomEncounter(null); clearWallDamage(); setStage("tunnel"); setMaxHp(hp); setRockHp(hp); track("mine_started",{attempt:save.digs+1,biome:save.biome}); };
+  const continueAfterDiscovery=()=>{
+    const wisdom=pendingWisdomEncounter;
+    setPendingWisdomEncounter(null);
+    if(wisdom){setFound(null);setWisdomEncounter(wisdom);return}
+    continueMine();
+  };
+  const closeWisdom=()=>{setWisdomEncounter(null);continueMine()};
   const snortDust=(id:BerserkModeId)=>{if(currentBerserk)return setToast({name:"PEON ALREADY CHEMICALLY MOTIVATED",text:"Wait for the current workplace incident to subside."});const result=activateBerserk(save.dust,id);if(!result)return setToast({name:"INSUFFICIENT SPECIMEN DUST",text:"Produce more duplicates. Grind them finer."});const mode=berserkMode(id)!;setSave(s=>{const live=activateBerserk(s.dust,id);return live?{...s,dust:live.dust,dustSpent:s.dustSpent+live.dustSpent,activeBerserk:live.active}:s});setBerserkNow(Date.now());setToast({name:`${mode.name} ENGAGED`,text:`PEON: “${mode.activationLine}”`});track("berserk_activated",{mode:id,cost:mode.cost,duration_ms:mode.durationMs,dust_before:save.dust})};
 
   const leaveVolatile=()=>{const encounter=save.volatileEncounter;if(!encounter)return;setSave(s=>{if(!s.volatileEncounter)return s;const veinDigsRemaining=Math.max(0,s.veinDigsRemaining-1),veinExpired=s.veinDigsRemaining>0&&veinDigsRemaining===0;return {...s,digs:s.digs+1,lastDigAt:Date.now(),volatileEncounter:null,volatileStats:{...s.volatileStats,left:s.volatileStats.left+1},pendingArtifactModifier:null,veinDigsRemaining,veinOre:veinExpired?null:s.veinOre}});sessionDigs.current++;setSessionDigsCount(c=>c+1);setSessionDrought(0);track("volatile_ore_left",{ore_id:encounter.oreId,biome:encounter.mine,attempt:encounter.startedAtDig});continueMine()};
@@ -577,7 +591,7 @@ export default function Home() {
   const selectForbiddenFirst=(direction:FirstDirection)=>{if(tunnelInputPhase!=="select"||Date.now()<tunnelReadyAt.current||tunnelInputLocked.current)return;tunnelInputLocked.current=true;const current=save.forbiddenTunnel;if(!current||current.chamber!=="first"){tunnelInputLocked.current=false;return}const result=selectFirstPath(current,direction,rng.current);setSave(s=>s.forbiddenTunnel?.id===current.id&&s.forbiddenTunnel.chamber==="first"?{...s,forbiddenTunnel:result.tunnel,pendingArtifactModifier:result.modifier||s.pendingArtifactModifier,forbiddenContractSeen:true,tunnelChoices:{...s.tunnelChoices,[direction]:s.tunnelChoices[direction]+1}}:s);const outcome=current.firstAssignments[direction];track("forbidden_tunnel_first_path_selected",{biome:save.biome,direction,assigned_outcome:outcome,session_dig:sessionDigs.current,seeded_test:!!seed});track("forbidden_tunnel_first_outcome",{outcome});if(outcome==="x5")track("forbidden_tunnel_second_chamber_reached",{biome:save.biome});else if(result.modifier)track("artifact_modifier_activated",{modifier:result.modifier.chance,source:result.modifier.source});setTimeout(()=>{tunnelInputLocked.current=false},0)};
   const selectForbiddenSecond=(direction:SecondDirection)=>{if(tunnelInputPhase!=="select"||Date.now()<tunnelReadyAt.current||tunnelInputLocked.current)return;tunnelInputLocked.current=true;const current=save.forbiddenTunnel;if(!current||current.chamber!=="second"){tunnelInputLocked.current=false;return}const result=selectSecondPath(current,direction);setSave(s=>s.forbiddenTunnel?.id===current.id&&s.forbiddenTunnel.chamber==="second"?{...s,forbiddenTunnel:result.tunnel,pendingArtifactModifier:result.modifier}:s);const outcome=current.secondAssignments?.[direction];track("forbidden_tunnel_second_path_selected",{biome:save.biome,direction,assigned_outcome:outcome,session_dig:sessionDigs.current,seeded_test:!!seed});track(outcome==="deep"?"forbidden_tunnel_deep_way":"forbidden_tunnel_sealed_passage",{modifier:result.modifier?.chance});if(result.modifier)track("artifact_modifier_activated",{modifier:result.modifier.chance,source:result.modifier.source});setTimeout(()=>{tunnelInputLocked.current=false},0)};
 
-  const beginTrueEncounter=(artifact:TrueArtifact,trigger:"empty"|"ore")=>{const artifactHp=Math.max(60,Math.ceil(maxHp*20)),activeTrueEncounter:ActiveTrueEncounter={artifactId:artifact.id,trigger,hp:artifactHp,maxHp:artifactHp,startedAtDig:save.digs+1};emptyDigStreak.current=0;setMineCommentary(TRUE_ARTIFACT_COMMENTARY);setPendingOre(null);setPendingTrue({artifact,trigger});setFractures([]);setStage("artifact");setMaxHp(artifactHp);setRockHp(artifactHp);setSave(s=>({...s,activeTrueEncounter}));playImpact("clank");track("true_artifact_encounter_started",{artifact_id:artifact.id,attempt:save.digs+1,biome:save.biome,trigger,health_multiplier:20,artifact_hp:artifactHp,tool_id:save.equippedTool});emitGameplayEvent("TRUE_ARTIFACT_ENCOUNTER_STARTED",{artifact_id:artifact.id,trigger,health_multiplier:20,artifact_hp:artifactHp});};
+  const beginTrueEncounter=(artifact:TrueArtifact,trigger:"empty"|"ore")=>{const artifactHp=Math.max(60,Math.ceil(maxHp*20)),activeTrueEncounter:ActiveTrueEncounter={artifactId:artifact.id,trigger,hp:artifactHp,maxHp:artifactHp,startedAtDig:save.digs+1};emptyDigStreak.current=0;setMineCommentary(TRUE_ARTIFACT_COMMENTARY);setPendingOre(null);setPendingTrue({artifact,trigger});clearWallDamage();setStage("artifact");setMaxHp(artifactHp);setRockHp(artifactHp);setSave(s=>({...s,activeTrueEncounter}));playImpact("clank");track("true_artifact_encounter_started",{artifact_id:artifact.id,attempt:save.digs+1,biome:save.biome,trigger,health_multiplier:20,artifact_hp:artifactHp,tool_id:save.equippedTool});emitGameplayEvent("TRUE_ARTIFACT_ENCOUNTER_STARTED",{artifact_id:artifact.id,trigger,health_multiplier:20,artifact_hp:artifactHp});};
   const completeTrueEncounter=()=>{if(!pendingTrue)return;const {artifact,trigger}=pendingTrue,modifier=save.pendingArtifactModifier,trueChance=artifactChanceForDig(modifier,equippedMiningTool(save).trueArtifactChance),firstDiscovery=!save.trueArtifacts[artifact.id];playImpact("crack");
     if(artifact.id===ASOC_TICKET_ID){setSave(s=>{const completedAt=new Date().toISOString(),record=completionRecord(s,completedAt);return {...s,digs:s.digs+1,gameCompleted:true,endingSeen:false,completionCount:s.completionCount+1,asocTickets:s.asocTickets+1,newGamePlusLevel:s.newGamePlusLevel,firstCompletionDate:s.firstCompletionDate||completedAt,latestCompletionDate:completedAt,completionHistory:[...s.completionHistory,record],activeTrueEncounter:null,pendingArtifactModifier:null,lastDigAt:Date.now()}});setPendingTrue(null);setFound(null);setTrueFind(null);setEmptyNotice(null);setDuplicateNotice(null);setToast(null);setMilestone(null);setMineCompletion(null);setEndingActive(true);track("true_artifact_found",{artifact_id:ASOC_TICKET_ID,attempt:save.digs+1,biome:save.biome,tool_id:save.equippedTool,true_artifact_chance:ASOC_TICKET_CHANCE,endgame:true});emitGameplayEvent("TRUE_ARTIFACT_FOUND",{artifact_id:artifact.id,trigger,tool_id:save.equippedTool,health_multiplier:20});return;}
     setSave(s=>{const digNumber=s.digs+1,isFirst=!s.trueArtifacts[artifact.id],veinDigsRemaining=Math.max(0,s.veinDigsRemaining-1),veinExpired=s.veinDigsRemaining>0&&veinDigsRemaining===0;if(veinExpired)emitGameplayEvent("VEIN_EXPIRED",{ore:s.veinOre});if(isFirst)setTrueFind({artifact,digNumber});const unlocks=isFirst&&artifact.rewardSkinId?[...new Set([...s.unlocks,artifact.rewardSkinId])]:s.unlocks;return {...s,digs:digNumber,unlocks,trueArtifacts:{...s.trueArtifacts,[artifact.id]:1},trueFirst:isFirst?{...s.trueFirst,[artifact.id]:digNumber}:s.trueFirst,activeTrueEncounter:null,pendingArtifactModifier:null,lastDigAt:Date.now(),veinDigsRemaining,veinOre:veinExpired?null:s.veinOre}});if(firstDiscovery&&artifact.rewardSkinId)setToast({name:"PICKAXE SKIN UNLOCKED — ALIJA'S SHOVEL",text:"Permanent cosmetic added to the Pickaxe Rack. Technology stats remain unchanged."});sessionDigs.current++;setSessionDigsCount(c=>c+1);setPendingTrue(null);if(modifier){track("artifact_modifier_consumed",{modifier:modifier.chance,source:modifier.source,success:true});track("artifact_won_from_modified_dig",{artifact_id:artifact.id,modifier:modifier.chance,source:modifier.source})}track("true_artifact_found",{artifact_id:artifact.id,attempt:save.digs+1,biome:save.biome,trigger,tool_id:save.equippedTool,true_artifact_chance:trueChance,health_multiplier:20});emitGameplayEvent("TRUE_ARTIFACT_FOUND",{artifact_id:artifact.id,trigger,tool_id:save.equippedTool,health_multiplier:20});};
@@ -612,7 +626,7 @@ export default function Home() {
   }
 
   const strike = (point?:{x:number;y:number}) => {
-    if (found||assayTransfer||trueFind||save.gameCompleted||save.forbiddenTunnel||save.volatileEncounter||stage==="volatile"||tunnelInputPhase!=="mining") return;
+    if (found||assayTransfer||trueFind||wisdomEncounter||pendingWisdomEncounter||save.gameCompleted||save.forbiddenTunnel||save.volatileEncounter||stage==="volatile"||tunnelInputPhase!=="mining") return;
     const strikePoint=point||{x:50,y:48};
     setHitPoint(strikePoint);
 
@@ -669,7 +683,7 @@ export default function Home() {
     }
 
     const hit = rockHp - damage;
-    setFractures(current=>[...current.slice(-11),{id:++fractureId.current,x:strikePoint.x,y:strikePoint.y,power:damage}]);
+    setWallDamage(current=>({scope:wallDamageScope,marks:addWallDamageMark(current.scope===wallDamageScope?current.marks:[],{id:++fractureId.current,x:strikePoint.x,y:strikePoint.y,kind:hitKind as WallHitKind})}));
     if(hit<=0){setCollapseBurst({id:fractureId.current,x:strikePoint.x,y:strikePoint.y});if(collapseTimer.current)clearTimeout(collapseTimer.current);collapseTimer.current=setTimeout(()=>setCollapseBurst(null),460)}
     setImpact(Date.now());
     setTimeout(() => setImpact(null), 430);
@@ -691,11 +705,11 @@ export default function Home() {
       const weights = applyVein(depthWeights(save.biome, band), save.veinOre);
       const ore = pick(ores,rng.current,weights);
       if(shouldTriggerVolatile(save.biome,rng.current)){
-        const volatileEncounter:VolatileEncounter={oreId:ore.id,mine:save.biome,startedAtDig:save.digs+1};emptyDigStreak.current=0;setPendingOre(null);setFractures([]);setVolatileResolution(null);setStage("volatile");setSave(s=>({...s,volatileEncounter,volatileStats:{...s.volatileStats,encountered:s.volatileStats.encountered+1}}));playImpact("clank");track("volatile_ore_triggered",{ore_id:ore.id,biome:save.biome,chance:VOLATILE_TRIGGER_RATES[save.biome],attempt:save.digs+1});return;
+        const volatileEncounter:VolatileEncounter={oreId:ore.id,mine:save.biome,startedAtDig:save.digs+1};emptyDigStreak.current=0;setPendingOre(null);clearWallDamage();setVolatileResolution(null);setStage("volatile");setSave(s=>({...s,volatileEncounter,volatileStats:{...s.volatileStats,encountered:s.volatileStats.encountered+1}}));playImpact("clank");track("volatile_ore_triggered",{ore_id:ore.id,biome:save.biome,chance:VOLATILE_TRIGGER_RATES[save.biome],attempt:save.digs+1});return;
       }
       emptyDigStreak.current=0;
       playImpact(impactKind??"clank");
-      setFractures([]);
+      clearWallDamage();
       setPendingOre(ore);
       rollMineCommentary(eligibleOreCommentary(ore.rarity));
       setStage("ore");
@@ -716,6 +730,8 @@ export default function Home() {
     const isNewResult=!save.combos[key],duplicateCount=(save.combos[key]||0)+1,modifier=save.pendingArtifactModifier;
     const veinRoll=rng.current()<VEIN_CHANCE,quotaWouldComplete=!biomeQuotaComplete(save,save.biome)&&biomePages[save.biome].every(id=>(save.ores[id]||0)+(id===ore.id?1:0)>=oreQuota(id));
     const tunnelEligible=canTriggerForbiddenTunnel(save,!isNewResult&&!veinRoll&&!quotaWouldComplete),tunnel=tunnelEligible&&rng.current()<FORBIDDEN_TUNNEL_TRIGGER_CHANCE?createForbiddenTunnel(rng.current,`${save.digs+1}-${Math.floor(rng.current()*1e9)}`):null;
+    const wisdomRoll=!veinRoll&&!quotaWouldComplete&&!tunnel?rollOreOfWisdom(rng.current):null;
+    if(wisdomRoll){setPendingWisdomEncounter(wisdomRoll);track("ore_of_wisdom_triggered",{biome:save.biome,attempt:save.digs+1,chance:ORE_OF_WISDOM_CHANCE})}
     playImpact(impactKind??"crack");
     setSave(s => {
       const isNew = !s.combos[key];
@@ -755,7 +771,7 @@ export default function Home() {
     if(tunnel)track("forbidden_tunnel_triggered",{biome:save.biome,session_dig:sessionDigs.current,seeded_test:!!seed});
     if(!isNewResult){
       setDuplicateNotice({id:++duplicateNoticeId.current,ore,mineral,count:duplicateCount,dust:dustByRarity[mineral.rarity]});
-      continueMine();
+      if(wisdomRoll){setPendingWisdomEncounter(null);setWisdomEncounter(wisdomRoll)}else continueMine();
     }
   };
   useEffect(()=>{strikeRef.current=strike});
@@ -771,7 +787,7 @@ export default function Home() {
       if(tab==="mine")event.preventDefault();
       if(event.repeat||spaceHeld.current)return;
       spaceHeld.current=true;
-      if(tab === "mine" && !found && !trueFind && !save.forbiddenTunnel && !save.volatileEncounter && stage!=="volatile" && tunnelInputPhase==="mining"){
+      if(tab === "mine" && !found && !trueFind && !wisdomEncounter && !pendingWisdomEncounter && !save.forbiddenTunnel && !save.volatileEncounter && stage!=="volatile" && tunnelInputPhase==="mining"){
         strikeRef.current();
         const tool=forgedItems.find(t=>t.id===save.equippedTool);
         if(tool?.holdToMine&&tool.continuousMining){const frenzy=activeBerserkMode(save.activeBerserk);setMiningEngaged(true);autoMineTimer.current=setInterval(()=>strikeRef.current(),Math.max(36,Math.round((tool.intervalMs||tool.actionDurationMs)*(frenzy?.intervalMultiplier||1))));}
@@ -784,7 +800,7 @@ export default function Home() {
     window.addEventListener("blur",releaseSpace);
     return () => {window.removeEventListener("keydown", onKey);window.removeEventListener("keyup",onKeyUp);window.removeEventListener("blur",releaseSpace);if(autoMineTimer.current)clearInterval(autoMineTimer.current)};
   // eslint-disable-next-line react-hooks/exhaustive-deps -- same activeBerserk transition guarantee as the expiry-countdown effect above (activateBerserk() always returns a fresh object; snortDust()'s guard prevents overlapping activations), so `.expiresAt` is a complete proxy for the object identity change that would actually need to re-arm this listener.
-  },[tab,save.equippedTool,save.activeBerserk?.expiresAt,save.forbiddenTunnel,save.volatileEncounter,stage,found,trueFind,tunnelInputPhase]);
+  },[tab,save.equippedTool,save.activeBerserk?.expiresAt,save.forbiddenTunnel,save.volatileEncounter,stage,found,trueFind,wisdomEncounter,pendingWisdomEncounter,tunnelInputPhase]);
 
   const unique = Object.keys(save.combos).length;
   const activeSkin=toolSkin(save.toolSkinId,save.unlocks);
@@ -792,7 +808,7 @@ export default function Home() {
   const hasSuccessfulExtraction=Object.values(save.ores).some(count=>count>0);
   const showStrikeInstruction=stage==="artifact"||(stage==="tunnel"&&!hasSuccessfulExtraction);
   const reset = () => setConfirmNewGame(true);
-  const startNewGame=()=>{localStorage.removeItem("ore-whore-save-v1");setSave({...blank,runStartedAt:Date.now()});setConfirmNewGame(false);setConfirmNewGamePlus(false);setCompletedBrowsing(false);setEndingActive(false);setTrueFind(null);setPendingTrue(null);setFound(null);setAssayTransfer(null);setPendingOre(null);setEmptyNotice(null);setDuplicateNotice(null);setToast(null);setMilestone(null);setMineCompletion(null);setGhostEntry(false);setDeepWayFailure(false);setBerserkOpen(false);setFractures([]);setCollapseBurst(null);setTab("mine");setStage("tunnel");setMaxHp(12);setRockHp(12);setOnboarding(true);setFirstPeonMoment(false);sessionDigs.current=0;setSessionDigsCount(0);setSessionMisses(0);setSessionVeins(0);setSessionNew(0);setSessionDrought(0);setSessionLongestDrought(0);consecutiveMisses.current=0;emptyDigStreak.current=0;rollMineCommentary(NORMAL_DIGGING_COMMENTARY)};
+  const startNewGame=()=>{localStorage.removeItem("ore-whore-save-v1");setSave({...blank,runStartedAt:Date.now()});setConfirmNewGame(false);setConfirmNewGamePlus(false);setCompletedBrowsing(false);setEndingActive(false);setTrueFind(null);setPendingTrue(null);setFound(null);setAssayTransfer(null);setPendingOre(null);setEmptyNotice(null);setDuplicateNotice(null);setToast(null);setMilestone(null);setMineCompletion(null);setGhostEntry(false);setDeepWayFailure(false);setBerserkOpen(false);clearWallDamage();setCollapseBurst(null);setTab("mine");setStage("tunnel");setMaxHp(12);setRockHp(12);setOnboarding(true);setFirstPeonMoment(false);sessionDigs.current=0;setSessionDigsCount(0);setSessionMisses(0);setSessionVeins(0);setSessionNew(0);setSessionDrought(0);setSessionLongestDrought(0);consecutiveMisses.current=0;emptyDigStreak.current=0;rollMineCommentary(NORMAL_DIGGING_COMMENTARY)};
   const startNewGamePlus=()=>{setSave(s=>({...blank,playerName:s.playerName,employmentAgreementSigned:true,employmentGreetingSeen:true,settings:s.settings,unlocks:s.unlocks,equipped:s.equipped,toolSkinId:s.toolSkinId,achievements:s.achievements,completionCount:s.completionCount,asocTickets:s.asocTickets,newGamePlusLevel:s.newGamePlusLevel+1,firstCompletionDate:s.firstCompletionDate,latestCompletionDate:s.latestCompletionDate,completionHistory:s.completionHistory,runStartedAt:Date.now()}));setConfirmNewGamePlus(false);setCompletedBrowsing(false);setEndingActive(false);setTrueFind(null);setPendingTrue(null);setFound(null);setEmptyNotice(null);setDuplicateNotice(null);setToast(null);setMilestone(null);setMineCompletion(null);setBerserkOpen(false);setTab("mine");setStage("tunnel");setMaxHp(12);setRockHp(12);setPendingOre(null);setWormholeTransition(false);setWormholeArrival(true);rollMineCommentary(NORMAL_DIGGING_COMMENTARY);};
   // Confirming NG+ no longer resets immediately: it enters a short, local-only
   // transition first (the actual wormhole event), and only THAT transition's
@@ -842,9 +858,9 @@ export default function Home() {
       {save.veinOre&&<div className="vein-banner"><span>VEIN EXPOSED</span><strong>{ghostOreConcealed(save,save.veinOre)?"UNKNOWN ORE":ores.find(o=>o.id===save.veinOre)?.name}</strong><small>{save.veinDigsRemaining} {save.veinDigsRemaining===1?"DIG":"DIGS"} REMAIN</small></div>}
       {save.pendingArtifactModifier&&!save.pendingArtifactModifier.consumed&&<div className={`artifact-modifier-hud ${save.pendingArtifactModifier.chance===.15?"deep-way":""}`}><small>{save.pendingArtifactModifier.chance===.15?"THE DEEP WAY AWAITS":"FORBIDDEN TUNNEL MODIFIER"}</small><strong>TRUE ARTIFACT CHANCE: {(save.pendingArtifactModifier.chance*100).toFixed(save.pendingArtifactModifier.chance<.01?2:0)}%</strong><span>NEXT COMPLETED DIG · NOT GUARANTEED</span></div>}
       <div className={`berserk-console ${currentBerserk?"running":""} ${berserkOpen||currentBerserk?"expanded":""}`} aria-label="Specimen Dust Berserk skill">
-        <button className="berserk-skill" aria-expanded={berserkOpen||!!currentBerserk} aria-controls="berserk-loadout" onClick={()=>!currentBerserk&&setBerserkOpen(open=>!open)}><span>✦</span><small>BERSERK</small><strong>{currentBerserk?`${Math.ceil(berserkRemainingMs(save.activeBerserk,berserkNow)/1000)}s`:save.dust}</strong><em>{currentBerserk?"ACTIVE":"DUST"}</em></button>
+        <button className="berserk-skill" aria-expanded={berserkOpen||!!currentBerserk} aria-controls="berserk-loadout" aria-label={currentBerserk?`${currentBerserk.name} active`:`Open Berserk controls. ${save.dust} Specimen Dust available`} onClick={()=>!currentBerserk&&setBerserkOpen(open=>!open)}><span className="berserk-icon" aria-hidden="true"><i/><b/></span><small>{currentBerserk?currentBerserk.name:"BERSERK"}</small><strong>{currentBerserk?`${Math.ceil(berserkRemainingMs(save.activeBerserk,berserkNow)/1000)}s`:save.dust}</strong><em>{currentBerserk?"ACTIVE":"DUST"}</em></button>
         {currentBerserk&&save.activeBerserk&&<div className="berserk-active-chip" aria-live="polite"><strong>{currentBerserk.name}</strong><i><b style={{height:`${Math.min(100,berserkRemainingMs(save.activeBerserk,berserkNow)/currentBerserk.durationMs*100)}%`}}/></i><span>DMG ×{currentBerserk.damageMultiplier.toFixed(2)}</span><span>CRIT +{Math.round(currentBerserk.criticalBonus*100)}%</span></div>}
-        {berserkOpen&&!currentBerserk&&<div className="berserk-flyout" id="berserk-loadout"><div className="berserk-console-copy"><small>QUESTIONABLE WORKPLACE STIMULANT</small><strong>SNORT THE DUST</strong><span>AVAILABLE DUST · ✦ {save.dust}</span></div><div className="berserk-options">{BERSERK_MODES.map(mode=><button key={mode.id} disabled={save.dust<mode.cost} onClick={()=>{snortDust(mode.id);setBerserkOpen(false)}}><span>{mode.name}</span><b>✦ {mode.cost}</b><small>{Math.round(mode.durationMs/1000)}s · DMG ×{mode.damageMultiplier.toFixed(2)} · CRIT +{Math.round(mode.criticalBonus*100)}%</small></button>)}</div></div>}
+        {berserkOpen&&!currentBerserk&&<div className="berserk-flyout" id="berserk-loadout"><div className="berserk-console-copy"><small>QUESTIONABLE WORKPLACE STIMULANT</small><strong>SNORT THE DUST</strong><span>AVAILABLE DUST · ✦ {save.dust}</span></div><div className="berserk-options">{BERSERK_MODES.map(mode=><button className={`berserk-option berserk-option-${mode.id}`} key={mode.id} disabled={save.dust<mode.cost} onClick={()=>{snortDust(mode.id);setBerserkOpen(false)}}><span>{mode.name}</span><b>✦ {mode.cost}</b><small>{Math.round(mode.durationMs/1000)}s · DMG ×{mode.damageMultiplier.toFixed(2)} · CRIT +{Math.round(mode.criticalBonus*100)}%</small></button>)}</div></div>}
       </div>
       {(()=>{const found=biomeQuotaProgress(save,save.biome),target=biomeQuotaTotal(save.biome),quotaMet=biomeQuotaComplete(save,save.biome),authorized=mineDescentAuthorized(save,save.biome),next=nextBiome(save.biome),required=next?mineRequiredShaftRating[next]:undefined;if(quotaMet&&!quotaExpanded)return <div className="mine-mastery extraction-quota quota-complete-compact"><div><span>{biomeNames[save.biome]} · EXTRACTION CERTIFICATION COMPLETE ✓</span><strong>{found}/{target}</strong></div><small>{authorized?(save.biome==="northrend"?"EXTRACTION COMPLETE · GHOST DESCENT REQUIREMENTS UNDEFINED":"DESCENT AUTHORIZED"):`DESCENT LOCKED · TIER ${required} TOOL REQUIRED`}</small><button onClick={()=>setQuotaExpanded(true)}>VIEW QUOTAS</button></div>;return <div className="mine-mastery extraction-quota"><div><span>{biomeNames[save.biome]} EXTRACTION QUOTA</span><strong>{found} / {target}</strong></div><i><b style={{width:`${Math.min(100,found/target*100)}%`}}/></i><div className="quota-list">{biomePages[save.biome].map(id=>{const ore=ores.find(o=>o.id===id)!,count=Math.min(save.ores[id]||0,oreQuota(id)),targetCount=oreQuota(id),concealed=ghostOreConcealed(save,id);return <span key={id} className={count>=targetCount?"met":""}>{concealed?<div className="ore-gem gem-art" style={{"--gem":"#2b2d2e"} as React.CSSProperties}/>:<img src={oreAsset(id)} alt=""/>}<b>{concealed?"UNKNOWN ORE":ore.name.replace(" Ore","")}</b><em>{count}/{targetCount}</em>{count>=targetCount&&<strong>✓</strong>}</span>})}</div><small>{quotaMet?(authorized?(save.biome==="northrend"?"EXTRACTION CERTIFICATION COMPLETE · Ghost Mines shaft requirements remain undefined.":"DESCENT AUTHORIZED · extraction and equipped functional tool requirements verified."):`EXTRACTION CERTIFICATION COMPLETE · DESCENT LOCKED — TIER ${required} FUNCTIONAL TOOL REQUIRED. Equipped shaft rating: ${equippedShaftRating(save)}.`):required?`Complete every extraction quota. Descent also requires an equipped Tier ${required} functional tool.`:"Complete every extraction quota."}</small>{quotaMet&&<button className="quota-collapse" onClick={()=>setQuotaExpanded(false)}>HIDE QUOTAS</button>}</div>})()}
       <button className={`rock depletion-${mineDepletionLevel(save,save.biome)} technology-tier-${activeTechnology.tier} motion-${activeSkin.animation.id} ${miningEngaged&&activeSkin.animation.engagedLoop?"mining-engaged":""} ${impact ? "hit" : ""} ${stage === "ore" ? "ore-rock" : ""} ${stage === "artifact" ? "artifact-rock" : ""} damage-${Math.floor((1-rockHp/maxHp)*4)} ${rockHp===1?"final-hit":""} ${lastHitKind?`hit-${lastHitKind==="perfectCrit"?"perfect-crit":lastHitKind}`:""}`} style={{"--hit-x":`${hitPoint.x}%`,"--hit-y":`${hitPoint.y}%`,"--tool-tier":activeTechnology.tier,"--tool-power":activeTechnology.damage,"--impact-scale":.92+activeTechnology.tier*.035,"--impact-flash-size":`${92+activeTechnology.tier*6}px`,"--impact-glow":`${10+activeTechnology.tier*2}px`,"--ore-light":pendingOre?.color||biomeVisuals[save.biome].light} as React.CSSProperties} onPointerEnter={followPointer} onPointerMove={followPointer} onPointerLeave={stopFollowing} onClick={strikeAtPointer} aria-label={stage === "artifact" ? "Excavate the unidentified impossible object" : stage === "ore" ? "Crack the exposed ore deposit" : "Strike the rock wall"}>
@@ -857,7 +873,7 @@ export default function Home() {
           {Array.from({length:12},(_,i)=><i key={i}/>) }
         </span>
         <span className="damage-reveal" style={{"--subsurface":stage==="ore"&&pendingOre?pendingOre.color:biomeVisuals[save.biome].accent} as React.CSSProperties} aria-hidden="true"/>
-        <span className="fracture-field" aria-hidden="true">{fractures.map(f=><i key={f.id} className={`persistent-fracture fracture-power-${f.power}`} style={{"--fracture-x":`${f.x}%`,"--fracture-y":`${f.y}%`,"--fracture-turn":`${(f.id*47)%360}deg`,"--fracture-strength":Math.min(4,f.power),"--fracture-scale":.84+Math.min(4,f.power)*.13} as React.CSSProperties}/>)}</span>
+        <span className={`fracture-field wall-material-${save.biome}`} aria-hidden="true">{(wallDamage.scope===wallDamageScope?wallDamage.marks:[]).map(f=><i key={f.id} className={`persistent-fracture fracture-strength-${f.strength} fracture-kind-${f.kind}`} style={{"--fracture-x":`${f.x}%`,"--fracture-y":`${f.y}%`,"--fracture-turn":`${f.rotation}deg`,"--fracture-scale":.78+f.strength*.18} as React.CSSProperties}><b/><em/><span/></i>)}</span>
         <span className="impact-scar" aria-hidden="true"/>
         <span className="crack c1"/><span className="crack c2"/><span className="crack c3"/>
         <span className={`perfect-ring ${perfectReady?"ready":""}`} aria-hidden="true"/>
@@ -890,8 +906,9 @@ export default function Home() {
     {ghostEntry && <GhostEntry reducedMotion={save.settings.reducedMotion} onContinue={()=>{setGhostEntry(false);setSave(s=>({...s,ghostEntrySeen:true}));rollMineCommentary(GHOST_MINE_AMBIENT_COMMENTARY);}} />}
     {save.forbiddenTunnel&&<ForbiddenTunnelEncounter state={save.forbiddenTunnel} inputPhase={tunnelInputPhase} contractCallback={!save.forbiddenContractSeen} reducedMotion={save.settings.reducedMotion} onFirst={selectForbiddenFirst} onSecond={selectForbiddenSecond} onContinue={()=>{setSave(s=>({...s,forbiddenTunnel:null}));setTab("mine");continueMine()}}/>}
     {stage==="volatile"&&(save.volatileEncounter||volatileResolution)&&<VolatileOreEncounter encounter={save.volatileEncounter} resolution={volatileResolution} onLeave={leaveVolatile} onDig={digVolatile} onContinue={continueMine}/>}
+    {wisdomEncounter&&<OreOfWisdomEncounterView encounter={wisdomEncounter} reducedMotion={save.settings.reducedMotion} onContinue={closeWisdom}/>}
     {deepWayFailure&&!found&&<div className="deep-way-failure" role="dialog" aria-modal="true"><section><small>SYSTEM / FOREMAN</small><h2>THE DEEP WAY HAS RETURNED NOTHING.</h2><p>Statistically survivable. Spiritually ruinous.</p><blockquote><b>PEON</b> “Peon saw fifteen percent. Peon trusted fifteen percent.”</blockquote><button onClick={()=>{setDeepWayFailure(false);continueMine()}}>KEEP DIGGING</button></section></div>}
-    {found && <Reveal found={found} total={unique} attempt={save.digs} biome={save.biome} onContinue={continueMine} />}
+    {found && <Reveal found={found} total={unique} attempt={save.digs} biome={save.biome} onContinue={continueAfterDiscovery} />}
       {duplicateNotice&&<div key={duplicateNotice.id} className="duplicate-float" role="status" aria-live="polite"><span>DUPLICATE ×{duplicateNotice.count}</span><strong>{discoveryOreName(duplicateNotice.ore)} + {duplicateNotice.mineral.name}</strong><small>+{duplicateNotice.dust} SPECIMEN DUST</small></div>}
     {emptyNotice&&<div key={emptyNotice.id} className="empty-insult" role="status" aria-live="polite"><small>SYSTEM</small><p><strong>{emptyNotice.result}</strong><span> — {emptyNotice.insult}</span></p></div>}
     {milestone && <Milestone data={milestone} onClose={()=>setMilestone(null)} onAlbum={()=>{if(milestone.level===14&&milestone.missing){const target=`${milestone.ore.id}-${milestone.missing.id}`,b=bestBiome(milestone.ore);setSave(s=>({...s,biome:b,huntTarget:target,huntStartedAtDig:s.digs,huntCounts:{...s.huntCounts,[target]:(s.huntCounts[target]||0)+1}}));track("hunt_started",{biome:b,combination_id:target});setTab("mine")}else setTab("album");setMilestone(null)}} />}
@@ -902,6 +919,54 @@ export default function Home() {
     {toast&&<AchievementToast toast={toast} onDismiss={()=>setToast(null)}/>}
     {savePulse&&<div className="local-save-pulse" role="status" aria-live="polite"><i>✓</i><span>PROGRESS SAVED LOCALLY</span></div>}
   </main>;
+}
+
+function OreOfWisdomEncounterView({encounter,reducedMotion,onContinue}:{encounter:OreOfWisdomEncounter;reducedMotion:boolean;onContinue:()=>void}){
+  const [wisdomVisible,setWisdomVisible]=useState(reducedMotion);
+  const [afterthoughtVisible,setAfterthoughtVisible]=useState(false);
+
+  useEffect(()=>{
+    setWisdomVisible(reducedMotion);
+    setAfterthoughtVisible(false);
+    const quoteDelay=reducedMotion?80:1150;
+    const quoteTimer=window.setTimeout(()=>setWisdomVisible(true),quoteDelay);
+    const afterthoughtTimer=encounter.showAfterthought
+      ?window.setTimeout(()=>setAfterthoughtVisible(true),quoteDelay+(reducedMotion?100:950))
+      :undefined;
+    return()=>{
+      window.clearTimeout(quoteTimer);
+      if(afterthoughtTimer!==undefined)window.clearTimeout(afterthoughtTimer);
+    };
+  },[encounter.quote,encounter.showAfterthought,reducedMotion]);
+
+  return <div className="wisdom-overlay" role="dialog" aria-modal="true" aria-labelledby="wisdom-title">
+    <div className="wisdom-embers" aria-hidden="true"/>
+    <section className={`wisdom-card${wisdomVisible?" wisdom-speaking":""}`}>
+      <header>
+        <small>SYSTEM / UNCLASSIFIED GEOLOGICAL ADVISORY</small>
+        <span>NO INVENTORY VALUE</span>
+      </header>
+      <div className="wisdom-body">
+        <figure className="wisdom-specimen">
+          <span className="wisdom-halo" aria-hidden="true"/>
+          <img src="/assets/encounters/ore-of-wisdom.webp" alt="A stern living stone face lit by molten amber fissures"/>
+        </figure>
+        <div className="wisdom-transcript">
+          <p className="wisdom-invocation"><b>PEON</b> “{ORE_OF_WISDOM_INVOCATION}”</p>
+          <div className="wisdom-pause" aria-hidden="true"><i/><i/><i/></div>
+          <div className="wisdom-answer">
+            <small id="wisdom-title">ORE OF WISDOM</small>
+            <blockquote>“{encounter.quote}”</blockquote>
+          </div>
+          {encounter.showAfterthought&&<p className={`wisdom-afterthought${afterthoughtVisible?" visible":""}`}><b>PEON</b> “{ORE_OF_WISDOM_AFTERTHOUGHT}”</p>}
+        </div>
+      </div>
+      <footer>
+        <span>ADVICE RECORDED · COMPENSATION UNCHANGED</span>
+        <button type="button" disabled={!wisdomVisible} onClick={onContinue}>RETURN TO LABOUR <b>→</b></button>
+      </footer>
+    </section>
+  </div>
 }
 
 function VolatileOreEncounter({encounter,resolution,onLeave,onDig,onContinue}:{encounter:VolatileEncounter|null;resolution:VolatileResolution|null;onLeave:()=>void;onDig:()=>void;onContinue:()=>void}){

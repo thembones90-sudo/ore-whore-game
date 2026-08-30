@@ -1,0 +1,24 @@
+/* v1.0.8 — Persistent mining-wall strike damage. Visual only. */
+.fracture-field{--scar-core:#171410;--scar-dust:#8d7a61;--scar-edge:#40382e;--scar-leak:transparent}
+.fracture-field.wall-material-old{--scar-core:#17130f;--scar-dust:#9b8468;--scar-edge:#514537}
+.fracture-field.wall-material-deep{--scar-core:#100b09;--scar-dust:#65544a;--scar-edge:#39201a;--scar-leak:#b33018}
+.fracture-field.wall-material-outland{--scar-core:#09100a;--scar-dust:#4f6248;--scar-edge:#253b25;--scar-leak:#76d83b}
+.fracture-field.wall-material-northrend{--scar-core:#07131c;--scar-dust:#a7cad7;--scar-edge:#4d8196;--scar-leak:#65c8ef}
+.fracture-field.wall-material-ghost{--scar-core:#09080d;--scar-dust:#827a91;--scar-edge:#443c55;--scar-leak:#a58bc9}
+.fracture-field.wall-material-moon{--scar-core:#0d0e12;--scar-dust:#9fa3ad;--scar-edge:#565b67;--scar-leak:#d7dded}
+.persistent-fracture{--fracture-size:44px;width:var(--fracture-size);height:var(--fracture-size);opacity:.76;isolation:isolate;filter:drop-shadow(0 2px 2px #000c);animation:wallScarSettle .32s ease-out both}
+.persistent-fracture::before{left:50%;top:50%;width:3px;height:78%;background:linear-gradient(to bottom,var(--scar-core) 0 48%,var(--scar-edge) 49% 58%,transparent 60%);box-shadow:0 0 4px color-mix(in srgb,var(--scar-leak) 42%,transparent);transform:rotate(12deg);clip-path:polygon(24% 0,100% 0,58% 24%,96% 35%,42% 55%,88% 68%,28% 100%,0 100%,35% 67%,0 55%,45% 35%,8% 21%)}
+.persistent-fracture::after{left:50%;top:50%;width:2px;height:64%;background:linear-gradient(to bottom,var(--scar-core) 0 55%,var(--scar-edge) 57% 65%,transparent 68%);box-shadow:0 0 3px color-mix(in srgb,var(--scar-leak) 42%,transparent);transform:rotate(132deg);clip-path:polygon(0 0,100% 0,62% 29%,100% 46%,42% 70%,76% 100%,0 100%,31% 69%,0 48%,40% 27%)}
+.persistent-fracture>b{position:absolute;inset:36%;z-index:2;border-radius:46% 54% 61% 39%;background:radial-gradient(circle at 42% 38%,var(--scar-edge),var(--scar-core) 62%,#000 100%);box-shadow:0 0 0 2px color-mix(in srgb,var(--scar-dust) 28%,transparent),0 2px 4px #000;transform:rotate(-17deg)}
+.persistent-fracture>em{position:absolute;inset:10%;z-index:-1;border-radius:50%;opacity:.2;background:repeating-conic-gradient(from 12deg,var(--scar-dust) 0 3deg,transparent 3deg 31deg);mask:radial-gradient(circle,transparent 0 28%,#000 33% 68%,transparent 73%);transform:rotate(calc(var(--fracture-turn) * -1))}
+.persistent-fracture>span{position:absolute;left:48%;top:60%;width:18%;height:48%;opacity:0;background:linear-gradient(var(--scar-dust),transparent);filter:blur(1.5px);animation:wallScarDust .9s .12s ease-out both}
+.fracture-strength-2{--fracture-size:68px;opacity:.84}.fracture-strength-3{--fracture-size:92px;opacity:.94}.fracture-strength-4{--fracture-size:122px;opacity:1}
+.fracture-strength-2>b{inset:34%}.fracture-strength-3>b,.fracture-strength-4>b{inset:31%}
+.fracture-strength-3::before,.fracture-strength-4::before,.fracture-strength-4::after{background:linear-gradient(to bottom,var(--scar-leak) 0 8%,var(--scar-core) 15% 49%,var(--scar-edge) 51% 59%,transparent 62%)}
+.fracture-kind-perfect{filter:drop-shadow(0 1px 2px #000) drop-shadow(0 0 3px color-mix(in srgb,var(--scar-dust) 38%,transparent))}.fracture-kind-crit,.fracture-kind-perfectCrit{filter:drop-shadow(0 2px 3px #000) drop-shadow(0 0 6px color-mix(in srgb,var(--scar-leak) 55%,transparent))}
+.fracture-kind-crit>em,.fracture-kind-perfectCrit>em{opacity:.42}.fracture-kind-perfectCrit>span,.fracture-kind-crit>span{animation-name:wallScarHeavyDust;animation-duration:1.2s}
+@keyframes wallScarSettle{0%{opacity:0;scale:.2;filter:brightness(2.2) drop-shadow(0 0 9px var(--scar-dust))}55%{opacity:1;scale:1.12}100%{scale:var(--fracture-scale)}}
+@keyframes wallScarDust{0%{opacity:.45;translate:0 -6px;scale:.5}100%{opacity:0;translate:5px 34px;scale:1.8}}
+@keyframes wallScarHeavyDust{0%{opacity:.72;translate:0 -10px;scale:.7}100%{opacity:0;translate:9px 58px;scale:2.5}}
+.reduced-motion .persistent-fracture{animation:none;scale:var(--fracture-scale)}.reduced-motion .persistent-fracture>span{display:none}
+@media(max-width:600px){.persistent-fracture{--fracture-size:36px}.fracture-strength-2{--fracture-size:54px}.fracture-strength-3{--fracture-size:72px}.fracture-strength-4{--fracture-size:94px}.fracture-field .persistent-fracture:nth-child(-n+10){display:none}}

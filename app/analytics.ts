@@ -15,7 +15,7 @@ export type AnalyticsEvent =
   | "asoc_ticket_triggered" | "resource_earned" | "resource_processed"
   | "tool_forged" | "tool_auto_forged" | "recipe_viewed" | "recipe_blocked"
   | "volatile_ore_triggered" | "volatile_ore_left" | "volatile_ore_success"
-  | "volatile_ore_detonated";
+  | "volatile_ore_detonated" | "ore_of_wisdom_triggered";
 
 const started = Date.now();
 export function track(event: AnalyticsEvent, context: Record<string, unknown> = {}) {

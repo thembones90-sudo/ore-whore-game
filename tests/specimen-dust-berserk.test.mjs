@@ -8,7 +8,7 @@ const read=path=>readFile(new URL(path,root),"utf8");
 
 test("the three canonical temporary modes escalate and spend exact Dust",()=>{
   assert.deepEqual(BERSERK_MODES.map(x=>[x.name,x.cost,x.durationMs]),[
-    ["AGITATED",150,45_000],["BERSERK",300,30_000],["ABSOLUTELY FUCKING FERAL",750,18_000],
+    ["I — RAGE",150,45_000],["II — BLOODRAGE",300,30_000],["III — BLOODFURY",750,18_000],
   ]);
   for(let i=1;i<BERSERK_MODES.length;i++){
     assert.ok(BERSERK_MODES[i].damageMultiplier>BERSERK_MODES[i-1].damageMultiplier);

@@ -14,7 +14,12 @@ test("Specimen Dust is a compact expandable combat skill",()=>{
   assert.match(page,/className="berserk-active-chip"/);
   assert.match(css,/\.mine-screen>\.berserk-console\{position:fixed!important/);
   assert.doesNotMatch(page,/\(berserkOpen\|\|currentBerserk\)&&<div className="berserk-flyout"/);
-  assert.match(latestCss,/\.berserk-active-chip\{width:68px/);
+  assert.match(latestCss,/\.berserk-active-chip\{width:78px/);
+  assert.match(page,/className="berserk-icon"/);
+  assert.match(page,/berserk-option-\$\{mode\.id\}/);
+  assert.match(css,/\.berserk-agitated \.berserk-skill/);
+  assert.match(css,/\.berserk-berserk \.berserk-skill/);
+  assert.match(css,/\.berserk-feral \.berserk-skill/);
 });
 
 test("the playable wall is taller while the skill rail safely redocks responsively",()=>{
