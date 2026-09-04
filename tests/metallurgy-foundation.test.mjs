@@ -21,7 +21,7 @@ test("equipped technology supplies the ordinary TRUE Artifact chance",()=>{
 });
 
 test("Peon Technology Tree uses canonical display names without changing stable early IDs",()=>{
-  for(const name of ["ROCK BONKER","BRONZE BONKER","BIG PICK","SHINY BONKER","ANGRY PICK","LOUD BONKER","SPINNY DIGGER","BIGGER SPINNY DIGGER","ROCK EATER","MOUNTAIN HURTER","MOUNTAIN FUCKER"])assert.ok(data.includes(`name:"${name}"`));
+  for(const name of ["STONEBREAKER","BRONZE FANG","IRONCLAW","STEELBITE","RIFTSPIKE","THUNDERJACK","COREBORER","DEEPBORE","BEDROCK EATER","MOUNTAIN BREAKER","SPLICER","GHOST OF THE FORGE"])assert.ok(data.includes(`name:"${name}"`));
   for(const technical of ["Peon Pickaxe","Mithrilsteel Pickaxe","Darksteel Pickaxe","Felsteel Jackhammer","Khorium Rotary Drill","Ultimate Mining Machine"])assert.ok(data.includes(`technicalName:"${technical}"`));
   assert.match(data,/id:"rusty-pickaxe"[\s\S]*?icon:"\/assets\/tools\/tool-rock-bonker\.webp"/);
   assert.match(game,/canonical-rock-bonker/);

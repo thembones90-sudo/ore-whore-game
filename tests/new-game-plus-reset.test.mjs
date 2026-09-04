@@ -30,11 +30,12 @@ test("New Game+ resets distance (the current descent) to zero and correctly incr
   assert.doesNotMatch(handler,/distance:s\.distance/,"distance must never be explicitly re-preserved — the reset is the whole point");
 });
 
-test("New Game+ preserves the existing curated permanent-state list, unchanged",()=>{
+test("New Game+ preserves curated permanent state while canonicalizing the employee designation",()=>{
   const start=page.indexOf("const startNewGamePlus=");
   const end=page.indexOf("return <main",start);
   const handler=page.slice(start,end);
-  for(const preserved of ["playerName:s.playerName","settings:s.settings","unlocks:s.unlocks","equipped:s.equipped","toolSkinId:s.toolSkinId","achievements:s.achievements","completionCount:s.completionCount","asocTickets:s.asocTickets","firstCompletionDate:s.firstCompletionDate","latestCompletionDate:s.latestCompletionDate","completionHistory:s.completionHistory"]){
+  assert.match(handler,/playerName:"PEON"/);
+  for(const preserved of ["settings:s.settings","unlocks:s.unlocks","equipped:s.equipped","toolSkinId:s.toolSkinId","achievements:s.achievements","completionCount:s.completionCount","asocTickets:s.asocTickets","firstCompletionDate:s.firstCompletionDate","latestCompletionDate:s.latestCompletionDate","completionHistory:s.completionHistory"]){
     assert.ok(handler.includes(preserved),`expected ${preserved} to remain in the preserved-state list`);
   }
 });
@@ -89,7 +90,7 @@ test("confirming NG+ starts the wormhole transition, not the reset, directly",()
 });
 
 test("the NG+ reset logic itself exists exactly once in the file — never duplicated into a second copy",()=>{
-  const resetSignature=(page.match(/\{\.\.\.blank,playerName:s\.playerName,employmentAgreementSigned:true,employmentGreetingSeen:true/g)||[]).length;
+  const resetSignature=(page.match(/\{\.\.\.blank,playerName:"PEON",employmentAgreementSigned:true,employmentGreetingSeen:true/g)||[]).length;
   const definitions=(page.match(/const startNewGamePlus=/g)||[]).length;
   const setTimeoutCalls=(page.match(/window\.setTimeout\(startNewGamePlus,/g)||[]).length;
   assert.equal(resetSignature,1,"the reset's actual field-spread logic must exist in exactly one place");
@@ -139,4 +140,3 @@ test("the wormhole transition CSS ships in the final stylesheet layer and provid
   assert.match(css,/\.reduced-motion \.wormhole-transition\{animation-duration:\.26s\}/);
   assert.match(css,/@media\(prefers-reduced-motion:reduce\)\{\.wormhole-transition\{animation-duration:\.26s\}\}/);
 });
-

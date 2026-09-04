@@ -18,7 +18,7 @@ The attachment that established this backlog repeated an older fixed `0.05%` rul
 
 Current canonical behavior is:
 
-- `0.05%` is the ROCK BONKER starting chance per completed excavation.
+- `0.05%` is the STONEBREAKER starting chance per completed excavation.
 - The currently equipped Peon Technology supplies the ordinary chance.
 - The data-driven technology curve rises through the existing tiers to the `1.00%` hard cap.
 - Owned technologies do not stack.
@@ -51,7 +51,7 @@ Required event categories:
 - **Greed / informed choice:** the player sees the possible reward and danger before choosing.
 - **Telegraphed:** a short sequence of cues culminates in an event.
 - **Depth-gated:** eligibility changes with environmental depth.
-- **Mine-specific:** Old Mine, Deep Mine, Outland, or Northrend exclusives.
+- **Mine-specific:** Derelict Mine, The Forbidden Mine, The Sunder, or The Rime exclusives.
 
 Events must be rare enough to remain special and must return the player to mining quickly.
 
@@ -108,10 +108,10 @@ Example cadence:
 
 ## Biome event identities — Backlog
 
-- **Old Mine:** physical and abandoned-industry events—collapsed shafts, forgotten equipment, old tunnels, unstable supports.
-- **Deep Mine:** oppressive geological events—enormous veins, pressure cracks, deep chambers, strange echoes.
-- **Outland:** fel, unstable, alien geology.
-- **Northrend:** frozen, ancient, buried discoveries.
+- **Derelict Mine:** physical and abandoned-industry events—collapsed shafts, forgotten equipment, old tunnels, unstable supports.
+- **The Forbidden Mine:** oppressive geological events—enormous veins, pressure cracks, deep chambers, strange echoes.
+- **The Sunder:** unstable, alien geology inside a colossal rupture.
+- **The Rime:** frozen, ancient, buried discoveries beneath impossible cold.
 
 Do not design the full roster until implementation requires it. Preserve combinations such as `Northrend + depth 250+ + telegraphed + extremely rare` without special-case spaghetti.
 
@@ -154,4 +154,3 @@ Avoid raw mining-power bonuses.
 4. Add one short telegraphed biome event.
 5. Add one informed greed-versus-safety event with telemetry.
 6. Balance depth gates and event frequency from playtest data before expanding the roster.
-

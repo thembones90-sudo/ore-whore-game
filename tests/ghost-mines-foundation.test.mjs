@@ -110,8 +110,9 @@ test("save schema migration preserves Ghost entrance and inefficiency feedback s
   assert.match(game, /schema:22,employmentAgreementSigned:/);
 });
 
-test("mine-completion descent ceremony has Ghost Mines diagnostics in its own clinical voice", () => {
-  assert.match(game, /ghost:\["ORIGIN: UNKNOWN","BIOLOGICAL ACTIVITY: NONE DETECTED","SURVEY MATCH: NONE"\]/);
+test("mine-completion descent ceremony frames Heart of the Hollow as pre-existing ancient workings", () => {
+  assert.match(game, /ghost:\["WORKINGS: PRE-EXISTING","ORIGIN: UNKNOWN","SURVEY MATCH: NONE"\]/);
+  assert.match(game, /THE MINE REMEMBERS\./);
 });
 
 test("Ghost Mines mine-art CSS follows the exact same pattern as the other four mines", () => {

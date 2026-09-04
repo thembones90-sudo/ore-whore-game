@@ -39,7 +39,7 @@ test("Berserk modifies strikes and cadence but never geological or TRUE Artefact
 
 test("the mine exposes a consumable control, countdown, barks, audio ramp and accessible spectacle",async()=>{
   const [page,data,css,layout]=await Promise.all([read("app/page.tsx"),read("app/berserk.ts"),read("app/v080.css"),read("app/layout.tsx")]);
-  assert.match(page,/SNORT THE DUST/);
+  assert.match(page,/HOW ANGRY IS THE PEON\?/);
   assert.match(page,/SPECIMEN DUST EFFECTS SUBSIDING\./);
   assert.match(data,/PEON IS THE PICKAXE NOW\./);
   assert.match(page,/playbackRate=starts\[index\]\+\(target-starts\[index\]\)\*smooth/);
@@ -49,4 +49,28 @@ test("the mine exposes a consumable control, countdown, barks, audio ramp and ac
   assert.match(css,/\.reduced-shake/);
   assert.match(css,/\.reduced-motion/);
   assert.ok(layout.lastIndexOf('import "./v080.css";')>layout.lastIndexOf('import "./v079.css";'));
+});
+
+test("BERSERK presentation keeps the locked hierarchy, replaceable portraits and unstable escalation",async()=>{
+  const [page,data,css,layout]=await Promise.all([read("app/page.tsx"),read("app/berserk.ts"),read("app/berserk-v110.css"),read("app/layout.tsx")]);
+  assert.match(page,/SPECIMEN DUST/);
+  assert.match(page,/FUEL THE PEON&apos;S RAGE\. PRODUCTIVITY IS NOT GUARANTEED\./);
+  assert.match(page,/data-portrait-slot=\{mode\.id\}/);
+  assert.match(page,/src=\{mode\.portrait\}/);
+  assert.match(page,/berserk-skill-icon\.webp/);
+  assert.match(data,/peon-rage\.webp/);
+  assert.match(data,/peon-bloodrage\.webp/);
+  assert.match(data,/peon-bloodfury\.webp/);
+  assert.match(page,/DURATION/);
+  assert.match(page,/DAMAGE/);
+  assert.match(page,/ACTIVATE/);
+  assert.match(page,/USE WISELY\. THERE IS NO &quot;OFF&quot; SWITCH\./);
+  assert.match(css,/\.berserk-option-agitated/);
+  assert.match(css,/\.berserk-option-berserk/);
+  assert.match(css,/\.berserk-option-feral/);
+  assert.match(css,/overflow:visible!important/);
+  assert.match(css,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+  assert.match(css,/@media\(max-width:980px\)/);
+  assert.ok(layout.lastIndexOf('import "./berserk-v110.css";')>layout.lastIndexOf('import "./wisdom-v109.css";'));
+  assert.doesNotMatch(css,/#d9ff45|var\(--acid\)|lime|orange/i);
 });

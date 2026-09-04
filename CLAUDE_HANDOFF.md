@@ -71,7 +71,7 @@ Untracked `.npm-cache*`, `ore-whore-site*.tar.gz`, and `tsconfig.tsbuildinfo` ar
 - Storage key: `ore-whore-save-v1`; schema: `20`.
 - `migrate()` in `app/page.tsx` preserves collection, ordinary TRUE Artefacts, ASOC history, resources, tools, cosmetics, achievements, settings, statistics, tunnel state and completion history.
 - Existing pre-onboarding saves receive safe identity `PEON` and are treated as agreement-signed.
-- New flow: intro dialogue → four-clause agreement → employee signature → Shadez welcome → Old Mine.
+- New flow: intro dialogue → four-clause agreement → employee signature → Shadez assigns PEON → Derelict Mine.
 - Persisted onboarding fields include `playerName`, `employmentAgreementSigned`, `employmentGreetingSeen`, `forbiddenContractSeen`.
 
 Latest onboarding fix at `1535178`:
@@ -108,7 +108,7 @@ Separate concepts:
 
 Shaft ratings: Old 1, Deep 2, Outland 3, Northrend 4. Cosmetic skins never affect access/stats/probability. Locked unidentified mines show `🔒 ?????` and hide names/odds.
 
-Known ambiguity—do not silently redesign: Ghost has no `mineRequiredShaftRating`, yet follows Northrend in `biomeOrder`. Completing Northrend currently can unlock Ghost without a hard shaft requirement; Ghost then uses a soft gate where conventional tools face 10× integrity and `GHOSTFORGED PICK` restores normal extraction. Copy also says Ghost hard requirements are undefined. Change only with explicit approval/tests.
+Known ambiguity—do not silently redesign: Ghost has no `mineRequiredShaftRating`, yet follows Northrend in `biomeOrder`. Completing Northrend currently can unlock Ghost without a hard shaft requirement; Ghost then uses a soft gate where conventional tools face 10× integrity and `GHOST OF THE FORGE` restores normal extraction. Copy also says Ghost hard requirements are undefined. Change only with explicit approval/tests.
 
 ### Functional tools
 
@@ -116,18 +116,18 @@ Only equipped technology applies. `shaftRating = min(4, tier + 1)`.
 
 | Tier | Name | Shaft | Ordinary TRUE chance |
 |---:|---|---:|---:|
-| 0 | ROCK BONKER | 1 | 0.05% |
-| 1 | BRONZE BONKER | 2 | 0.06% |
-| 2 | BIG PICK | 3 | 0.08% |
-| 3 | SHINY BONKER | 4 | 0.10% |
-| 4 | ANGRY PICK | 4 | 0.15% |
-| 5 | LOUD BONKER | 4 | 0.20% |
-| 6 | SPINNY DIGGER | 4 | 0.30% |
-| 7 | BIGGER SPINNY DIGGER | 4 | 0.40% |
-| 8 | ROCK EATER | 4 | 0.50% |
-| 9 | MOUNTAIN HURTER | 4 | 0.75% |
-| 10 | MOUNTAIN FUCKER | 4 | 1.00% |
-| 11 | GHOSTFORGED PICK | 4 | 1.00% |
+| 0 | STONEBREAKER | 1 | 0.05% |
+| 1 | BRONZE FANG | 2 | 0.06% |
+| 2 | IRONCLAW | 3 | 0.08% |
+| 3 | STEELBITE | 4 | 0.10% |
+| 4 | RIFTSPIKE | 4 | 0.15% |
+| 5 | THUNDERJACK | 4 | 0.20% |
+| 6 | COREBORER | 4 | 0.30% |
+| 7 | DEEPBORE | 4 | 0.40% |
+| 8 | BEDROCK EATER | 4 | 0.50% |
+| 9 | MOUNTAIN BREAKER | 4 | 0.75% |
+| 10 | SPLICER | 4 | 1.00% |
+| 11 | GHOST OF THE FORGE | 4 | 1.00% |
 
 Manual tools reject held-Space repeat; industrial tools explicitly hold-to-mine. Technology supplies cadence/damage/shaft/probability; cosmetic model supplies art/animation only.
 
@@ -145,7 +145,7 @@ First Alija discovery permanently unlocks the actual shovel cosmetic; eligible o
 
 ### Golden ASOC Ticket
 
-ASOC is separate from the eight archive entries (`app/asoc-ticket.ts`): ID `asoc`; requires equipped `ultimate-machine`/MOUNTAIN FUCKER; chance `0.001` = 0.1% per completed excavation before run completion; unique per run; unaffected by Forbidden Tunnel ordinary modifiers; starts ending flow.
+ASOC is separate from the eight archive entries (`app/asoc-ticket.ts`): ID `asoc`; requires equipped `ultimate-machine`/SPLICER; chance `0.001` = 0.1% per completed excavation before run completion; unique per run; unaffected by Forbidden Tunnel ordinary modifiers; starts ending flow.
 
 Before secured, UI must not reveal the ASOC name or artwork. New Game+ resets current-run ordinary TRUE Artefacts while preserving only explicitly permanent history/unlocks.
 

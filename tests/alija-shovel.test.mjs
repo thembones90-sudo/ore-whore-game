@@ -4,6 +4,7 @@ import test from "node:test";
 import { artifactRewardUnlocks, ALIJA_SHOVEL_ARTIFACT_ID, ALIJA_SHOVEL_SKIN_ID } from "../app/artifact-rewards.ts";
 
 const page = fs.readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
+const artifacts = fs.readFileSync(new URL("../app/true-artifacts.ts", import.meta.url), "utf8");
 const skins = fs.readFileSync(new URL("../app/tool-skins.ts", import.meta.url), "utf8");
 
 test("existing Alija discoveries migrate into the permanent cosmetic unlock", () => {
@@ -12,9 +13,9 @@ test("existing Alija discoveries migrate into the permanent cosmetic unlock", ()
 });
 
 test("Alija's Shovel is unique TRUE Artefact data with the canonical bark and reward", () => {
-  assert.match(page, /name:"ALIJA'S SHOVEL"/);
-  assert.match(page, /Boss, me need biggest shovel\. This shovel best\./);
-  assert.match(page, /rewardSkinId:ALIJA_SHOVEL_SKIN_ID/);
+  assert.match(artifacts, /name:"ALIJA'S SHOVEL"/);
+  assert.match(artifacts, /Boss, me need biggest shovel\. This shovel best\./);
+  assert.match(artifacts, /rewardSkinId:ALIJA_SHOVEL_SKIN_ID/);
   assert.match(page, /PICKAXE SKIN UNLOCKED — ALIJA'S SHOVEL/);
   assert.match(page, /trueArtifacts:\{\.\.\.s\.trueArtifacts,\[artifact\.id\]:1\}/);
 });

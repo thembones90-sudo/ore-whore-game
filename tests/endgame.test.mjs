@@ -21,7 +21,7 @@ test("the archive conceals ASOC identity until secured and keeps it outside the 
   assert.match(page,/AUTHORIZATION WITHHELD/);
   assert.match(page,/ELIGIBILITY: CLASSIFIED/);
   assert.doesNotMatch(page,/count\?a\.name:asoc\?"GOLDEN ASOC TICKET"/);
-  assert.doesNotMatch(page,/MOUNTAIN FUCKER REQUIRED/);
+  assert.doesNotMatch(page,/SPLICER REQUIRED/);
   assert.doesNotMatch(page,/0\.1% PER COMPLETED EXCAVATION WHEN ELIGIBLE/);
 });
 

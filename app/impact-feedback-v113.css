@@ -1,0 +1,39 @@
+/* v1.13 — core mining impact feedback. All geometry originates at --impact-x/y. */
+.impact-feedback-layer{position:absolute;inset:0;z-index:38;overflow:hidden;pointer-events:none}
+.impact-feedback{
+  position:absolute;
+  left:var(--impact-x);
+  top:var(--impact-y);
+  z-index:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  translate:calc(-50% + var(--spawn-x)) -50%;
+  color:#e8e0d0;
+  font:900 clamp(15px,1.15vw,22px)/.9 "Arial Narrow",Impact,Arial,sans-serif;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  text-shadow:0 2px 4px #000,0 0 2px #000;
+  opacity:0;
+  pointer-events:none;
+  will-change:transform,opacity;
+  animation:impact-feedback-rise var(--feedback-life) cubic-bezier(.16,.72,.24,1) both;
+}
+.impact-feedback-miss{color:#d95c59}
+.impact-feedback-crit{color:#ff8a32;font-size:clamp(17px,1.3vw,25px);text-shadow:0 2px 4px #000,0 0 10px #ff6a284f}
+.impact-feedback-perfect{color:#c8ff3d;font-size:clamp(17px,1.3vw,25px);text-shadow:0 2px 4px #000,0 0 10px #bfff3d55}
+.impact-feedback-perfectCrit{display:grid;gap:1px;text-align:center;filter:drop-shadow(0 0 7px #ffd45a55)}
+.impact-feedback-perfectCrit .impact-perfect{color:#c8ff3d}
+.impact-feedback-perfectCrit .impact-critical{color:#ff8a32}
+
+@keyframes impact-feedback-rise{
+  0%{opacity:0;transform:translate(0,5px) scale(.8)}
+  12%{opacity:1;transform:translate(0,0) scale(1.08)}
+  28%{opacity:1;transform:translate(0,-12px) scale(1)}
+  72%{opacity:1}
+  100%{opacity:0;transform:translate(var(--drift-x),calc(-1 * var(--rise))) scale(1)}
+}
+@media(prefers-reduced-motion:reduce){.impact-feedback{animation-name:impact-feedback-fade}}
+@keyframes impact-feedback-fade{0%,70%{opacity:1}100%{opacity:0}}
+

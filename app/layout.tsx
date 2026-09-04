@@ -74,6 +74,15 @@ import "./v106.css";
 import "./v107.css";
 import "./v108.css";
 import "./wisdom-v109.css";
+import "./berserk-v110.css";
+import "./polish-v111.css";
+import "./mine-ui-v112.css";
+import "./impact-feedback-v113.css";
+import "./tunnel-progress-v114.css";
+import "./ore-casing-v115.css";
+import "./milestone-bulletin-v116.css";
+import "./album-archive-v117.css";
+import "./forge-workshop-v118.css";
 
 export const metadata: Metadata = { title: "ORE WHORE — Compulsive Geology", description: "Dig. Clank. Crack. Collect every ore and mineral combination." };
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) { return <html lang="en"><body>{children}</body></html>; }

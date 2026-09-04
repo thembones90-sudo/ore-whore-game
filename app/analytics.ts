@@ -4,7 +4,7 @@ export type AnalyticsEvent =
   | "album_opened" | "ore_page_opened" | "missing_view_opened" | "biome_selected"
   | "page_milestone_3" | "page_milestone_4" | "page_completed" | "achievement_unlocked"
   | "hunt_started" | "return_visit"
-  | "dig_empty" | "biome_completed" | "biome_unlocked" | "true_artifact_found"
+  | "dig_empty" | "biome_completed" | "biome_unlocked" | "true_artifact_found" | "final_artifact_found"
   | "berserk_activated" | "berserk_ended"
   | "forbidden_tunnel_triggered" | "forbidden_tunnel_first_path_selected"
   | "forbidden_tunnel_first_outcome" | "forbidden_tunnel_second_chamber_reached"

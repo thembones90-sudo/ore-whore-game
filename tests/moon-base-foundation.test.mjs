@@ -17,9 +17,9 @@ test("exactly four Moon ores exist, no fifth invented", () => {
   assert.equal((block.match(/id: "(chromite|helion|heartofiron|zyn)"/g) || []).length, 4);
 });
 
-test("Moon Base has a display name and does not remove or rename Ghost Mines", () => {
+test("Moon Base and Heart of the Hollow have their canonical display names", () => {
   assert.match(game, /moon:"MOON BASE"/);
-  assert.match(game, /ghost:"GHOST MINES"/, "Ghost Mines' own display name must be untouched");
+  assert.match(game, /ghost:"HEART OF THE HOLLOW"/);
 });
 
 test("Moon's own spawn table only spawns its own four native ores, and no other biome spawns a Moon ore", () => {

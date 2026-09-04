@@ -3,6 +3,18 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const game=fs.readFileSync(new URL("../app/page.tsx",import.meta.url),"utf8");
+
+test("canonical player-facing mine names map onto stable internal biome IDs",()=>{
+  assert.match(game,/old:"DERELICT MINE",deep:"THE FORBIDDEN MINE",outland:"THE SUNDER",northrend:"THE RIME",ghost:"HEART OF THE HOLLOW"/);
+  assert.match(game,/biomeOrder:Biome\[\]=\["old","deep","outland","northrend","ghost","moon"\]/);
+});
+
+test("mine transitions carry the canonical environmental progression",()=>{
+  assert.match(game,/A barred metal door sealed the lower workings\./);
+  assert.match(game,/colossal rupture/);
+  assert.match(game,/temperature falls with every meter/);
+  assert.match(game,/Ancient mine workings wait below any recorded depth\. THE MINE REMEMBERS\./);
+});
 const metallurgy=fs.readFileSync(new URL("../app/metallurgy.ts",import.meta.url),"utf8");
 
 test("canonical mine extraction quotas — all five mines, including Ghost — are centralized in one map",()=>{

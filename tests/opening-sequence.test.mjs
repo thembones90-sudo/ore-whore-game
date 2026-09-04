@@ -26,15 +26,15 @@ test("canonical Peon portrait and first line are wired",()=>{
   assert.match(game,/Boss say dig\.<br\/><strong>Me dig\.<\/strong>/);
 });
 
-test("contract callbacks cover reassignment, forbidden tunnels, indefinite excavation and termination",()=>{
-  assert.match(game,/Deeper excavation duties are now authorized\./);
+test("contract callbacks cover canonical renaming, forbidden tunnels, indefinite excavation and termination",()=>{
+  assert.match(game,/A barred metal door sealed the lower workings\./);
   assert.match(game,/Fortunately, you waived this objection\./);
   assert.match(game,/Your employment agreement remains in effect\./);
   assert.match(game,/EMPLOYMENT STATUS<br\/><strong>TERMINATED<\/strong>/);
   assert.match(game,/CONTRACT SUPERSEDED BY INVITATION/);
 });
 
-test("New Game Plus preserves the hook without replaying an unapproved revised agreement",()=>{
-  assert.match(game,/\.\.\.blank,playerName:s\.playerName,employmentAgreementSigned:true,employmentGreetingSeen:true/);
+test("New Game Plus preserves the Peon designation without replaying an unapproved revised agreement",()=>{
+  assert.match(game,/\.\.\.blank,playerName:"PEON",employmentAgreementSigned:true,employmentGreetingSeen:true/);
   assert.match(layout,/v091\.css/);
 });

@@ -19,9 +19,12 @@ test("canonical recruitment and paperwork exchange is complete and ordered",()=>
   for(const line of lines){const next=page.indexOf(line,cursor+1);assert.ok(next>cursor,`missing or out of order: ${line}`);cursor=next}
 });
 
-test("signed exchange uses the saved employee name and ends with Shadez",()=>{
-  assert.match(page,/Welcome to ORE WHORE, \$\{signedName\}/);
-  assert.match(page,/text:"Me have job now\?"/);
-  assert.match(page,/text:"Regrettably\."/);
-  assert.match(page,/onComplete=\{\(\)=>onDone\(true,signedName\)\}/);
+test("signed exchange discards the entered name and assigns the canonical Peon designation",()=>{
+  const apology="I'm sorry if, at any given moment, it seemed like I care about your name.";
+  const assignment="Peon it is.";
+  const apologyAt=page.indexOf(apology),assignmentAt=page.indexOf(assignment,apologyAt+1);
+  assert.ok(apologyAt>=0&&assignmentAt>apologyAt,"locked Shadez lines must exist in canonical order");
+  assert.match(page,/<s>\{signedName\}<\/s> · DESIGNATION: PEON/);
+  assert.match(page,/onComplete=\{\(\)=>onDone\(true\)\}/);
+  assert.doesNotMatch(page,/Welcome to ORE WHORE, \$\{signedName\}/);
 });

@@ -29,18 +29,20 @@ test("decline flow keeps the entered name and can become acceptance",()=>{
   assert.match(page,/declined\?signAgreement\(\):setDeclined\(true\)/);
 });
 
-test("signed name persists, migrates, and survives New Game Plus",()=>{
-  assert.match(page,/playerName:\"\"/);
-  assert.match(page,/old\.playerName\.trim\(\)\.slice\(0,28\):"PEON"/);
-  assert.match(page,/playerName:playerName\?\.trim\(\)\.slice\(0,28\)\|\|s\.playerName\|\|"PEON"/);
-  assert.match(page,/\.\.\.blank,playerName:s\.playerName,employmentAgreementSigned:true/);
+test("submitted name is discarded and every persisted designation is PEON",()=>{
+  assert.match(page,/const playerName="PEON"/);
+  assert.match(page,/\.\.\.s,playerName:"PEON",employmentAgreementSigned/);
+  assert.match(page,/\.\.\.blank,playerName:"PEON",employmentAgreementSigned:true/);
+  assert.doesNotMatch(page,/playerName:playerName\?\.trim/);
+  assert.doesNotMatch(page,/playerName:s\.playerName/);
 });
 
-test("contract signature returns at welcome, records, progression, and termination",()=>{
-  assert.match(page,/SIGNED: \{signedName\}/);
-  assert.match(page,/Welcome to ORE WHORE, \$\{signedName\}/);
+test("Shadez discards the signature with the exact locked two-line gag",()=>{
+  assert.match(page,/<s>\{signedName\}<\/s> · DESIGNATION: PEON/);
+  assert.match(page,/I'm sorry if, at any given moment, it seemed like I care about your name\./);
+  assert.match(page,/Peon it is\./);
+  assert.doesNotMatch(page,/Welcome to ORE WHORE, \$\{signedName\}/);
   assert.match(page,/EMPLOYEE <b>\{save\.playerName\}<\/b>/);
-  assert.match(page,/Extraction quota satisfied, \$\{playerName\}/);
   assert.match(page,/className="termination-record"/);
   assert.match(page,/CONTRACT SUPERSEDED BY INVITATION/);
 });

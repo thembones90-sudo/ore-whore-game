@@ -64,7 +64,7 @@
 .wanted-list footer{min-height:68px;padding:14px 20px;background:#0d100d;font-size:8px}.wanted-list footer span{display:flex;flex-direction:column;gap:5px}.wanted-list footer span strong{color:#e0e4db;font-size:12px;letter-spacing:1px}.wanted-list footer button{min-height:42px;padding:11px 17px;font-size:9px;letter-spacing:.6px}
 @media(max-width:760px){.wanted-page{padding-inline:14px}.wanted-page .page-head h2{font-size:48px;letter-spacing:-3px}.wanted-sort{flex-wrap:nowrap;overflow-x:auto}.wanted-page .missing-grid{grid-template-columns:1fr}.wanted-list h3{display:block}.wanted-list h3 b{display:block;width:max-content;margin-top:7px}.wanted-list article>header{padding:14px}.wanted-page .ore-sprite-wanted{width:66px!important;height:66px!important}.wanted-list footer{align-items:stretch}.wanted-list footer button{width:100%}}
 
-/* Canonical ROCK BONKER asset: generated original Peon Pickaxe model. */
+/* Canonical starting-pickaxe asset: generated original Peon Pickaxe model. */
 .canonical-rock-bonker{width:176px!important;height:176px!important;transform:rotate(-8deg) scale(1)!important;transform-origin:20px 72px!important;translate:-2% -40%!important;filter:drop-shadow(0 11px 6px #000e)!important}
 .canonical-rock-bonker img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
 @media(pointer:fine){.rock .canonical-rock-bonker,.rock.pick-following:not(.hit) .canonical-rock-bonker{transform:rotate(-8deg) scale(1)!important;transform-origin:20px 72px!important;translate:-2% -40%!important}}

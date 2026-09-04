@@ -22,7 +22,7 @@ test("active ore remaining HP rescales proportionally in both directions",()=>{
   assert.equal(rescaleRemainingHp(1,50,5),1,"switching tools never grants a free completion");
 });
 
-test("Ghost capability is explicit and exclusive to GHOSTFORGED PICK",()=>{
+test("Ghost capability is explicit and exclusive to GHOST OF THE FORGE",()=>{
   const ghost=forgedItems.find(tool=>tool.id==="ghostforged-pick");
   assert.equal(ghost.ghostCapable,true);
   assert.ok(forgedItems.filter(tool=>tool.id!==ghost.id).every(tool=>tool.ghostCapable===false));

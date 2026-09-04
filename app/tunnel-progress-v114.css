@@ -1,0 +1,37 @@
+/* v1.14 — tunnel telemetry styled as recessed excavation instrumentation. */
+.dig-panel:not(.ore-integrity-panel):not(.artifact-dig-panel)>.integrity>span{
+  margin-bottom:7px!important;
+  color:#c2b59c!important;
+  font-weight:800!important;
+  letter-spacing:.14em!important;
+  text-align:center!important;
+  text-shadow:0 1px 2px #000!important;
+}
+.dig-panel:not(.ore-integrity-panel):not(.artifact-dig-panel)>.integrity>i{
+  box-sizing:border-box!important;
+  display:grid!important;
+  grid-template-columns:repeat(12,minmax(0,1fr))!important;
+  gap:2px!important;
+  width:min(360px,100%)!important;
+  height:15px!important;
+  margin-inline:auto!important;
+  padding:3px!important;
+  border:1px solid #302d27!important;
+  border-radius:1px!important;
+  background:#060706!important;
+  box-shadow:inset 0 3px 5px #000,inset 0 -1px #24221e,0 1px #ffffff06!important;
+}
+.dig-panel:not(.ore-integrity-panel):not(.artifact-dig-panel)>.integrity>i>b{
+  width:auto!important;
+  min-width:0!important;
+  height:6px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#151716!important;
+  box-shadow:inset 0 1px 2px #050606,inset 0 0 0 1px #252724!important;
+}
+.dig-panel:not(.ore-integrity-panel):not(.artifact-dig-panel)>.integrity>i>b.full{
+  background-color:#8b602d!important;
+  background-image:repeating-linear-gradient(105deg,#2a170010 0 3px,#d09a4a0b 3px 5px)!important;
+  box-shadow:inset 0 1px #bb8848,inset 0 -2px #4a2b14,inset 1px 0 #70451f,0 0 5px #9c63253d!important;
+}
